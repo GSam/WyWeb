@@ -1,89 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <title>Whiley on the Web!</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link rel="shortcut icon" href="http://whiley.org/wp-content/themes/atahualpa351/images/favicon/whileyfav.ico" />
-    <link rel="stylesheet" href="css/jstree.css">
-    <script type="text/javascript" src="js/jquery.js"></script>
-    <script type="text/javascript" src="js/jquery-ui.js"></script>
-    <script type="text/javascript" src="js/ace.js" charset="utf-8"></script>
-    <script type="text/javascript" src="js/jstree.js"></script>
-    <script type="text/javascript" src="js/mode-whiley.js"></script>
-    <script type="text/javascript">
-        var root_url = "${ROOT_URL}";
-        var error = "${ERROR}";
-        var redirect = "${REDIRECT}";
-    </script>
-    <script type="text/javascript" src="js/whileyweb.js"></script>
-</head>
-<body>
-    <div class="container-fluid" id="container">
-    
-    <div class="row topbar">
-	  		<div class="col-md-1">
-	  			<img src="images/wylogo.png" class="image-responsive"/>
-	  		</div>
-	  		<div class="col-md-11">
-	  			<p>
-	  					<h1>Whiley <span id="bold">PLAY</span><br/>
-	  					<small>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</small></h1>
-	  			</p>
-	  		</div>
-	  		
-	 </div>
-	<div class="row">	 
-   <nav class="navbar navbar-default" role="navigation">
-      <div class="container-fluid">
-         <!-- Brand and toggle get grouped for better mobile display -->
-         <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            </button>
-         </div>
-         <!-- Collect the nav links, forms, and other content for toggling -->
-         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-               <button type="button"  class="btn btn-primary navbar-btn" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>
-					<li class="divider"></li>
-               <button type="button"  class="btn btn-primary navbar-btn" onClick="compile();" title="Compile your program to check it is correct.">Compile</button>
-               <li class="divider"></li>
-               <button type="button"  class="btn btn-primary navbar-btn" onClick="run();" title="Run your program to produce some output!">Run</button>
-            </ul>
-         </div>
-         <!-- /.navbar-collapse -->
+   <head>
+      <meta charset="utf-8" />
+      <title>Whiley on the Web!</title>
+      <link rel="stylesheet" href="css/style.css">
+      <link href="css/bootstrap.min.css" rel="stylesheet">
+      <link rel="shortcut icon" href="http://whiley.org/wp-content/themes/atahualpa351/images/favicon/whileyfav.ico" />
+      <link rel="stylesheet" href="css/jstree.css">
+      <script type="text/javascript" src="js/jquery.js"></script>
+      <script type="text/javascript" src="js/jquery-ui.js"></script>
+      <script type="text/javascript" src="js/ace.js" charset="utf-8"></script>
+      <script type="text/javascript" src="js/jstree.js"></script>
+      <script type="text/javascript" src="js/mode-whiley.js"></script>
+      <script type="text/javascript">
+         var root_url = "${ROOT_URL}";
+         var error = "${ERROR}";
+         var redirect = "${REDIRECT}";
+      </script>
+      <script type="text/javascript" src="js/whileyweb.js"></script>
+   </head>
+   <body>
+      <div class="container-fluid content">
+      <div class="col-md-1">
       </div>
-      <!-- /.container-fluid -->
-   </nav>
-	</div>
-	
-	<div class="row">	 
-
-        <div class="container-fluid" id="content">
-            <div id="ide">
-            <div id="file-tree" class="col-md-1">
-            File Explorer
+      <div class="col-md-10">
+         <div class="container-fluid" id="container">
+            <div class="row topbar">
+               <div class="col-md-1">
+                  <img src="images/wylogo.png" class="image-responsive"/>
+               </div>
+               <div class="col-md-11">
+                  <p>
+                  <h1>Whiley <span id="bold">PLAY</span><br/>
+                     <small>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</small>
+                  </h1>
+                  </p>
+               </div>
             </div>
-            <div id="code" class="col-md-11">${CODE}</div>
+            <div class="row">
+               <nav class="navbar navbar-default" role="navigation">
+                  <div class="container-fluid">
+                  <form class="navbar-form">
+			              <button type="button"  class="btn btn-primary navbar-btn" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>           
+			               <button type="button"  class="btn btn-primary navbar-btn" onClick="compile();" title="Compile your program to check it is correct.">Compile</button>           
+			              <button type="button"  class="btn btn-primary navbar-btn" onClick="run();" title="Run your program to produce some output!">Run</button>          
+			              <label class="checkbox inline">
+			        				<input id="verification" type="checkbox" checked="checked" title="Enable or disable compile-time verification" class="navbar-btn"/> Enable Verification
+			    			  </label>    
+		            </form>
+                  </div>
+                  <!-- /.container-fluid -->
+               </nav>
             </div>
+            <div class="row">
+              <div class="container-fluid" id="content">
+           		 <div id="ide">
+                  	<div class="file-browser">
+	                     <div id="file-browser" class="col-md-2">
+								  <ul>
+								    <li>Project 1
+								    	<ul>
+								        <li data-jstree='{"icon":"http://localhost:8080/images/wylogo_small.png"}'>Hello World</li>
+								      </ul>
+								      </li>
+								  </ul>
+								</div>
+                     </div>
+                </div>
+                <div id="code" class="col-md-10">${CODE}</div>
+              </div>
+               </div>
             <div id="messages"></div>
-            <textarea id="console" readonly="readonly"></textarea>
-        </div>
-    </div>
-    <script type="text/javascript">
-        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-    </script>
-    <script type="text/javascript">
-        try {
-            var pageTracker = _gat._getTracker("UA-5582165-5");
-            pageTracker._trackPageview();
-        } catch(err) {}
-    </script>
-</body>
+            <div>
+            	<textarea id="console" readonly="readonly"></textarea>
+            </div>
+            
+         </div>
+      </div>
+      <div class="col-md-1">
+      </div>
+      <script type="text/javascript">
+         var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+         document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+      </script>
+      <script type="text/javascript">
+         try {
+             var pageTracker = _gat._getTracker("UA-5582165-5");
+             pageTracker._trackPageview();
+         } catch(err) {}
+      </script>
+   </body>
 </html>

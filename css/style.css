@@ -23,20 +23,10 @@ body {
     text-align: left;
 }
 
-/*#container {
-    margin: 2em auto;
-    padding: 0px;
-    width: 1024px;
-    text-align: left;
+#container {
     border: 1px solid black;
     background: #ffffff;
     box-shadow: 2px 2px 5px 0 #000;
-}*/
-
-#content {
-    padding: 1em;
-    font-family: 'Pontano Sans', Verdana, Helvetica, sans-serif;
-    font-size: 11pt;
 }
 
 .message {
@@ -58,17 +48,38 @@ body {
     margin-top: 1em;
 }
 
+.topbar {
+	background-color: rgb(213, 195, 151);
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left:20px;
+	font-family:trebuchet ms,verdana,arial;
+}
+
+#bold {
+	font-weight:bold;
+}
+
+#file-tree {
+	background-color: rgb(255, 255, 255);
+}
+
+   img {
+          display: block;
+          height: auto;
+          max-width: 100%;
+   }
+
+* {
+  -webkit-border-radius: 0 !important;
+     -moz-border-radius: 0 !important;
+          border-radius: 0 !important;
+}
+
+
 /* ====================================================== */
 /* Editor Settings */
 /* ====================================================== */
-
-#content h1 {
-    margin: 0 0 20 0;
-    font-size: 16pt;
-    font-weight: normal;
-    color: #1b6987;
-    border-bottom: 1px solid #ccc;
-}
 
 #code {
     border: 1px solid #ddd;
@@ -79,7 +90,7 @@ body {
     font-family: "Courier New", Courier, monospace;
     font-size: 11pt;
     background-color: #111111;
-    color: #eeeeee;
+    color: #0f0;
     width: 100%;
     height: 100px;
     min-height: 100px;
@@ -151,20 +162,7 @@ body {
 /**
 * Styles to display the filebrowser.
 */
-#file-browser {
-    position: absolute;
-    float: left;
-    width: 180px;
+.file-browser {
+	border: 1px solid #ddd;
 }
 
-   img {
-          display: block;
-          height: auto;
-          max-width: 100%;
-   }
-
-* {
-  -webkit-border-radius: 0 !important;
-     -moz-border-radius: 0 !important;
-          border-radius: 0 !important;
-}

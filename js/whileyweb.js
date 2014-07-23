@@ -21,6 +21,7 @@ function compile() {
         clearMessages();
         console.value = "";
         $("#spinner").hide();
+        $("#spinner").hide();
         var response = $.parseJSON(response);
         if(response.result == "success") {
             clearErrors(true);
