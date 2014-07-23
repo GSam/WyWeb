@@ -6,6 +6,8 @@ INSERT INTO project( projectid, project_name, userid)  VALUES ( 1,'helloWorld',1
 INSERT INTO project( projectid, project_name, userid)  VALUES ( 2,'quadcopterControlSystem',2);
 INSERT INTO file( fileid, projectid, filename)  VALUES ( 1,1,'helloWorld.wy');
 INSERT INTO file( fileid, projectid, filename)  VALUES ( 2,2,'controlTheCopter.wy');
+UPDATE file SET source =  convert_from('import whiley.lang.System method main(System.Console console):    console.out.println("Hello World")','UTF8')::BYTEA  WHERE fileid =  1 ;
+UPDATE file SET source =  convert_from('import whiley.lang.System method main(System.Console console):    console.out.println("Go Copter Go")', 'UTF8')::BYTEA  WHERE fileid =  2 ;
 INSERT INTO institution( institutionid, institution_name)  VALUES ( 1,'MIT');
 INSERT INTO institution( institutionid, institution_name)  VALUES ( 2,'Victoria University of Wellington');
 INSERT INTO course( courseid, course_name, code, year, institutionid)  VALUES ( 2,'Next Generation Languages','SWEN244',2014,2);
