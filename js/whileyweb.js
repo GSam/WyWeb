@@ -81,6 +81,22 @@ function clearErrors() {
     }
     editor.markers = [];
 }
+$(function() {
+    $("#file-browser").jstree({
+        data : [
+            {
+                text: 'New Project',
+                state: {
+                    opened : true,
+                    selected : true
+                },
+                children: [
+                    'main.wy'
+                ]
+            }
+        ]
+    })
+});
 /**
  * Add a new message to the message list above the console.
  */

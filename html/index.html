@@ -4,9 +4,11 @@
     <meta charset="utf-8" />
     <title>Whiley on the Web!</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/jstree.css">
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/jquery-ui.js"></script>
     <script type="text/javascript" src="js/ace.js" charset="utf-8"></script>
+    <script type="text/javascript" src="js/jstree.js"></script>
     <script type="text/javascript" src="js/mode-whiley.js"></script>
     <script type="text/javascript">
         var root_url = "${ROOT_URL}";
@@ -19,6 +21,7 @@
     <div id="container">
         <div id="content">
             <p>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</p>
+            <div id="file-browser"></div>
             <div id="code">${CODE}</div>
             <section id="toolbar">
                 <button type="button" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>
