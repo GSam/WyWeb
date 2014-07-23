@@ -137,6 +137,7 @@ body {
 	background-color: rgb(213, 195, 151);
 	padding-top: 10px;
 	padding-bottom: 10px;
+	padding-left:20px;
 	font-family:trebuchet ms,verdana,arial;
 }
 
@@ -146,4 +147,16 @@ body {
 
 #file-tree {
 	background-color: rgb(255, 255, 255);
+}
+
+   img {
+          display: block;
+          height: auto;
+          max-width: 100%;
+   }
+
+* {
+  -webkit-border-radius: 0 !important;
+     -moz-border-radius: 0 !important;
+          border-radius: 0 !important;
 }
