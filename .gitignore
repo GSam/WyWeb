@@ -5,3 +5,7 @@ data/*
 !data/max
 !data/microwave
 config.py
+*~
+*.swp
+*.swo
+*.log
