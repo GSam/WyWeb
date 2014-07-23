@@ -146,4 +146,12 @@ body {
 
 #file-tree {
 	background-color: rgb(255, 255, 255);
+
+/**
+* Styles to display the filebrowser.
+*/
+#file-browser {
+    position: absolute;
+    float: left;
+    width: 180px;
 }

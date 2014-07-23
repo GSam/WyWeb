@@ -9,3 +9,7 @@ config.py
 *.swp
 *.swo
 *.log
+
+lib/cherrypy
+lib/mako
+

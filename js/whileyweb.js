@@ -1,28 +1,40 @@
-// Global reference to the code editor.
-var editor;
-
+$(document).on("ace-loaded", function autoindent() {
+    editor.on("change", function(evt) {
+        if (evt.data.action == "insertText" && evt.data.text == "\n") {
+            var line = evt.data.range.end.row,
+                prevLine = evt.data.range.start.row,
+                doc = editor.getSession().getDocument(),
+                prevLineText = doc.getLine(prevLine);
+            if (prevLineText.charAt(prevLineText.length - 1) == ":")
+                window.setTimeout(function() {editor.indent()}, 0);
+        }
+    })
+});
 /**
- * Add a new message to the message list above the console.
+ * Compile a given snippet of Whiley code.
  */
-function addMessage(message_class, message_text, callback) {
-    var message = $("<div></div>");
-    message.text(message_text);
-    message.addClass("message");
-    message.addClass(message_class);
-    message.appendTo("#messages");
-    message.fadeIn(200).delay(2000).slideUp(200, function() {
-        message.remove();
-        if (callback !== undefined) {
-            callback();
+function compile() {
+    var console = document.getElementById("console");
+    var verify = document.getElementById("verification");
+    var request = { code: editor.getValue(), verify: verify.checked };
+    $.post(root_url + "/compile", request, function(response) {
+        clearMessages();
+        console.value = "";
+        $("#spinner").hide();
+        var response = $.parseJSON(response);
+        if(response.result == "success") {
+            clearErrors(true);
+            addMessage("success", "Compiled successfully.");
+        } else if(response.result == "errors") {
+            var errors = response.errors;
+            showErrors(errors);
+            addMessage("error", "Compilation failed: " + errors.length + " error" + (errors.length > 1 ? "s." : "."));
+        } else if(response.result == "error") {
+            clearErrors(true);
+            addMessage("error", response.error);
         }
     });
-}
-
-/**
- * Remove all messages from the message list above the console.
- */
-function clearMessages() {
-    $("#messages").children().remove();
+    $("#spinner").show();
 }
 
 /**
@@ -69,32 +81,46 @@ function clearErrors() {
     }
     editor.markers = [];
 }
-
+$(function() {
+    $("#file-browser").jstree({
+        data : [
+            {
+                text: 'New Project',
+                state: {
+                    opened : true,
+                    selected : true
+                },
+                children: [
+                    'main.wy'
+                ],
+                li_attr: {},
+                a_attr: {}
+            }
+        ]
+    })
+});
 /**
- * Compile a given snippet of Whiley code.
+ * Add a new message to the message list above the console.
  */
-function compile() {
-    var console = document.getElementById("console");
-    var verify = document.getElementById("verification");
-    var request = { code: editor.getValue(), verify: verify.checked };
-    $.post(root_url + "/compile", request, function(response) {
-        clearMessages();
-        console.value = "";
-        $("#spinner").hide();
-        var response = $.parseJSON(response);
-        if(response.result == "success") {
-            clearErrors(true);
-            addMessage("success", "Compiled successfully.");
-        } else if(response.result == "errors") {
-            var errors = response.errors;
-            showErrors(errors);
-            addMessage("error", "Compilation failed: " + errors.length + " error" + (errors.length > 1 ? "s." : "."));
-        } else if(response.result == "error") {
-            clearErrors(true);
-            addMessage("error", response.error);
+function addMessage(message_class, message_text, callback) {
+    var message = $("<div></div>");
+    message.text(message_text);
+    message.addClass("message");
+    message.addClass(message_class);
+    message.appendTo("#messages");
+    message.fadeIn(200).delay(2000).slideUp(200, function() {
+        message.remove();
+        if (callback !== undefined) {
+            callback();
         }
     });
-    $("#spinner").show();
+}
+
+/**
+ * Remove all messages from the message list above the console.
+ */
+function clearMessages() {
+    $("#messages").children().remove();
 }
 
 /**
@@ -123,7 +149,6 @@ function run() {
     });
     $("#spinner").show();
 }
-
 /**
  * Save a given snippet of Whiley code.
  */
@@ -140,8 +165,12 @@ function save() {
     $("#spinner").show();
 }
 
+
+// Global reference to the code editor.
+var editor;
+
 // Run this code when the page has loaded.
-$(document).ready(function() {
+$(function() {
     ace.Range = require('ace/range').Range;
     // Enable the editor with Whiley syntax.
     editor = ace.edit("code");
@@ -180,4 +209,7 @@ $(document).ready(function() {
             }
         });
     }
+
+    // Now activate all "behaviours" for the editor.
+    $(document).trigger("ace-loaded");
 });
