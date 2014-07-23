@@ -9,7 +9,9 @@ $(function() {
                 },
                 children: [
                     'main.wy'
-                ]
+                ],
+                li_attr: {},
+                a_attr: {}
             }
         ]
     })

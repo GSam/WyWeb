@@ -132,3 +132,12 @@ body {
 	background: url("../images/resizable.png");
 	background-repeat: no-repeat;
 }
+
+/**
+* Styles to display the filebrowser.
+*/
+#file-browser {
+    position: absolute;
+    float: left;
+    width: 180px;
+}
