@@ -5,3 +5,8 @@ data/*
 !data/max
 !data/microwave
 config.py
+
+# I didn't have access to the Python path
+lib/cherrypy
+lib/mako
+
