@@ -6,7 +6,7 @@ body {
     margin: 0px;
     padding: 0px;
     font-family: "helvetica";
-    background: #cccccc;
+    background: rgb(116,116,116) !important;
 }
 
 #header {
@@ -23,7 +23,7 @@ body {
     text-align: left;
 }
 
-#container {
+/*#container {
     margin: 2em auto;
     padding: 0px;
     width: 1024px;
@@ -31,7 +31,7 @@ body {
     border: 1px solid black;
     background: #ffffff;
     box-shadow: 2px 2px 5px 0 #000;
-}
+}*/
 
 #content {
     padding: 1em;
@@ -131,4 +131,19 @@ body {
 	right: 0;
 	background: url("../images/resizable.png");
 	background-repeat: no-repeat;
+}
+
+.topbar {
+	background-color: rgb(213, 195, 151);
+	padding-top: 10px;
+	padding-bottom: 10px;
+	font-family:trebuchet ms,verdana,arial;
+}
+
+#bold {
+	font-weight:bold;
+}
+
+#file-tree {
+	background-color: rgb(255, 255, 255);
 }

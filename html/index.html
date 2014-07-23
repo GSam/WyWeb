@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <title>Whiley on the Web!</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="shortcut icon" href="http://whiley.org/wp-content/themes/atahualpa351/images/favicon/whileyfav.ico" />
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/jquery-ui.js"></script>
@@ -17,10 +18,25 @@
     <script type="text/javascript" src="js/whileyweb.js"></script>
 </head>
 <body>
-    <div id="container">
-        <div id="content">
-            <p>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</p>
-            <div id="code">${CODE}</div>
+    <div class="container-fluid" id="container">
+    
+    <div class="row topbar">
+    	
+  		<div class="col-md-2">
+  			<img src="images/wylogo.png"  alt="" class="image-responsive"/>
+  		</div>
+  		<div class="col-md-10">
+  			<h2>Whiley <span id="bold">PLAY</span></h2>
+  			<h2><small>From this page, you can run Whiley programs in your browser!  For more on Whiley, visit <a href="http://whiley.org">whiley.org</a>.</small></h2>
+  		</div>
+	</div>
+        <div class id="content">
+            <div id="ide">
+            <div id="file-tree" class="col-md-1">
+            File Explorer
+            </div>
+            <div id="code" class="col-md-9">${CODE}</div>
+            </div>
             <section id="toolbar">
                 <button type="button" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>
                 <button type="button" onClick="compile();" title="Compile your program to check it is correct.">Compile</button>
