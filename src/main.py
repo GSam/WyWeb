@@ -121,6 +121,10 @@ class Main(object):
     def default(self, *args, **kwargs):
         raise HTTPRedirect("/")
     default.exposed = True
+    
+     def admin(self, *args, **kwargs):
+            raise HTTPRedirect("/administrator.html")
+    default.exposed = True
 
 # ============================================================
 # Compiler Interface
