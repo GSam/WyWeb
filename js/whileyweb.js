@@ -83,21 +83,27 @@ function clearErrors() {
 }
 $(function() {
     $("#file-browser").jstree({
-        data : [
-            {
-                text: 'New Project',
-                state: {
-                    opened : true,
-                    selected : true
-                },
-                children: [
-                    'main.wy'
-                ],
-                li_attr: {},
-                a_attr: {}
-            }
-        ],
-    	core: {check_callback: true},
+    	core: {
+            check_callback: true,
+            data: [
+                {
+                    text: 'Project 1',
+                    state: {
+                        opened: true
+                    },
+                    children: [
+                        {
+                            text: 'Hello World',
+                            type: 'file',
+                            data: "import whiley.lang.System\n\nmethod main(System.Console console):\n    console.out.println(\"Hello World\")",
+                            state: {
+                                selected: true
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
     	plugins: ["contextmenu", "dnd", "types", "unique"],
     	contextmenu: {
     		items: function(node) {
@@ -119,8 +125,9 @@ $(function() {
                         action: function(data) {
                             var inst = $.jstree.reference(data.reference),
                                 obj = inst.get_node(data.reference);
-                            inst.create_node(obj, {type: "file", text: "New File"}, "last", function(new_node) {
-                                setTimeout(function() {inst.edit(new_node); }, 0);
+                            inst.create_node(obj, {type: "file", text: "New File", data: ""}, "last", 
+                                function(new_node) {
+                                    setTimeout(function() {inst.edit(new_node); }, 0);
                             })
                         }
                     }
@@ -163,6 +170,26 @@ function clearMessages() {
     $("#messages").children().remove();
 }
 
+var _selectedFile, _fileLoading = false;
+
+$(function() {
+    $('#file-browser').on('changed.jstree', function(evt, data) {
+        if (data && data.node && "data" in data.node) {
+            _fileLoading = true
+            editor.setValue(data.node.data, 0);
+            _fileLoading = false
+            _selectedFile = data.node
+        }
+    })
+})
+
+$(document).on('ace-loaded', function() {
+    editor.on('change', function() {
+        if (!_fileLoading) {
+            _selectedFile.data = editor.getValue()
+        }
+    })
+})
 /**
  * Compile and run a given snippet of Whiley code.
  */
