@@ -40,21 +40,19 @@ function compile() {
         }
     });
     $("#spinner").show();
-
-    function addFiles(prefix, node, query) {
-        var data = $files.jstree('get_node', node);
-        if (data.type == "file")
-            query[prefix + data.text] = data.data;
-        else for (var i = 0; i < data.children.length; i++) {
-            addFiles(prefix + "/" + data.text, data.children[i], query);
-        }
-    }
-    function getPath(node) {
-        var data = $files.jstree('get_node', node);
-        return get(data.parent) + "/" + data.text;
+}
+function addFiles(prefix, node, query) {
+    var data = $files.jstree('get_node', node);
+    if (data.type == "file")
+        query[prefix + data.text] = data.data;
+    else for (var i = 0; i < data.children.length; i++) {
+        addFiles(prefix + "/" + data.text, data.children[i], query);
     }
 }
-
+function getPath(node) {
+    var data = $files.jstree('get_node', node);
+    return get(data.parent) + "/" + data.text;
+}
 /**
  * Display all the compilation errors.
  */
@@ -101,13 +99,13 @@ function clearErrors() {
 }
 $(function() {
     $("#file-browser").jstree({
-    	core: {
+     core: {
             check_callback: true,
             data: getFileData()
         },
-    	plugins: ["contextmenu", "dnd", "types", "unique"],
-    	contextmenu: {
-    		items: function(node) {
+     plugins: ["contextmenu", "dnd", "types", "unique"],
+     contextmenu: {
+     items: function(node) {
                 var tmp = $.jstree.defaults.contextmenu.items()
                 delete tmp.create.action;
                 tmp.create.submenu = {
@@ -126,8 +124,9 @@ $(function() {
                         action: function(data) {
                             var inst = $.jstree.reference(data.reference),
                                 obj = inst.get_node(data.reference);
-                            inst.create_node(obj, {type: "file", text: "New File"}, "last", function(new_node) {
-                                setTimeout(function() {inst.edit(new_node); }, 0);
+                            inst.create_node(obj, {type: "file", text: "New File", data: ""}, "last",
+                                function(new_node) {
+                                    setTimeout(function() {inst.edit(new_node); }, 0);
                             })
                         }
                     }
@@ -250,7 +249,10 @@ $(document).on('ace-loaded', function() {
  */
 function run() {
     var console = document.getElementById("console");
-    var request = { code: editor.getValue() };
+    var $files = $('#file-browser');
+    var main = getPath($files.js_tree('get_selected')[0])
+    var request = { _main: main, _verify: verify.checked };
+    addFiles("", "#", request);
     $.post(root_url + "/run", request, function(response) {
         clearMessages();
         console.value = "";

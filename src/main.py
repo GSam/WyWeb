@@ -130,6 +130,28 @@ class Main(object):
         return json.dumps(response)
     run.exposed = True
 
+    def run_all(self, _verify, _main, *args, **files):
+        allow(["HEAD", "POST"])
+
+        # First, create working directory
+        dir = createWorkingDirectory()
+        dir = config.DATA_DIR + "/" + dir
+
+        result = compile_all(_main, files, _verify, dir)
+
+        shutil.rmtree(dir)
+
+        if type(result) == str:
+            response = {"result": "error", "error": result}
+        elif len(result) != 0:
+            response = {"result": "errors", "errors": result}
+        else:
+            response = {"result": "success"}
+
+            output = run(dir, _main)
+            response["output"] = output
+        return json.dumps(response)
+
     # application root
     def index(self, id="HelloWorld", *args, **kwargs):
         allow(["HEAD", "GET"])
@@ -453,7 +475,7 @@ def compile_all(main, files, verify, dir):
     except Exception as ex:
         return "Compile Error: " + str(ex)
 
-def run(dir):
+def run(dir, main="tmp"):
     try:
         # run the JVM
         proc = subprocess.Popen([
@@ -461,7 +483,7 @@ def run(dir):
             "-Djava.security.manager",
             "-Djava.security.policy=whiley.policy",            
             "-cp",config.WYJC_JAR + ":" + dir,
-            "tmp"
+            main
             ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
         (out, err) = proc.communicate()
         return out
