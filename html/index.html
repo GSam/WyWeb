@@ -41,12 +41,13 @@
                <nav class="navbar navbar-default" role="navigation">
                   <div class="container-fluid">
                   <form class="navbar-form">
-			              <button type="button"  class="btn btn-primary navbar-btn" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>           
-			               <button type="button"  class="btn btn-primary navbar-btn" onClick="compile();" title="Compile your program to check it is correct.">Compile</button>           
-			              <button type="button"  class="btn btn-primary navbar-btn" onClick="run();" title="Run your program to produce some output!">Run</button>          
+			              <button type="button"  class="btn btn-primary navbar-btn" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>
+			               <button type="button"  class="btn btn-primary navbar-btn" onClick="compile();" title="Compile your program to check it is correct.">Compile</button>
+			              <button type="button"  class="btn btn-primary navbar-btn" onClick="run();" title="Run your program to produce some output!">Run</button>
+			              <a href="admin" class="btn btn-primary navbar-btn" title="Admin">Admin</a>
 			              <label class="checkbox inline">
 			        				<input id="verification" type="checkbox" checked="checked" title="Enable or disable compile-time verification" class="navbar-btn"/> Enable Verification
-			    			  </label>    
+			    			  </label>
 		            </form>
                   </div>
                   <!-- /.container-fluid -->
@@ -67,7 +68,7 @@
             <div>
             	<textarea id="console" readonly="readonly"></textarea>
             </div>
-            
+
          </div>
       </div>
       <div class="col-md-1">
