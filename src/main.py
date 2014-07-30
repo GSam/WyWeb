@@ -82,21 +82,6 @@ class Main(object):
         # Second, save the file
         save(config.DATA_DIR + "/" + dir + "/tmp.whiley", code)
 
-        try:
-            cnx = mysql.connector.connect(host="kipp-cafe.ecs.vuw.ac.nz", user="whiley", database="whiley", passwd="coyote")
-            data = open(config.DATA_DIR + "/" + dir + "/tmp.whiley", "rb").read()
-            cursor = cnx.cursor()
-            sql = "INSERT INTO file (projectid, filename, source) VALUES ('1','text', %s)"
-            cursor.execute(sql, (data,))
-        except mysql.connector.Error as err:
-            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                print("Something is wrong with your user name or password")
-            elif err.errno == errorcode.ER_BAD_DB_ERROR:
-                print("Database does not exists")
-            else:
-                print(err)
-        else:
-          cnx.close()
         # Fouth, return result as JSON
         return json.dumps({
             "id": dir
@@ -270,6 +255,21 @@ def save(filename,data):
     f = open(filename,"w")
     f.write(data)
     f.close()
+    try:
+        cnx = mysql.connector.connect(host="kipp-cafe.ecs.vuw.ac.nz", user="whiley", database="whiley", passwd="coyote")
+        data = open(filename, "rb").read()
+        cursor = cnx.cursor()
+        sql = "INSERT INTO file (projectid, filename, source) VALUES ('1','text', %s)"
+        cursor.execute(sql, (data,))
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong with your user name or password")
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exists")
+        else:
+            print(err)
+    else:
+        cnx.close()
     return
 
 # Compile a snippet of Whiley code.  This is done by saving the file
