@@ -7,7 +7,6 @@ import tempfile
 import subprocess
 import json
 import re
-import mysql.connector
 
 import config
 
