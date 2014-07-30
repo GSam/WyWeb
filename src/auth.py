@@ -5,8 +5,10 @@
 #
 
 import cherrypy
+import db 
 
 SESSION_KEY = '_cp_username'
+
 
 def check_credentials(username, password):
     """Verifies credentials for username and password.
@@ -123,6 +125,7 @@ class AuthController(object):
         if error_msg:
             return self.get_loginform(username, error_msg, from_page)
         else:
+            cherrypy.session.regenerate()
             cherrypy.session[SESSION_KEY] = cherrypy.request.login = username
             self.on_login(username)
             raise cherrypy.HTTPRedirect(from_page or "/")
@@ -136,3 +139,15 @@ class AuthController(object):
             cherrypy.request.login = None
             self.on_logout(username)
         raise cherrypy.HTTPRedirect(from_page or "/")
+
+    @cherrypy.expose
+    def testdb(self): 
+
+        cnx = db.connect()        
+        cursor = cnx.cursor()
+        query = ("SELECT username from whiley_user")
+        cursor.execute(query)
+        for (username) in cursor:
+            print("{} name".format(username)) 
+        cursor.close()
+        cnx.close()
