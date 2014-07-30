@@ -117,10 +117,11 @@ class Main(object):
     index.exposed = True
     # exposed
 
+
     # Everything else should redirect to the main page.
-    def default(self, *args, **kwargs):
+    """def default(self, *args, **kwargs):
         raise HTTPRedirect("/")
-    default.exposed = True
+    default.exposed = True"""
 
 # ============================================================
 # Compiler Interface
