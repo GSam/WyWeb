@@ -2,24 +2,7 @@ $(function() {
     $("#file-browser").jstree({
     	core: {
             check_callback: true,
-            data: [
-                {
-                    text: 'Project 1',
-                    state: {
-                        opened: true
-                    },
-                    children: [
-                        {
-                            text: 'Hello World',
-                            type: 'file',
-                            data: "import whiley.lang.System\n\nmethod main(System.Console console):\n    console.out.println(\"Hello World\")",
-                            state: {
-                                selected: true
-                            }
-                        }
-                    ]
-                }
-            ]
+            data: getFileData()
         },
     	plugins: ["contextmenu", "dnd", "types", "unique"],
     	contextmenu: {
