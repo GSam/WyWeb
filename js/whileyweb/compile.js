@@ -4,8 +4,12 @@
 function compile() {
     var console = document.getElementById("console");
     var verify = document.getElementById("verification");
-    var request = { code: editor.getValue(), verify: verify.checked };
-    $.post(root_url + "/compile", request, function(response) {
+
+    // build parameters
+    var request = { _main: , _verify: verify.checked },
+        $files = $('#file-browser');
+    addFiles("", "#", request);
+    $.post(root_url + "/compile_all", request, function(response) {
         clearMessages();
         console.value = "";
         $("#spinner").hide();
@@ -23,5 +27,14 @@ function compile() {
         }
     });
     $("#spinner").show();
+
+    function addFiles(prefix, node, query) {
+        var data = $files.jstree('get_node', node);
+        if (data.type == "file")
+            query[prefix + data.text] = data.data;
+        else for (var i = 0; i < data.children.length; i++) {
+            addFiles(prefix + "/" + data.text, data.children[i], query);
+        }
+    }
 }
 

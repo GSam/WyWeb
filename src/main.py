@@ -75,6 +75,26 @@ class Main(object):
         return json.dumps(response)
     compile.exposed = True
 
+    def compile_all(self, _verify, _main, *args, **files):
+        allow(["HEAD", "POST"])
+
+        # First, create working directory
+        dir = createWorkingDirectory()
+        dir = config.DATA_DIR + "/" + dir
+
+        result = compile_all(_main, files, _verify, dir)
+
+        shutil.rmtree(dir)
+
+        if type(result) == str:
+            response = {"result": "error", "error": result}
+        elif len(result) != 0:
+            response = {"result": "errors", "errors": result}
+        else:
+            response = {"result": "success"}
+        return json.dumps(response)
+    compile_all.exposed = True
+
     def save(self, code, *args, **kwargs):
         allow(["HEAD", "POST"])
         # First, create working directory
@@ -269,6 +289,11 @@ def save(filename,data):
             print(err)
     return
 
+def save_all(files, dir):
+    for filename, contents in files.items():
+        with open(dir + "/" + filename) as f:
+            f.write(contents)
+
 # Compile a snippet of Whiley code.  This is done by saving the file
 # to disk in a temporary location, compiling it using the Whiley2Java
 # Compiler and then returning the compilation output.
@@ -301,6 +326,34 @@ def compile(code,verify,dir):
             return splitErrors(err)
     except Exception as ex:
         # error, so return that
+        return "Compile Error: " + str(ex)
+
+def compile_all(main, files, verify, dir):
+    filename = dir + "/" + main
+    args = [
+            config.JAVA_CMD,
+            "-jar",
+            config.WYJC_JAR,
+            "-bootpath", config.WYRT_JAR,
+            "-whileydir", dir,
+            "-classdir", dir,
+            "-brief"
+        ]
+
+    if verify == "true":
+        args.append("-verify")
+
+    save_all(files, dir)
+    args.append(filename)
+
+    try:
+        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+        out, err = proc.communicate()
+        if err == None:
+            return splitErrors(out)
+        else:
+            return splitErrors(err)
+    except Exception as ex:
         return "Compile Error: " + str(ex)
 
 def run(dir):
