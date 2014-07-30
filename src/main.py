@@ -7,20 +7,30 @@ import tempfile
 import subprocess
 import json
 import re
+import mysql.connector
 
 import config
 
 from cherrypy.lib.static import serve_file
 from cherrypy.lib.cptools import allow
 from cherrypy import HTTPRedirect
+import cherrypy
 
 from mako.template import Template
 from mako.lookup import TemplateLookup
 lookup = TemplateLookup(directories=['html'])
 
+import mysql.connector
+from mysql.connector import errorcode
+
 # ============================================================
 # Application Entry
 # ============================================================
+
+def connect(thread_index):
+    cherrypy.thread_data.db = mysql.connector.connect(host="kipp-cafe.ecs.vuw.ac.nz", user="whiley", database="whiley", passwd="coyote")
+
+cherrypy.engine.subscribe('start_thread', connect)
 
 class Main(object):
 
@@ -68,6 +78,22 @@ class Main(object):
         dir = createWorkingDirectory()
         # Second, save the file
         save(config.DATA_DIR + "/" + dir + "/tmp.whiley", code)
+
+        try:
+            cnx = mysql.connector.connect(host="kipp-cafe.ecs.vuw.ac.nz", user="whiley", database="whiley", passwd="coyote")
+            data = open(config.DATA_DIR + "/" + dir + "/tmp.whiley", "rb").read()
+            cursor = cnx.cursor()
+            sql = "INSERT INTO file (projectid, filename, source) VALUES ('1','text', %s)"
+            cursor.execute(sql, (data,))
+        except mysql.connector.Error as err:
+            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                print("Something is wrong with your user name or password")
+            elif err.errno == errorcode.ER_BAD_DB_ERROR:
+                print("Database does not exists")
+            else:
+                print(err)
+        else:
+          cnx.close()
         # Fouth, return result as JSON
         return json.dumps({
             "id": dir
@@ -143,18 +169,18 @@ def admin_instutions(self, id="Admin Page Institutions", *args, **kwargs):
     error = ""
     redirect = "NO"
     try:
-	# Sanitize the ID.
-	safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
-	# Load the file
-	code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
-	# Escape the code
-	code = cgi.escape(code)
+        # Sanitize the ID.
+        safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
+        # Load the file
+        code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
+        # Escape the code
+        code = cgi.escape(code)
     except Exception:
-	code = ""
-	error = "Invalid ID: %s" % id
-	redirect = "YES"
-    template = lookup.get_template("admin_institutions.html")
-    return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect)
+        code = ""
+        error = "Invalid ID: %s" % id
+        redirect = "YES"
+        template = lookup.get_template("admin_institutions.html")
+        return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect)
     admin_instutions.exposed = True
 
     # Everything else should redirect to the main page.
