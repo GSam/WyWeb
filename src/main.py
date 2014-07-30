@@ -256,9 +256,8 @@ def save(filename,data):
     f.write(data)
     f.close()
     try:
-        cnx = mysql.connector.connect(host="kipp-cafe.ecs.vuw.ac.nz", user="whiley", database="whiley", passwd="coyote")
         data = open(filename, "rb").read()
-        cursor = cnx.cursor()
+        cursor = cherrypy.thread_data.db.cursor()
         sql = "INSERT INTO file (projectid, filename, source) VALUES ('1','text', %s)"
         cursor.execute(sql, (data,))
     except mysql.connector.Error as err:
@@ -268,8 +267,6 @@ def save(filename,data):
             print("Database does not exists")
         else:
             print(err)
-    else:
-        cnx.close()
     return
 
 # Compile a snippet of Whiley code.  This is done by saving the file
