@@ -13,6 +13,7 @@ import config
 from cherrypy.lib.static import serve_file
 from cherrypy.lib.cptools import allow
 from cherrypy import HTTPRedirect
+from cherrypy import request
 
 from mako.template import Template
 from mako.lookup import TemplateLookup
@@ -153,13 +154,22 @@ class Main(object):
         return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect,STATUS=status)
     admin.exposed = True
     
-<<<<<<< HEAD
     #Admin Main Page
     def admin_institutions(self, id="Admin Institutions", *args, **kwargs):
-    	allow(["HEAD", "GET"])
+    	allow(["HEAD", "GET","POST"])
     	error = ""
     	redirect = "NO"
         status = "DB: Connection ok"
+        options = " "
+        if request:
+        	if request.params:
+			if request.params['institution']:
+				cnx = mysql.connector.connect(user='whiley', password='coyote',host='kipp-cafe.ecs.vuw.ac.nz',database='whiley') 	
+				cursor = cnx.cursor()
+				query = ("insert into institution (institution_name) values (" + request.params['institution'] + ")")
+				cursor.close()
+				cnx.close()
+        
 	try:
 	  	cnx = mysql.connector.connect(user='whiley', password='coyote',host='kipp-cafe.ecs.vuw.ac.nz',database='whiley')
 	except mysql.connector.Error as err:
@@ -171,7 +181,14 @@ class Main(object):
 			status = err
 	else:
           	cnx.close()
-
+          	
+        cnx = mysql.connector.connect(user='whiley', password='coyote',host='kipp-cafe.ecs.vuw.ac.nz',database='whiley') 	
+        cursor = cnx.cursor()
+	query = ("SELECT institution_name from institution order by institution_name")
+	for (institution_name) in cursor:
+	  	options = options + "<option>" + institution_name + "</option>"	
+	cursor.close()
+	cnx.close()	
     	try:
 		# Sanitize the ID.
 		safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
@@ -184,29 +201,9 @@ class Main(object):
 		error = "Invalid ID: %s" % id
 		redirect = "YES"
     	template = lookup.get_template("admin_institutions.html")
-    	return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect,STATUS=status)
+    	return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect,STATUS=status,OPTION=options)
     admin_institutions.exposed = True
-=======
-#Admin Main Page
-def admin_instutions(self, id="Admin Page Institutions", *args, **kwargs):
-    allow(["HEAD", "GET"])
-    error = ""
-    redirect = "NO"
-    try:
-	# Sanitize the ID.
-	safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
-	# Load the file
-	code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
-	# Escape the code
-	code = cgi.escape(code)
-    except Exception:
-	code = ""
-	error = "Invalid ID: %s" % id
-	redirect = "YES"
-    template = lookup.get_template("admin_institutions.html")
-    return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect)
-    admin_instutions.exposed = True
->>>>>>> origin/master
+
 
     # Everything else should redirect to the main page.
     def default(self, *args, **kwargs):
