@@ -117,11 +117,50 @@ class Main(object):
     index.exposed = True
     # exposed
 
+    #Admin Main Page
+    def admin(self, id="Admin Page", *args, **kwargs):
+        allow(["HEAD", "GET"])
+        error = ""
+        redirect = "NO"
+        try:
+            # Sanitize the ID.
+            safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
+            # Load the file
+            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
+            # Escape the code
+            code = cgi.escape(code)
+        except Exception:
+            code = ""
+            error = "Invalid ID: %s" % id
+            redirect = "YES"
+        template = lookup.get_template("admin.html")
+        return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect)
+    admin.exposed = True
+    
+#Admin Main Page
+def admin_instutions(self, id="Admin Page Institutions", *args, **kwargs):
+    allow(["HEAD", "GET"])
+    error = ""
+    redirect = "NO"
+    try:
+	# Sanitize the ID.
+	safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
+	# Load the file
+	code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
+	# Escape the code
+	code = cgi.escape(code)
+    except Exception:
+	code = ""
+	error = "Invalid ID: %s" % id
+	redirect = "YES"
+    template = lookup.get_template("admin_institutions.html")
+    return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect)
+    admin_instutions.exposed = True
 
     # Everything else should redirect to the main page.
-    """def default(self, *args, **kwargs):
+    def default(self, *args, **kwargs):
         raise HTTPRedirect("/")
-    default.exposed = True"""
+    default.exposed = True
 
 # ============================================================
 # Compiler Interface
