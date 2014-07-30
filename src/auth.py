@@ -47,6 +47,8 @@ def check_auth(*args, **kwargs):
     
 cherrypy.tools.auth = cherrypy.Tool('before_handler', check_auth)
 
+
+
 def require(*conditions):
     """A decorator that appends conditions to the auth.require config
     variable."""
@@ -103,11 +105,6 @@ def all_of(*conditions):
 
 class AuthController(object):
     
-    def on_login(self, username):
-        """Called on successful login"""
-    
-    def on_logout(self, username):
-        """Called on logout"""
     
     def get_loginform(self, user, msg="Enter login information", from_page="/"):
         return """<html><body>
@@ -122,7 +119,8 @@ class AuthController(object):
     @cherrypy.expose
     def login(self, user=None, passwd=None, from_page="/"):
         if user is None or passwd is None:
-            return self.get_loginform("", from_page=from_page)
+            #return self.get_loginform("", from_page=from_page)
+            raise cherrypy.HTTPRedirect("/")
         
         error_msg = check_credentials(user, passwd)
         if error_msg:
@@ -130,8 +128,8 @@ class AuthController(object):
         else:
             cherrypy.session.regenerate()
             cherrypy.session[SESSION_KEY] = cherrypy.request.login = user
-            self.on_login(user)
-            raise cherrypy.HTTPRedirect("/admin")
+            #return cherrypy.session[SESSION_KEY]
+            raise cherrypy.HTTPRedirect("/")
     
     @cherrypy.expose
     def logout(self, from_page="/"):
@@ -140,7 +138,7 @@ class AuthController(object):
         sess[SESSION_KEY] = None
         if username:
             cherrypy.request.login = None
-            self.on_logout(username)
+            #self.on_logout(username)
         raise cherrypy.HTTPRedirect(from_page or "/")
 
     @cherrypy.expose
