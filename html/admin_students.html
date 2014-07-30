@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <title>Whiley on the Web!</title>
+      <link rel="stylesheet" href="css/style.css">
+      <link href="css/bootstrap.min.css" rel="stylesheet">
+      <link rel="shortcut icon" href="http://whiley.org/wp-content/themes/atahualpa351/images/favicon/whileyfav.ico" />
+      <link rel="stylesheet" href="css/jstree.css">
+      <script type="text/javascript" src="js/jquery.js"></script>
+      <script type="text/javascript" src="js/jquery-ui.js"></script>
+      <script type="text/javascript" src="js/ace.js" charset="utf-8"></script>
+      <script type="text/javascript" src="js/jstree.js"></script>
+      <script type="text/javascript" src="js/mode-whiley.js"></script>
+      <script type="text/javascript">
+         var root_url = "${ROOT_URL}";
+         var error = "${ERROR}";
+         var redirect = "${REDIRECT}";
+      </script>
+      <script type="text/javascript" src="js/whileyweb.js"></script>
+   </head>
+   <body>
+      <div class="container-fluid content">
+      <div class="col-md-1">
+      </div>
+      <div class="col-md-10">
+         <div class="container-fluid" id="container">
+            <div class="row topbar">
+               <div class="col-md-1">
+                  <img src="images/wylogo.png" class="image-responsive"/>
+               </div>
+               <div class="col-md-11">
+                  <p>
+                  <h1>Whiley <span id="bold">ADMINISTRATION</span><br/>
+                     <small>From this page, you can administer the Whiley system.</small>
+                  </h1>
+                  </p>
+               </div>
+            </div>
+            <div class="row">
+               <nav class="navbar navbar-default" role="navigation">
+                  <div class="container-fluid">
+                  <form class="navbar-form">
+                  		  <a href="/" class="btn btn-primary navbar-btn" title="Admin">Play</a>
+			              <a href="admin" class="btn btn-primary navbar-btn" title="Admin">Admin</a>
+			              <a href="admin_institutions" class="btn btn-primary navbar-btn" title="Institutions">Institutions</a>
+			              <a href="admin_courses" class="btn btn-primary navbar-btn" title="Courses">Courses</a>
+			              <a href="admin_students" class="btn btn-primary navbar-btn" title="Students">Students</a>
+			              <a href="http://www.whiley.org" class="btn btn-primary navbar-btn" title="Admin">whiley.org</a>
+		            </form>
+                  </div>
+                  <!-- /.container-fluid -->
+               </nav>
+            </div>
+            <div class="row">
+              <div class="container-fluid" id="content">
+           		 <div id="ide">
+<div class=content><br><table><tr><td width=55 align=left><img src=images/institution_small.png></td><td><h2> Current Institutions</h2></td></tr>
+<tr><td>&nbsp;</td><td><select>${OPTION}</select></td></tr></table>
+<br>
+<table><tr><td width=55 align=left><img src=images/course_small.png></td><td><h2> Current Courses</h2></td></tr>
+<tr><td>&nbsp;</td><td><select><option>Fake Course1</option><option>Fake Course2</option></select></td></tr></table>
+<br>
+<table><tr><td width=55 align=left><img src=images/student_small.png></td><td><h2> Current Students</h2></td></tr>
+<tr><td>&nbsp;</td><td><select><option>300000001 Fake Student</option><option>300000001 Fake Student2</option></select></td></tr></table>
+<br><hr>
+<table><tr><td width=55 align=left><img src=images/student_add_small.png></td><td><h2> Add New Student</h2></td></tr>
+<tr><td>&nbsp;</td><td><form method=post action=admin_students><table><tr><td>Student ID &nbsp; &nbsp; </td><td> <input name="studentID" type="textfield" size="50"></td></tr><tr><td>Student Firstname &nbsp; &nbsp; </td><td> <input name="student_firstname" type="textfield" size="50"></td></tr><tr><td>Student Surname &nbsp; &nbsp; </td><td> <input name="student_surname" type="textfield" size="50"></td></tr></table><br>
+<input type=submit value=Add class="btn btn-primary navbar-btn" ></form></td></tr></table>
+<br><br>
+ </div>
+      <div class="col-md-1">
+      </div>
+
+   </body>
+</html>
+   </body>
+</html>
+
