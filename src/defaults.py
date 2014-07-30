@@ -12,3 +12,5 @@ WYJC_JAR = "lib/wyjc-all-current.jar"
 WYRT_JAR = "lib/wyrt-current.jar"
 JAVA_CMD = "java"
 ERROR_LOG = None
+
+

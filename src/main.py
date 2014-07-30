@@ -116,7 +116,7 @@ class Main(object):
         return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect)
     index.exposed = True
     # exposed
-      
+
     #Admin Main Page
     def admin(self, id="Admin Page", *args, **kwargs):
         allow(["HEAD", "GET"])
@@ -156,7 +156,7 @@ def admin_instutions(self, id="Admin Page Institutions", *args, **kwargs):
     template = lookup.get_template("admin_institutions.html")
     return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect)
     admin_instutions.exposed = True
-    
+
     # Everything else should redirect to the main page.
     def default(self, *args, **kwargs):
         raise HTTPRedirect("/")
