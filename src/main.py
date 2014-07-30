@@ -7,16 +7,20 @@ import tempfile
 import subprocess
 import json
 import re
-
+import mysql.connector
 import config
 
+import cherrypy
 from cherrypy.lib.static import serve_file
 from cherrypy.lib.cptools import allow
 from cherrypy import HTTPRedirect
-import cherrypy
+from cherrypy import request
 
 from mako.template import Template
 from mako.lookup import TemplateLookup
+
+from mysql.connector import errorcode
+
 lookup = TemplateLookup(directories=['html'])
 
 import mysql.connector
@@ -147,6 +151,19 @@ class Main(object):
         allow(["HEAD", "GET"])
         error = ""
         redirect = "NO"
+        status = "DB: Connection ok"
+	try:
+	  	cnx = mysql.connector.connect(user='whiley', password='coyote',host='kipp-cafe.ecs.vuw.ac.nz',database='whiley')
+	except mysql.connector.Error as err:
+	  	if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+	    		status = "Something is wrong with your user name or password"
+	  	elif err.errno == errorcode.ER_BAD_DB_ERROR:
+	    		status = "Database does not exists"
+		else:
+			status = err
+	else:
+          	cnx.close()
+  	
         try:
             # Sanitize the ID.
             safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
@@ -159,32 +176,62 @@ class Main(object):
             error = "Invalid ID: %s" % id
             redirect = "YES"
         template = lookup.get_template("admin.html")
-        return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect)
+        return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect,STATUS=status)
     admin.exposed = True
     
-#Admin Main Page
-def admin_instutions(self, id="Admin Page Institutions", *args, **kwargs):
-    allow(["HEAD", "GET"])
-    error = ""
-    redirect = "NO"
-    try:
-        # Sanitize the ID.
-        safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
-        # Load the file
-        code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
-        # Escape the code
-        code = cgi.escape(code)
-    except Exception:
-        code = ""
-        error = "Invalid ID: %s" % id
-        redirect = "YES"
-        template = lookup.get_template("admin_institutions.html")
-        return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect)
-    admin_instutions.exposed = True
+    #Admin Main Page
+    def admin_institutions(self, id="Admin Institutions", *args, **kwargs):
+    	allow(["HEAD", "GET","POST"])
+    	error = ""
+    	redirect = "NO"
+        status = "DB: Connection ok"
+        options = " "
+        if request:
+        	if request.params:
+			if request.params['institution']:
+				cnx = mysql.connector.connect(user='whiley', password='coyote',host='kipp-cafe.ecs.vuw.ac.nz',database='whiley') 	
+				cursor = cnx.cursor()
+				query = ("insert into institution (institution_name) values (" + request.params['institution'] + ")")
+				cursor.close()
+				cnx.close()
+        
+	try:
+	  	cnx = mysql.connector.connect(user='whiley', password='coyote',host='kipp-cafe.ecs.vuw.ac.nz',database='whiley')
+	except mysql.connector.Error as err:
+	  	if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+	    		status = "Something is wrong with your user name or password"
+	  	elif err.errno == errorcode.ER_BAD_DB_ERROR:
+	    		status = "Database does not exists"
+		else:
+			status = err
+	else:
+          	cnx.close()
+          	
+        cnx = mysql.connector.connect(user='whiley', password='coyote',host='kipp-cafe.ecs.vuw.ac.nz',database='whiley') 	
+        cursor = cnx.cursor()
+	query = ("SELECT institution_name from institution order by institution_name")
+	for (institution_name) in cursor:
+	  	options = options + "<option>" + institution_name + "</option>"	
+	cursor.close()
+	cnx.close()	
+    	try:
+		# Sanitize the ID.
+		safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
+		# Load the file
+		code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
+		# Escape the code
+		code = cgi.escape(code)
+    	except Exception:
+		code = ""
+		error = "Invalid ID: %s" % id
+		redirect = "YES"
+    	template = lookup.get_template("admin_institutions.html")
+    	return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect,STATUS=status,OPTION=options)
+    admin_institutions.exposed = True
 
     # Everything else should redirect to the main page.
     def default(self, *args, **kwargs):
-        raise HTTPRedirect("/")
+	raise HTTPRedirect("/")
     default.exposed = True
 
 # ============================================================

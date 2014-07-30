@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <title>Whiley Admin (dev)</title>
+      <script type="text/javascript">
+         var root_url = "${ROOT_URL}";
+         var error = "${ERROR}";
+         var redirect = "${REDIRECT}";
+      </script>
+
+	<link rel="shortcut icon" href="http://whiley.org/wp-content/themes/atahualpa351/images/favicon/whileyfav.ico" />
+   </head>
+   <style>
+body { font-family:arial; }
+.dashboardMenu td {
+    text-align:center;
+    padding-right:40px;}
+a:link { text-decoration: none; color:#A58158; border-bottom:1px dotted;}
+a:visited { text-decoration: none; color:#A58158; border-bottom:1px dotted; }
+a:hover { text-decoration:none;color:#D7CF88;border-bottom:1px dotted; }
+.content { padding-left:20px;border: 2px solid #000000;
+border-radius: 25px; margin-top:20px; background:#D5C397; height:50%}
+h2 {  padding-top:0px; padding-top:20px; margin:0px; }
+</style>
+<BODY>
+<H1>Dashboard line</H1><h3>${STATUS}</h3>
+<table class=dashboardMenu><tr><td><img src=images/home.png></td><td><img src=images/institution.png></td><td><img src=images/course.png></td><td><img src=images/addcourse.png></td><td><img src=images/student.png></td></tr>
+</td><td><a href=admin>Home</a></td><td><a href=admin_institution>Institution</a></td><td><a href=#>Courses</td><td><a href=#>Add Course</td><td><a href=#>Students</a></td></tr></table>
+<div class=content><br><table><tr><td width=55 align=left><img src=images/institution_small.png></td><td><h2> Current Institutions</h2></td></tr>
+<tr><td>&nbsp;</td><td><select>${OPTION}</select></td></tr></table>
+<br><hr><table><tr><td width=55 align=left><img src=images/institution_add_small.png></td><td><h2> Add New Institution</h2></td></tr>
+<tr><td>&nbsp;</td><td><form method=post action=admin_institutions><table><tr><td> Institution Name </td><td> <input name="institution" type="textfield" size="50"></td></tr></table><br><input type=submit value=Add></form></td></tr></table></div>
+</BODY>
+</head>
+</html>
