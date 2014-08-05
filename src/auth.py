@@ -7,6 +7,12 @@
 import cherrypy
 import db 
 
+from mako.template import Template
+from mako.lookup import TemplateLookup
+import config
+
+lookup = TemplateLookup(directories=['html'])
+
 SESSION_KEY = '_cp_username'
 
 
@@ -117,14 +123,19 @@ class AuthController(object):
         </body></html>""" % locals()
     
     @cherrypy.expose
-    def login(self, user=None, passwd=None, from_page="/"):
-        if user is None or passwd is None:
+    def login(self, user=None, passwd="", from_page="/"):
+        if user is None:
             #return self.get_loginform("", from_page=from_page)
-            raise cherrypy.HTTPRedirect("/")
+            template = lookup.get_template("login.html")
+            error = False
+            return template.render(ERROR=error)
+            #raise cherrypy.HTTPRedirect("/")
         
         error_msg = check_credentials(user, passwd)
         if error_msg:
-            return self.get_loginform(user, error_msg, from_page)
+            error = True
+            template = lookup.get_template("login.html")
+            return template.render(ERRORMSG=error_msg, USERNAME=user, ERROR=error)
         else:
             cherrypy.session.regenerate()
             cherrypy.session[SESSION_KEY] = cherrypy.request.login = user
