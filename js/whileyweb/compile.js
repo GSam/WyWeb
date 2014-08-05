@@ -6,8 +6,9 @@ function compile() {
     var verify = document.getElementById("verification");
 
     // build parameters
-    var request = { _main: , _verify: verify.checked },
-        $files = $('#file-browser');
+    var $files = $('#file-browser');
+    var main = getPath($files.js_tree('get_selected')[0])
+    var request = { _main: main, _verify: verify.checked };
     addFiles("", "#", request);
     $.post(root_url + "/compile_all", request, function(response) {
         clearMessages();
@@ -27,14 +28,16 @@ function compile() {
         }
     });
     $("#spinner").show();
-
-    function addFiles(prefix, node, query) {
-        var data = $files.jstree('get_node', node);
-        if (data.type == "file")
-            query[prefix + data.text] = data.data;
-        else for (var i = 0; i < data.children.length; i++) {
-            addFiles(prefix + "/" + data.text, data.children[i], query);
-        }
+}
+function addFiles(prefix, node, query) {
+    var data = $files.jstree('get_node', node);
+    if (data.type == "file")
+        query[prefix + data.text] = data.data;
+    else for (var i = 0; i < data.children.length; i++) {
+        addFiles(prefix + "/" + data.text, data.children[i], query);
     }
 }
-
+function getPath(node) {
+    var data = $files.jstree('get_node', node);
+    return get(data.parent) + "/" + data.text;
+}

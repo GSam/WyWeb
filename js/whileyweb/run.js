@@ -3,7 +3,10 @@
  */
 function run() {
     var console = document.getElementById("console");
-    var request = { code: editor.getValue() };
+    var $files = $('#file-browser');
+    var main = getPath($files.js_tree('get_selected')[0])
+    var request = { _main: main, _verify: verify.checked };
+    addFiles("", "#", request);
     $.post(root_url + "/run", request, function(response) {
         clearMessages();
         console.value = "";

@@ -16,8 +16,13 @@ $(document).on("ace-loaded", function autoindent() {
 function compile() {
     var console = document.getElementById("console");
     var verify = document.getElementById("verification");
-    var request = { code: editor.getValue(), verify: verify.checked };
-    $.post(root_url + "/compile", request, function(response) {
+
+    // build parameters
+    var $files = $('#file-browser');
+    var main = getPath($files.js_tree('get_selected')[0])
+    var request = { _main: main, _verify: verify.checked };
+    addFiles("", "#", request);
+    $.post(root_url + "/compile_all", request, function(response) {
         clearMessages();
         console.value = "";
         $("#spinner").hide();
@@ -36,7 +41,18 @@ function compile() {
     });
     $("#spinner").show();
 }
-
+function addFiles(prefix, node, query) {
+    var data = $files.jstree('get_node', node);
+    if (data.type == "file")
+        query[prefix + data.text] = data.data;
+    else for (var i = 0; i < data.children.length; i++) {
+        addFiles(prefix + "/" + data.text, data.children[i], query);
+    }
+}
+function getPath(node) {
+    var data = $files.jstree('get_node', node);
+    return get(data.parent) + "/" + data.text;
+}
 /**
  * Display all the compilation errors.
  */
@@ -83,13 +99,13 @@ function clearErrors() {
 }
 $(function() {
     $("#file-browser").jstree({
-    	core: {
+     core: {
             check_callback: true,
             data: getFileData()
         },
-    	plugins: ["contextmenu", "dnd", "types", "unique"],
-    	contextmenu: {
-    		items: function(node) {
+     plugins: ["contextmenu", "dnd", "types", "unique", "wholerow"],
+     contextmenu: {
+     items: function(node) {
                 var tmp = $.jstree.defaults.contextmenu.items()
                 delete tmp.create.action;
                 tmp.create.submenu = {
@@ -108,7 +124,7 @@ $(function() {
                         action: function(data) {
                             var inst = $.jstree.reference(data.reference),
                                 obj = inst.get_node(data.reference);
-                            inst.create_node(obj, {type: "file", text: "New File", data: ""}, "last", 
+                            inst.create_node(obj, {type: "file", text: "New File", data: ""}, "last",
                                 function(new_node) {
                                     setTimeout(function() {inst.edit(new_node); }, 0);
                             })
@@ -154,32 +170,8 @@ function getFileData() {
 
 function saveFile() {
     var $files = $('#file-browser');
-
-    function getRoot(data) {
-        return $files.jstree('get_node', '#')
-    };
-
-    function toJS(data) {
-        if (!data) 
-            return {}
-
-        var newChildren = []
-        for (var i = 0; i < data.children.length; i++)
-            newChildren[i] = toJS($files.jstree('get_node', data.children[i]))
-
-        var newChildren_d = []
-        for (var i = 0; i < data.children_d.length; i++)
-            newChildren_d[i] = toJS($files.jstree('get_node', data.children[i]))
-
-        data.children = newChildren;
-        data.children_d = newChildren_d;
-        delete data.parent
-        delete data.parents
-
-        return data;
-    };
     
-    localStorage["files"] = JSON.stringify(toJS(getRoot()));
+    localStorage["files"] = JSON.stringify($files.jstree(true).get_json('#', {'flat':true}));
 }
 /**
  * Add a new message to the message list above the console.
@@ -233,7 +225,10 @@ $(document).on('ace-loaded', function() {
  */
 function run() {
     var console = document.getElementById("console");
-    var request = { code: editor.getValue() };
+    var $files = $('#file-browser');
+    var main = getPath($files.js_tree('get_selected')[0])
+    var request = { _main: main, _verify: verify.checked };
+    addFiles("", "#", request);
     $.post(root_url + "/run", request, function(response) {
         clearMessages();
         console.value = "";

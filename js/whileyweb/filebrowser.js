@@ -1,12 +1,12 @@
 $(function() {
     $("#file-browser").jstree({
-    	core: {
+     core: {
             check_callback: true,
             data: getFileData()
         },
-    	plugins: ["contextmenu", "dnd", "types", "unique"],
-    	contextmenu: {
-    		items: function(node) {
+     plugins: ["contextmenu", "dnd", "types", "unique", "wholerow"],
+     contextmenu: {
+     items: function(node) {
                 var tmp = $.jstree.defaults.contextmenu.items()
                 delete tmp.create.action;
                 tmp.create.submenu = {
@@ -25,7 +25,7 @@ $(function() {
                         action: function(data) {
                             var inst = $.jstree.reference(data.reference),
                                 obj = inst.get_node(data.reference);
-                            inst.create_node(obj, {type: "file", text: "New File", data: ""}, "last", 
+                            inst.create_node(obj, {type: "file", text: "New File", data: ""}, "last",
                                 function(new_node) {
                                     setTimeout(function() {inst.edit(new_node); }, 0);
                             })
