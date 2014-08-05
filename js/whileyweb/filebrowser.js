@@ -4,7 +4,7 @@ $(function() {
             check_callback: true,
             data: getFileData()
         },
-     plugins: ["contextmenu", "dnd", "types", "unique"],
+     plugins: ["contextmenu", "dnd", "types", "unique", "wholerow"],
      contextmenu: {
      items: function(node) {
                 var tmp = $.jstree.defaults.contextmenu.items()

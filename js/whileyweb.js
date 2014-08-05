@@ -103,7 +103,7 @@ $(function() {
             check_callback: true,
             data: getFileData()
         },
-     plugins: ["contextmenu", "dnd", "types", "unique"],
+     plugins: ["contextmenu", "dnd", "types", "unique", "wholerow"],
      contextmenu: {
      items: function(node) {
                 var tmp = $.jstree.defaults.contextmenu.items()
@@ -170,32 +170,8 @@ function getFileData() {
 
 function saveFile() {
     var $files = $('#file-browser');
-
-    function getRoot(data) {
-        return $files.jstree(true).get_json('#', {'flat':true});
-    };
-
-    function toJS(data) {
-        if (!data) 
-            return {}
-
-        var newChildren = []
-        for (var i = 0; i < data.children.length; i++)
-            newChildren[i] = toJS($files.jstree('get_node', data.children[i]))
-
-        var newChildren_d = []
-        for (var i = 0; i < data.children_d.length; i++)
-            newChildren_d[i] = toJS($files.jstree('get_node', data.children[i]))
-
-        data.children = newChildren;
-        data.children_d = newChildren_d;
-        delete data.parent
-        delete data.parents
-
-        return data;
-    };
     
-    localStorage["files"] = JSON.stringify(getRoot());
+    localStorage["files"] = JSON.stringify($files.jstree(true).get_json('#', {'flat':true}));
 }
 /**
  * Add a new message to the message list above the console.
