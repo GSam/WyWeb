@@ -172,7 +172,7 @@ function saveFile() {
     var $files = $('#file-browser');
 
     function getRoot(data) {
-        return $files.jstree('get_node', '#')
+        return $files.jstree(true).get_json('#', {'flat':true});
     };
 
     function toJS(data) {
@@ -195,7 +195,7 @@ function saveFile() {
         return data;
     };
     
-    localStorage["files"] = JSON.stringify(toJS(getRoot()));
+    localStorage["files"] = JSON.stringify(getRoot());
 }
 /**
  * Add a new message to the message list above the console.
