@@ -88,7 +88,7 @@ class Main(object):
 
         result = compile_all(_main, files, _verify, dir)
 
-        shutil.rmtree(dir)
+##        shutil.rmtree(dir)
 
         if type(result) == str:
             response = {"result": "error", "error": result}
@@ -142,8 +142,6 @@ class Main(object):
 
         result = compile_all(_main, files, _verify, dir)
 
-        shutil.rmtree(dir)
-
         if type(result) == str:
             response = {"result": "error", "error": result}
         elif len(result) != 0:
@@ -151,9 +149,13 @@ class Main(object):
         else:
             response = {"result": "success"}
 
-            output = run(dir, _main)
+            output = run(dir + os.path.dirname(_main), 
+                            os.path.split(_main[:-len(".whiley")])[1])
             response["output"] = output
+
+        #shutil.rmtree(dir)
         return json.dumps(response)
+    run_all.exposed = True
 
     # application root
     def index(self, id="HelloWorld", *args, **kwargs):
@@ -420,7 +422,10 @@ def save(filename,data,encoding):
 
 def save_all(files, dir):
     for filename, contents in files.items():
-        with open(dir + "/" + filename) as f:
+        filepath = dir + "/" + filename
+        if not os.path.exists(os.path.dirname(filepath)):
+            os.makedirs(os.path.dirname(filepath))
+        with codecs.open(filepath, 'w', 'utf8') as f:
             f.write(contents)
 
 # Compile a snippet of Whiley code.  This is done by saving the file
@@ -458,7 +463,7 @@ def compile(code,verify,dir):
         return "Compile Error: " + str(ex)
 
 def compile_all(main, files, verify, dir):
-    filename = dir + "/" + main
+    filename = dir +  main
     args = [
             config.JAVA_CMD,
             "-jar",
@@ -474,6 +479,7 @@ def compile_all(main, files, verify, dir):
 
     save_all(files, dir)
     args.append(filename)
+    print "DEBUG:", " ".join(args)
 
     try:
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
@@ -487,6 +493,13 @@ def compile_all(main, files, verify, dir):
 
 def run(dir, main="tmp"):
     try:
+        print "DEBUG:", [
+            config.JAVA_CMD,
+            "-Djava.security.manager",
+            "-Djava.security.policy=whiley.policy",
+            "-cp",config.WYJC_JAR + ":" + dir,
+            main
+            ]
         # run the JVM
         proc = subprocess.Popen([
             config.JAVA_CMD,

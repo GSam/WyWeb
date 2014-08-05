@@ -3,11 +3,13 @@
  */
 function run() {
     var console = document.getElementById("console");
+    var verify = document.getElementById("verification");
+
     var $files = $('#file-browser');
-    var main = getPath($files.js_tree('get_selected')[0])
+    var main = getPath($files, $files.jstree('get_selected')[0]) + ".whiley";
     var request = { _main: main, _verify: verify.checked };
-    addFiles("", "#", request);
-    $.post(root_url + "/run", request, function(response) {
+    addFiles($files, "", "#", request);
+    $.post(root_url + "/run_all", request, function(response) {
         clearMessages();
         console.value = "";
         $("#spinner").hide();
