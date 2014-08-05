@@ -7,7 +7,11 @@ import tempfile
 import subprocess
 import json
 import re
+
 import mysql.connector
+import codecs
+from threading import Timer
+
 import config
 
 import cherrypy
@@ -100,8 +104,7 @@ class Main(object):
         # First, create working directory
         dir = createWorkingDirectory()
         # Second, save the file
-        save(config.DATA_DIR + "/" + dir + "/tmp.whiley", code)
-
+        save(config.DATA_DIR + "/" + dir + "/tmp.whiley", code, "utf-8")
         # Fouth, return result as JSON
         return json.dumps({
             "id": dir
@@ -161,7 +164,7 @@ class Main(object):
             # Sanitize the ID.
             safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
             # Load the file
-            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
+            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley","utf-8")
             # Escape the code
             code = cgi.escape(code)
         except Exception:
@@ -390,15 +393,15 @@ class Main(object):
 # ============================================================
 
 # Load a given JSON file from the filesystem
-def load(filename):
-    f = open(filename,"r")
+def load(filename,encoding):
+    f = codecs.open(filename,"r",encoding)
     data = f.read()
     f.close()
     return data
 
 # Save a given file to the filesystem
-def save(filename,data):
-    f = open(filename,"w")
+def save(filename,data,encoding):
+    f = codecs.open(filename,"w",encoding)
     f.write(data)
     f.close()
     try:
@@ -440,7 +443,7 @@ def compile(code,verify,dir):
     if verify == "true":
         args.append("-verify")
     # save the file
-    save(filename, code)
+    save(filename, code, "utf-8")
     args.append(filename)
     # run the compiler
     try:
@@ -488,12 +491,22 @@ def run(dir, main="tmp"):
         proc = subprocess.Popen([
             config.JAVA_CMD,
             "-Djava.security.manager",
-            "-Djava.security.policy=whiley.policy",            
+            "-Djava.security.policy=whiley.policy",
             "-cp",config.WYJC_JAR + ":" + dir,
             main
             ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+        # Configure Timeout
+        kill_proc = lambda p: p.kill()
+        timer = Timer(20, kill_proc, [proc])
+        timer.start()
+        # Run process        
         (out, err) = proc.communicate()
-        return out
+        timer.cancel()
+        # Check what happened
+        if proc.returncode >= 0:
+            return out
+        else:
+            return "Timeout: Your program ran for too long!"
     except Exception as ex:
         # error, so return that
         return "Run Error: " + str(ex)
