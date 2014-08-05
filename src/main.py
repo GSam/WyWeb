@@ -169,7 +169,14 @@ class Main(object):
             error = "Invalid ID: %s" % id
             redirect = "YES"
         template = lookup.get_template("index.html")
-        return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect)
+        username = cherrypy.session.get("_cp_username")
+        if username is None:
+            loggedin = False
+            print ("not logged in")
+        else:
+            loggedin = True
+            print ("logged")
+        return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect, USERNAME=username, LOGGED=loggedin)
     index.exposed = True
     # exposed
 

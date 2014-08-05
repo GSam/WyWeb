@@ -10,21 +10,24 @@ import db
 SESSION_KEY = '_cp_username'
 
 
-def check_credentials(username, password):
+def check_credentials(user, passwd):
     """Verifies credentials for username and password.
     Returns None on success or a string describing the error on failure"""
     # Adapt to your needs
-    if username in ('joe', 'steve') and password == 'secret':
-        return None
+
+    cnx = db.connect()        
+    cursor = cnx.cursor()
+    query = ("SELECT * from whiley_user where username = '" + user +"' and password = '" + passwd + "'")
+    #query = ("SELECT * from whiley_user")
+    cursor.execute(query)
+    cursor.fetchall()
+    if cursor.rowcount > 0:
+        result = None
     else:
-        return u"Incorrect username or password."
-    
-    # An example implementation which uses an ORM could be:
-    # u = User.get(username)
-    # if u is None:
-    #     return u"Username %s is unknown to me." % username
-    # if u.password != md5.new(password).hexdigest():
-    #     return u"Incorrect password"
+        result = "Incorrect username or password"
+    cursor.close()
+    cnx.close()
+    return result
 
 def check_auth(*args, **kwargs):
     """A tool that looks in config for 'auth.require'. If found and it
@@ -43,6 +46,8 @@ def check_auth(*args, **kwargs):
             raise cherrypy.HTTPRedirect("/auth/login")
     
 cherrypy.tools.auth = cherrypy.Tool('before_handler', check_auth)
+
+
 
 def require(*conditions):
     """A decorator that appends conditions to the auth.require config
@@ -100,35 +105,31 @@ def all_of(*conditions):
 
 class AuthController(object):
     
-    def on_login(self, username):
-        """Called on successful login"""
     
-    def on_logout(self, username):
-        """Called on logout"""
-    
-    def get_loginform(self, username, msg="Enter login information", from_page="/"):
+    def get_loginform(self, user, msg="Enter login information", from_page="/"):
         return """<html><body>
             <form method="post" action="/auth/login">
             <input type="hidden" name="from_page" value="%(from_page)s" />
             %(msg)s<br />
-            Username: <input type="text" name="username" value="%(username)s" /><br />
-            Password: <input type="password" name="password" /><br />
+            Username: <input type="text" name="user" value="%(user)s" /><br />
+            Password: <input type="password" name="passwd" /><br />
             <input type="submit" value="Log in" />
         </body></html>""" % locals()
     
     @cherrypy.expose
-    def login(self, username=None, password=None, from_page="/"):
-        if username is None or password is None:
-            return self.get_loginform("", from_page=from_page)
+    def login(self, user=None, passwd=None, from_page="/"):
+        if user is None or passwd is None:
+            #return self.get_loginform("", from_page=from_page)
+            raise cherrypy.HTTPRedirect("/")
         
-        error_msg = check_credentials(username, password)
+        error_msg = check_credentials(user, passwd)
         if error_msg:
-            return self.get_loginform(username, error_msg, from_page)
+            return self.get_loginform(user, error_msg, from_page)
         else:
             cherrypy.session.regenerate()
-            cherrypy.session[SESSION_KEY] = cherrypy.request.login = username
-            self.on_login(username)
-            raise cherrypy.HTTPRedirect(from_page or "/")
+            cherrypy.session[SESSION_KEY] = cherrypy.request.login = user
+            #return cherrypy.session[SESSION_KEY]
+            raise cherrypy.HTTPRedirect("/")
     
     @cherrypy.expose
     def logout(self, from_page="/"):
@@ -137,7 +138,7 @@ class AuthController(object):
         sess[SESSION_KEY] = None
         if username:
             cherrypy.request.login = None
-            self.on_logout(username)
+            #self.on_logout(username)
         raise cherrypy.HTTPRedirect(from_page or "/")
 
     @cherrypy.expose

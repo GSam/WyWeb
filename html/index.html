@@ -40,15 +40,34 @@
             <div class="row">
                <nav class="navbar navbar-default" role="navigation">
                   <div class="container-fluid">
-                  <form class="navbar-form">
-			              <button type="button"  class="btn btn-primary navbar-btn" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>
-			               <button type="button"  class="btn btn-primary navbar-btn" onClick="compile();" title="Compile your program to check it is correct.">Compile</button>
-			              <button type="button"  class="btn btn-primary navbar-btn" onClick="run();" title="Run your program to produce some output!">Run</button>
-			              <a href="admin" class="btn btn-primary navbar-btn" title="Admin">Admin</a>
-			              <label class="checkbox inline">
-			        				<input id="verification" type="checkbox" checked="checked" title="Enable or disable compile-time verification" class="navbar-btn"/> Enable Verification
-			    			  </label>
-		            </form>
+                     <form class="navbar-form navbar-left">
+                        <div class="form-group">
+   			              <button type="button"  class="btn btn-primary" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>
+   			               <button type="button"  class="btn btn-primary" onClick="compile();" title="Compile your program to check it is correct.">Compile</button>
+   			              <button type="button"  class="btn btn-primary" onClick="run();" title="Run your program to produce some output!">Run</button>
+   			              <a href="admin" class="btn btn-primary" title="Admin">Admin</a>
+   			              <label class="checkbox inline">
+   			        				<input id="verification" type="checkbox" checked="checked" title="Enable or disable compile-time verification" /> Enable Verification
+   			    			  </label>
+                        </div>
+   		            </form>
+                     % if LOGGED is True:
+                        <form class="navbar-form navbar-right"  method="post" action="/auth/logout" role="login">
+                           <button type="submit" class="btn btn-default">Log out</button>
+                        </form>
+                        <p class="navbar-text navbar-right">Logged in as <a href="#" class="navbar-link">${USERNAME}</a></p>
+                        
+                     % else:
+                        <form class="navbar-form navbar-right"  method="post" action="/auth/login" role="login">
+                           <div class="form-group">
+                              <input type="text" class="form-control" placeholder="Username" name="user">
+                              <input type="password" class="form-control" placeholder="Password" name="passwd">
+                              <input type="hidden" name="from_page" value="/" />
+                           </div>
+                           <button type="submit" class="btn btn-default">Log In</button>
+                        </form>
+                     % endif
+
                   </div>
                   <!-- /.container-fluid -->
                </nav>
