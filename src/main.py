@@ -339,7 +339,6 @@ class Main(object):
         redirect = "NO"
         options = " "
         selectedValue = ""
-<<<<<<< HEAD
         course_list = ""
         
         if request:
@@ -371,8 +370,7 @@ class Main(object):
                 cursor.close()
             except mysql.connector.Error as err:
                 status = err
-                
-=======
+               
 
         if request:
             if request.params:
@@ -404,7 +402,7 @@ class Main(object):
             cursor.close()
             cnx.close()
 
->>>>>>> origin/master
+
         try:
             cursor = cherrypy.thread_data.db.cursor() 
             query = ("SELECT courseid,code from course where institutionid = '" + selectedValue + "' order by code")
@@ -427,12 +425,7 @@ class Main(object):
             error = "Invalid ID: %s" % id
             redirect = "YES"
         template = lookup.get_template("admin_courses.html")
-<<<<<<< HEAD
         return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect,OPTION=options,COURSE_LIST=course_list)
-=======
-        return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, OPTION=options)
-
->>>>>>> origin/master
     admin_courses.exposed = True
 
     #
