@@ -529,7 +529,7 @@ def compile_all(main, files, verify, dir):
 
     save_all(files, dir)
     args.append(filename)
-    print "DEBUG:", " ".join(args)
+    #print("DEBUG:", " ".join(args))
 
     try:
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
@@ -543,13 +543,13 @@ def compile_all(main, files, verify, dir):
 
 def run(dir, main="tmp"):
     try:
-        print "DEBUG:", [
-            config.JAVA_CMD,
-            "-Djava.security.manager",
-            "-Djava.security.policy=whiley.policy",
-            "-cp",config.WYJC_JAR + ":" + dir,
-            main
-            ]
+        #print("DEBUG:", [
+        #    config.JAVA_CMD,
+        #    "-Djava.security.manager",
+        #    "-Djava.security.policy=whiley.policy",
+        #    "-cp",config.WYJC_JAR + ":" + dir,
+        #    main
+        #    ])
         # run the JVM
         proc = subprocess.Popen([
             config.JAVA_CMD,
