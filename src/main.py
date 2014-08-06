@@ -340,6 +340,7 @@ class Main(object):
         redirect = "NO"
         options = " "
         selectedValue = ""
+        course_list = ""
         
         if request:
             if request.params:
@@ -347,34 +348,40 @@ class Main(object):
                     selectedValue = request.params['institution']           
                     try:    
                         cursor = cherrypy.thread_data.db.cursor() 
-                        query = ("SELECT institution_name from institution order by institution_name")
+                        query = ("SELECT institutionid,institution_name from institution order by institution_name")
                         cursor.execute(query) 
-                        for (institution) in cursor:
-                            if institution[0] == selectedValue:
-                                options = options + "<option selected>" + institution[0] + "</option>"
+                        for (institutionid,institution_name) in cursor:
+                            if str(institutionid) == selectedValue:
+                                options = options + "<option value='" + str(institutionid) + "' selected>" + institution_name + "</option>"
                             else:
-                                options = options + "<option>" + institution[0] + "</option>"
+                                options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>"
                         cursor.close()
                     except mysql.connector.Error as err:
                         status = err
 
         if selectedValue == "":
-            try:       
+            try:           
                 cursor = cherrypy.thread_data.db.cursor() 
-                query = ("SELECT institution_name from institution order by institution_name")
+                query = ("SELECT institutionid,institution_name from institution order by institution_name")
                 cursor.execute(query)
-                selectedValue = ""
-                for (institution) in cursor:
-                        options = options + "<option>" + institution[0] + "</option>"
-                        if selectedValue == "":
-                            selectedValue = institution[0]
-                            
+                for (institutionid,institution_name) in cursor:
+                    options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>" 
+                    if selectedValue == "":
+                        selectedValue = str(institutionid)
                 cursor.close()
             except mysql.connector.Error as err:
-                status = err 
-
-
+                status = err
                 
+        try:
+            cursor = cherrypy.thread_data.db.cursor() 
+            query = ("SELECT courseid,code from course where institutionid = '" + selectedValue + "' order by code")
+            cursor.execute(query)
+            for (courseid,code) in cursor:
+                course_list = course_list + "<a href=\"#\">" + code + "</a><br>"   
+            cursor.close()
+        except mysql.connector.Error as err:
+            status = err
+            
         try:
             # Sanitize the ID.
             safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
@@ -387,7 +394,7 @@ class Main(object):
             error = "Invalid ID: %s" % id
             redirect = "YES"
         template = lookup.get_template("admin_courses.html")
-        return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect,OPTION=options)
+        return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect,OPTION=options,COURSE_LIST=course_list)
     admin_courses.exposed = True
 
     #
