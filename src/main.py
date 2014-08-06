@@ -215,7 +215,7 @@ class Main(object):
             print ("logged")
             filelist = get_files(username)
             files = build_file_tree(filelist)
-            print files
+            #print files
         return template.render(
                             ROOT_URL=config.VIRTUAL_URL,
                             CODE=code,
@@ -550,8 +550,7 @@ def save(project_name, filename, data):
     username = cherrypy.session.get("_cp_username")
     cnx, status = db.connect()
     cursor = cnx.cursor()
-    sql = """SELECT p.projectid FROM project p, whiley_user w 
-WHERE w.userid = p.userid AND w.username = '""" + username + "'"
+    sql = """SELECT p.projectid FROM project p, whiley_user w WHERE w.userid = p.userid AND w.username = '""" + username + "'"
     cursor.execute(sql)
     projectid = cursor.fetchone()[0]
 

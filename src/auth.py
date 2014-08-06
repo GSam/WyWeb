@@ -7,6 +7,9 @@
 import cherrypy
 import db 
 
+import uuid
+import hashlib
+
 from mako.template import Template
 from mako.lookup import TemplateLookup
 import config
@@ -14,26 +17,74 @@ import config
 lookup = TemplateLookup(directories=['html'])
 
 SESSION_KEY = '_cp_username'
+ 
+#def hash_password(password):
+    # uuid is used to generate a random number
+#    salt = uuid.uuid4().hex
+#    return hashlib.sha256(salt.encode() + password.encode()).hexdigest() + ':' + salt
+    
+#def check_password(hashed_password, user_password):
+#    password, salt = hashed_password.split(':')
+#    return password == hashlib.sha256(salt.encode() + user_password.encode()).hexdigest()
+ 
+
+#TO HASH PASSWORD hashed_password = hash_password(new_pass) 
+#check_password(hashed_password, old_pass)
 
 
 def check_credentials(user, passwd):
     """Verifies credentials for username and password.
     Returns None on success or a string describing the error on failure"""
-    # Adapt to your needs
 
-    cnx,status = db.connect()
+    cnx = db.connect()[0]        
     cursor = cnx.cursor()
-    query = ("SELECT * from whiley_user where username = '" + user +"' and password = '" + passwd + "'")
+    query = ("SELECT * from whiley_user where username = '" + user + "' and password = '" + passwd + "'")
     #query = ("SELECT * from whiley_user")
     cursor.execute(query)
-    cursor.fetchall()
+    row = cursor.fetchone()
     if cursor.rowcount > 0:
+        #print("{} passwd".format(row[2]))
+        #hashed_password = hash_password(passwd)
+        #if check_password(hashed_password, row[2]):    
         result = None
     else:
         result = "Incorrect username or password"
     cursor.close()
     cnx.close()
+
     return result
+
+def check_username(user):
+    cnx = db.connect()[0]        
+    cursor = cnx.cursor()
+    query = ("SELECT * from whiley_user where username = '" + user +"'")
+    cursor.execute(query)
+    cursor.fetchall()
+    if cursor.rowcount > 0:
+        result = "Username not available"
+    else:
+        result = None
+    cursor.close()
+    cnx.close()
+    return result
+    
+def create_username(user, passwd, email):
+    #hashed_password = hash_password(passwd)
+    cnx = db.connect()[0]        
+    cursor = cnx.cursor()
+    try:
+        query = ("INSERT into whiley_user VALUES (null, %s, %s, %s)")
+        cursor.execute(query, (user, passwd, email,))
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong")
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exists")
+        else:
+            print(err)
+    cursor.close()
+    cnx.close()
+
 
 def check_auth(*args, **kwargs):
     """A tool that looks in config for 'auth.require'. If found and it
@@ -111,17 +162,6 @@ def all_of(*conditions):
 
 class AuthController(object):
     
-    
-    def get_loginform(self, user, msg="Enter login information", from_page="/"):
-        return """<html><body>
-            <form method="post" action="/auth/login">
-            <input type="hidden" name="from_page" value="%(from_page)s" />
-            %(msg)s<br />
-            Username: <input type="text" name="user" value="%(user)s" /><br />
-            Password: <input type="password" name="passwd" /><br />
-            <input type="submit" value="Log in" />
-        </body></html>""" % locals()
-    
     @cherrypy.expose
     def login(self, user=None, passwd="", from_page="/"):
         if user is None:
@@ -130,7 +170,6 @@ class AuthController(object):
             error = False
             return template.render(ERROR=error)
             #raise cherrypy.HTTPRedirect("/")
-        
         error_msg = check_credentials(user, passwd)
         if error_msg:
             error = True
@@ -142,6 +181,30 @@ class AuthController(object):
             #return cherrypy.session[SESSION_KEY]
             raise cherrypy.HTTPRedirect("/")
     
+    @cherrypy.expose
+    def signup(self, user=None, passwd=None, email=None, cpasswd=None):
+        #create_username("test", "ẗest", "testemail")
+        if user is None or passwd is None or email is None:
+            error_msg="All fields are required"
+            template = lookup.get_template("signup.html")
+            error = True
+            return template.render(ERROR=error, ERRORMSG=error_msg, USERCREATED=False)
+        elif passwd != cpasswd:
+            error_msg="Passwords do not match"
+            template = lookup.get_template("signup.html")
+            error = True
+            return template.render(ERROR=error, ERRORMSG=error_msg, USERCREATED=False)
+        error_msg = check_username(user)
+        if error_msg is None:
+            create_username(user, passwd, email)
+            template = lookup.get_template("signup.html")
+            return template.render(USERCREATED=True)
+        else:
+            error_msg="Username already exists, choose another one"
+            template = lookup.get_template("signup.html")
+            error = True
+            return template.render(ERROR=error, ERRORMSG=error_msg, USERCREATED=False)
+
     @cherrypy.expose
     def logout(self, from_page="/"):
         sess = cherrypy.session
@@ -155,7 +218,7 @@ class AuthController(object):
     @cherrypy.expose
     def testdb(self): 
 
-        cnx,status = db.connect()
+        cnx = db.connect()[0]        
         cursor = cnx.cursor()
         query = ("SELECT username from whiley_user")
         cursor.execute(query)
