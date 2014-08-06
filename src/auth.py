@@ -21,7 +21,7 @@ def check_credentials(user, passwd):
     Returns None on success or a string describing the error on failure"""
     # Adapt to your needs
 
-    cnx = db.connect()        
+    cnx,status = db.connect()
     cursor = cnx.cursor()
     query = ("SELECT * from whiley_user where username = '" + user +"' and password = '" + passwd + "'")
     #query = ("SELECT * from whiley_user")
@@ -155,7 +155,7 @@ class AuthController(object):
     @cherrypy.expose
     def testdb(self): 
 
-        cnx = db.connect()        
+        cnx,status = db.connect()
         cursor = cnx.cursor()
         query = ("SELECT username from whiley_user")
         cursor.execute(query)
