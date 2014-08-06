@@ -315,7 +315,7 @@ class Main(object):
                     query = ("SELECT institution_name, institutionid from institution order by institution_name")
                     cursor.execute(query)
                     for (institution) in cursor:
-                        if institution[1] == selected_value:
+                        if str(institution[1]) == selected_value:
                             options = options + "<option value='"+str(institution[1])+"' selected>" + institution[0] + "</option>"
                         else:
                             options = options + "<option value='"+str(institution[1])+"'>" + institution[0] + "</option>"
@@ -343,7 +343,7 @@ class Main(object):
         cnx, status = db.connect()
         cursor = cnx.cursor()
         query = (
-            "SELECT institution_name,description,contact,website from institution where institution_name = '" + str(selected_value) + "'")
+            "SELECT institution_name,description,contact,website from institution where institutionid = '" + str(selected_value) + "'")
         cursor.execute(query)
         for (institution_name, description, contact, website) in cursor:
             displayInstitution = institution_name
