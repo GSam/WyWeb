@@ -454,7 +454,7 @@ class Main(object):
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
                     query = ("insert into course (course_name,code,year,institutionid) values ('" + request.params[
-                        'course_name'] + "','" + request.params['course_code'] + "','" + request.params[
+                        'course_name'] + "','" + request.params['course_code'].upper() + "','" + request.params[
                                  'course_year'] + "','" + request.params['course_institution'] + "')")
                     cursor.execute(query)
                     status = "New course has been added"
