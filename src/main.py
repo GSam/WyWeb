@@ -39,6 +39,13 @@ def connect(thread_index):
 
 cherrypy.engine.subscribe('start_thread', connect)
 
+HELLO_WORLD = """
+import whiley.lang.System
+
+method main(System.Console console):
+    console.out.println("Hello World")
+"""
+
 class Main(object):
 
     # gives access to images/
@@ -82,6 +89,9 @@ class Main(object):
     def compile_all(self, _verify, _main, *args, **files):
         allow(["HEAD", "POST"])
 
+        # to start auto-save project for logged in users
+        self.private_save(**files)
+
         # First, create working directory
         dir = createWorkingDirectory()
         dir = config.DATA_DIR + "/" + dir
@@ -98,6 +108,14 @@ class Main(object):
             response = {"result": "success"}
         return json.dumps(response)
     compile_all.exposed = True
+
+    def private_save(self, **files):
+        if cherrypy.session.get("_cp_username"):
+            for filepath, source in files.items():
+                filepath = filepath.split("/")
+                project = filepath.pop(0)
+                save(project, "/".join(filepath)[:-len(".whiley")], source)
+    private_save.exposed = True
 
     def save(self, code, *args, **kwargs):
         allow(["HEAD", "POST"])
@@ -135,6 +153,9 @@ class Main(object):
 
     def run_all(self, _verify, _main, *args, **files):
         allow(["HEAD", "POST"])
+
+        # to start auto-save project for logged in users
+        self.private_save(**files)
 
         # First, create working directory
         dir = createWorkingDirectory()
@@ -175,13 +196,36 @@ class Main(object):
             redirect = "YES"
         template = lookup.get_template("index.html")
         username = cherrypy.session.get("_cp_username")
+        files = [
+            {
+                "text": "Project 1",
+                "children": [
+                    {
+                        "text": "Hello World",
+                        "data": HELLO_WORLD,
+                        "type": 'file'
+                    }
+                ]
+            }
+        ]
         if username is None:
             loggedin = False
             print ("not logged in")
         else:
             loggedin = True
             print ("logged")
-        return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect, USERNAME=username, LOGGED=loggedin)
+            filelist = get_files(username)
+            files = build_file_tree(filelist)
+            print files
+        return template.render(
+                            ROOT_URL=config.VIRTUAL_URL,
+                            CODE=code,
+                            ERROR=error,
+                            REDIRECT=redirect, 
+                            USERNAME=username, 
+                            LOGGED=loggedin,
+                            HELLO_WORLD=HELLO_WORLD,
+                            FILES=json.dumps(files))
     index.exposed = True
     # exposed
 
@@ -452,15 +496,18 @@ def load(filename,encoding):
     return data
 
 # Save a given file to the filesystem
-def save(filename,data,encoding):
-    f = codecs.open(filename,"w",encoding)
-    f.write(data)
-    f.close()
+def save(project_name, filename, data):
+    username = cherrypy.session.get("_cp_username")
+    cursor = cherrypy.thread_data.db.cursor()
+    sql = """SELECT p.projectid FROM project p, whiley_user w 
+WHERE w.userid = p.userid AND w.username = '""" + username + "'"
+    cursor.execute(sql)
+    projectid = cursor.fetchone()[0]
+
     try:
-        data = open(filename, "rb").read()
         cursor = cherrypy.thread_data.db.cursor()
-        sql = "INSERT INTO file (projectid, filename, source) VALUES ('1','text', %s)"
-        cursor.execute(sql, (data,))
+        sql = "INSERT INTO file (projectid, filename, source) VALUES (%s, %s, %s)"
+        cursor.execute(sql, (projectid, filename, data))
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Something is wrong with your user name or password")
@@ -477,6 +524,52 @@ def save_all(files, dir):
             os.makedirs(os.path.dirname(filepath))
         with codecs.open(filepath, 'w', 'utf8') as f:
             f.write(contents)
+
+def get_files(user):
+    cursor = cherrypy.thread_data.db.cursor()
+    sql = """SELECT f.fileid, f.filename, p.project_name, f.source
+FROM file f, project p, whiley_user w
+WHERE f.projectid = p.projectid AND p.userid = w.userid AND w.username = '""" + user + "'"
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    cursor.close()
+    return result
+
+def build_file_tree(filelist):
+    result = []
+    for fileid, filepath, project_name, source in filelist:
+        project = None
+        for project_ in result:
+            if project_["text"] == project_name:
+                project = project_
+                break
+
+        if not project:
+            project = {
+                        "text": project_name,
+                        "children": [],
+                      }
+            result.append(project)
+        
+        for component in filepath.split("/"):
+            subdir = None
+            for child in project['children']:
+                if child["text"] == component:
+                    subdir = child
+                    break
+
+            if not subdir:
+                subdir = {
+                        "text": component,
+                        "children": [],
+                      }
+                project['children'].append(subdir)
+            project = subdir
+
+        project['data'] = source
+        project['type'] = "file"
+
+    return result
 
 # Compile a snippet of Whiley code.  This is done by saving the file
 # to disk in a temporary location, compiling it using the Whiley2Java

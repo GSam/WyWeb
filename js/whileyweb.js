@@ -148,32 +148,19 @@ $(function() {
     })
 });
 function getFileData() {
-    if ("files" in localStorage)
+    if ("files" in localStorage && !isLoggedIn)
         return JSON.parse(localStorage["files"])
-    return [
-                {
-                    text: 'Project 1',
-                    state: {
-                        opened: true
-                    },
-                    children: [
-                        {
-                            text: 'Hello World',
-                            type: 'file',
-                            data: "import whiley.lang.System\n\nmethod main(System.Console console):\n    console.out.println(\"Hello World\")",
-                            state: {
-                                selected: true
-                            }
-                        }
-                    ]
-                }
-            ]
+    return serverFiles
 }
 
 function saveFile() {
-    var $files = $('#file-browser');
+    if (!isLoggedIn) {
+        var $files = $('#file-browser');
     
-    localStorage["files"] = JSON.stringify($files.jstree(true).get_json('#', {'flat':true}));
+        localStorage["files"] = JSON.stringify($files.jstree(true).get_json('#', {'flat':true}));
+    } else {
+        // perform ajax call.
+    }
 }
 /**
  * Add a new message to the message list above the console.

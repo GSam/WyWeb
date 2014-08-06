@@ -16,6 +16,8 @@
          var root_url = "${ROOT_URL}";
          var error = "${ERROR}";
          var redirect = "${REDIRECT}";
+         var isLoggedIn = ${"true" if LOGGED else "false"};
+         var serverFiles = ${FILES};
       </script>
       <script type="text/javascript" src="js/whileyweb.js"></script>
    </head>
@@ -77,7 +79,12 @@
            		 <div id="ide">
                   	<div class="file-browser">
 	                     <div id="file-browser" class="col-md-2">
-								</div>
+                            <ul>
+                                <li>Project 1<ul>
+                                    <li data-jstree="${HELLO_WORLD.replace('"', '\'')}">Hello World</li>
+                                </ul></li>
+                            </ul>
+						</div>
                      </div>
                 </div>
                 <div id="code" class="col-md-10">${CODE}</div>
