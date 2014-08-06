@@ -158,8 +158,6 @@ function saveFile() {
         var $files = $('#file-browser');
     
         localStorage["files"] = JSON.stringify($files.jstree(true).get_json('#', {'flat':true}));
-    } else {
-        // perform ajax call.
     }
 }
 /**
@@ -209,6 +207,21 @@ $(document).on('ace-loaded', function() {
         }
     })
 })
+if (isLoggedIn) {
+    // Start the timer as late as possible
+    $(document).on('ace-loaded', function() {
+        window.setInterval(saveToServer, 30*1000);
+    })
+    $(document).on('unload', saveToServer);
+}
+
+function saveToServer() {
+    var request = {};
+    var $files = $('#file-browser');
+    addFiles($files, "", "#", request);
+
+    $.post('/private_save',  request);
+}
 /**
  * Compile and run a given snippet of Whiley code.
  */
