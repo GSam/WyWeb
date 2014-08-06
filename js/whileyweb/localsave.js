@@ -9,7 +9,5 @@ function saveFile() {
         var $files = $('#file-browser');
     
         localStorage["files"] = JSON.stringify($files.jstree(true).get_json('#', {'flat':true}));
-    } else {
-        // perform ajax call.
     }
 }

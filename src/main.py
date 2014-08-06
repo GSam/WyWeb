@@ -215,7 +215,7 @@ class Main(object):
             print ("logged")
             filelist = get_files(username)
             files = build_file_tree(filelist)
-            #print files
+            # print files
         return template.render(
                             ROOT_URL=config.VIRTUAL_URL,
                             CODE=code,
