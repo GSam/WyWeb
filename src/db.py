@@ -27,3 +27,6 @@ def connect_dev():
 
 def connect_prod():
     return mysql.connector.connect(host="depot.ecs.vuw.ac.nz", user="whiley", database="whiley_s302_2014", passwd="coyote2Dev")
+
+def safe(unsafeString):
+    return unsafeString.replace("'", "\\'")

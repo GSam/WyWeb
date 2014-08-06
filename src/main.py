@@ -268,9 +268,11 @@ class Main(object):
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
                     query = (
-                    "insert into institution (institution_name,description,contact,website) values ('" + request.params[
-                        'institution'] + "','" + request.params['description'] + "','" + request.params[
-                        'contact'] + "','" + request.params['website'] + "')")
+                        "insert into institution (institution_name,description,contact,website) values ('" +
+                        db.safe(request.params['institution']) + "','" +
+                        db.safe(request.params['description']) + "','" +
+                        db.safe(request.params['contact']) + "','" +
+                        db.safe(request.params['website']) + "')")
                     cursor.execute(query)
                     status = "New institution has been added"
                     cursor.close()
@@ -302,21 +304,21 @@ class Main(object):
         redirect = "NO"
         options = " "
 
-        selectedValue = ""
+        selected_value = ""
 
         if request:
             if request.params:
                 if request.params['institution']:
-                    selectedValue = request.params['institution']
+                    selected_value = request.params['institution']
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
-                    query = ("SELECT institution_name from institution order by institution_name")
+                    query = ("SELECT institution_name, institutionid from institution order by institution_name")
                     cursor.execute(query)
                     for (institution) in cursor:
-                        if institution[0] == selectedValue:
-                            options = options + "<option selected>" + institution[0] + "</option>"
+                        if institution[1] == selected_value:
+                            options = options + "<option value='"+str(institution[1])+"' selected>" + institution[0] + "</option>"
                         else:
-                            options = options + "<option>" + institution[0] + "</option>"
+                            options = options + "<option value='"+str(institution[1])+"'>" + institution[0] + "</option>"
                     cursor.close()
                     cnx.close()
         displayInstitution = ""
@@ -324,16 +326,16 @@ class Main(object):
         displayWebsite = ""
         displayDescription = ""
 
-        if selectedValue == "":
+        if selected_value == "":
             cnx, status = db.connect()
             cursor = cnx.cursor()
-            query = ("SELECT institution_name from institution order by institution_name")
+            query = ("SELECT institution_name, institutionid from institution order by institution_name")
             cursor.execute(query)
-            selectedValue = ""
+            selected_value = ""
             for (institution) in cursor:
-                options = options + "<option>" + institution[0] + "</option>"
-                if selectedValue == "":
-                    selectedValue = institution[0]
+                options = options + "<option value='"+str(institution[1])+"'>" + institution[0] + "</option>"
+                if selected_value == "":
+                    selected_value = institution[1]
 
             cursor.close()
             cnx.close()
@@ -341,14 +343,14 @@ class Main(object):
         cnx, status = db.connect()
         cursor = cnx.cursor()
         query = (
-        "SELECT institution_name,description,contact,website from institution where institution_name = '" + selectedValue + "'")
+            "SELECT institution_name,description,contact,website from institution where institution_name = '" + str(selected_value) + "'")
         cursor.execute(query)
         for (institution_name, description, contact, website) in cursor:
             displayInstitution = institution_name
             displayDescription = description
             displayContact = contact
             displayWebsite = website
-        selectedValue = ""
+        selected_value = ""
         cursor.close()
         cnx.close()
 
@@ -682,7 +684,7 @@ def compile_all(main, files, verify, dir):
 def run(dir, main="tmp"):
     try:
         # print("DEBUG:", [
-        #    config.JAVA_CMD,
+        # config.JAVA_CMD,
         #    "-Djava.security.manager",
         #    "-Djava.security.policy=whiley.policy",
         #    "-cp",config.WYJC_JAR + ":" + dir,
