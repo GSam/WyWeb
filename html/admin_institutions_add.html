@@ -52,24 +52,26 @@
                   <!-- /.container-fluid -->
                </nav>
             </div>
-<div class="row">
-	<div class="container-fluid" id="content">
-	<div id="ide">
-	<div class=content><div align="right"><a href="admin_institutions_add">Add Institution</a></div>
-		<form>
-		<table width="100%" border="0">
-			<tr><td width=55 align=left valign="top"><img src=images/institution_small.png></td><td valign="top"><h2 style="margin-top:0px;padding-top:0px;"> Current Institutions</h2></td><td rowspan="2" width="50%"> <fieldset>  <legend>${INSTITUTION}</legend>
-${DESCRIPTION}<br>${CONTACT}<br>${WEBSITE}</fieldset></td></tr>
-			<tr><td>&nbsp;</td><td valign="top"><select name="institution" onchange="this.form.submit()">${OPTION}</select></td></tr>
-		</table>
-		</form>
-	<br><br>
-	</div>
-	</div>
-	</div>
-<div class="col-md-1">
-</div>
+            <div class="row">
+              <div class="container-fluid" id="content">
+           		 <div id="ide">
+<div class=content>
+${STATUS}
+<table><tr><td width=55 align=left valign="top"><img src=images/institution_add_small.png></td><td valign="top"><h2 style="margin-top:0px;padding-top:0px;"> Add New Institution</h2></td></tr>
+<tr><td>&nbsp;</td><td><form method=post action=admin_institutions_add><table>
+<tr><td>Institution Name &nbsp; &nbsp; </td><td> <input name="institution" type="textfield" size="50"></td></tr>
+<tr><td>Description &nbsp; &nbsp; </td><td><textarea name = "description" cols="30" rosw="5"></textarea></td></tr>
+<tr><td>Contact &nbsp; &nbsp; </td><td> <input name="contact" type="textfield" size="50"></td></tr>
+<tr><td>Website &nbsp; &nbsp; </td><td> <input name="website" type="textfield" size="50"></td></tr>
+</table><br>
+<input type=submit value=Add class="btn btn-primary navbar-btn" ></form></td></tr></table>
+<br><br>
+ </div>
+      <div class="col-md-1">
+      </div>
 
-</body>
+   </body>
+</html>
+   </body>
 </html>
 

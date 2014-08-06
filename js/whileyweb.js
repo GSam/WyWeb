@@ -19,9 +19,9 @@ function compile() {
 
     // build parameters
     var $files = $('#file-browser');
-    var main = getPath($files.js_tree('get_selected')[0])
+    var main = getPath($files, $files.jstree('get_selected')[0]) + ".whiley";
     var request = { _main: main, _verify: verify.checked };
-    addFiles("", "#", request);
+    addFiles($files, "", "#", request);
     $.post(root_url + "/compile_all", request, function(response) {
         clearMessages();
         console.value = "";
@@ -41,17 +41,19 @@ function compile() {
     });
     $("#spinner").show();
 }
-function addFiles(prefix, node, query) {
+function addFiles($files, prefix, node, query) {
     var data = $files.jstree('get_node', node);
     if (data.type == "file")
-        query[prefix + data.text] = data.data;
+        query[prefix + "/" + data.text + ".whiley"] = data.data;
     else for (var i = 0; i < data.children.length; i++) {
-        addFiles(prefix + "/" + data.text, data.children[i], query);
+        addFiles($files, prefix ? prefix + "/" + data.text : data.text, data.children[i], query);
     }
 }
-function getPath(node) {
+function getPath($files, node) {
+    if (node == '#') return ""
     var data = $files.jstree('get_node', node);
-    return get(data.parent) + "/" + data.text;
+    if (!data || !data.text || !data.text.length) return ""
+    return getPath($files, data.parent) + "/" + data.text;
 }
 /**
  * Display all the compilation errors.
@@ -225,11 +227,13 @@ $(document).on('ace-loaded', function() {
  */
 function run() {
     var console = document.getElementById("console");
+    var verify = document.getElementById("verification");
+
     var $files = $('#file-browser');
-    var main = getPath($files.js_tree('get_selected')[0])
+    var main = getPath($files, $files.jstree('get_selected')[0]) + ".whiley";
     var request = { _main: main, _verify: verify.checked };
-    addFiles("", "#", request);
-    $.post(root_url + "/run", request, function(response) {
+    addFiles($files, "", "#", request);
+    $.post(root_url + "/run_all", request, function(response) {
         clearMessages();
         console.value = "";
         $("#spinner").hide();
