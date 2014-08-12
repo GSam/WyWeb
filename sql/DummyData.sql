@@ -1,4 +1,3 @@
-
 INSERT INTO whiley_user( userid, username, password, email_address)  VALUES ( 1,'greg','gdg','gregory@gregs.co.nz');
 INSERT INTO whiley_user( userid, username, password, email_address)  VALUES ( 2,'scott','sdb','sdbolten@gmail.com');
 INSERT INTO whiley_user( userid, username, password, email_address)  VALUES ( 3,'roma','rom','roma@nowhere.com');
@@ -6,8 +5,6 @@ INSERT INTO project( projectid, project_name, userid)  VALUES ( 1,'helloWorld',1
 INSERT INTO project( projectid, project_name, userid)  VALUES ( 2,'quadcopterControlSystem',2);
 INSERT INTO file( fileid, projectid, filename)  VALUES ( 1,1,'helloWorld.wy');
 INSERT INTO file( fileid, projectid, filename)  VALUES ( 2,2,'controlTheCopter.wy');
-UPDATE file SET source =  convert_from('import whiley.lang.System method main(System.Console console):    console.out.println("Hello World")','UTF8')::BYTEA  WHERE fileid =  1 ;
-UPDATE file SET source =  convert_from('import whiley.lang.System method main(System.Console console):    console.out.println("Go Copter Go")', 'UTF8')::BYTEA  WHERE fileid =  2 ;
 INSERT INTO institution( institutionid, institution_name)  VALUES ( 1,'MIT');
 INSERT INTO institution( institutionid, institution_name)  VALUES ( 2,'Victoria University of Wellington');
 INSERT INTO course( courseid, course_name, code, year, institutionid)  VALUES ( 2,'Next Generation Languages','SWEN244',2014,2);
@@ -19,8 +16,8 @@ INSERT INTO course_stream( coursestreamid, stream_name, courseid)  VALUES ( 4,'a
 INSERT INTO course_stream( coursestreamid, stream_name, courseid)  VALUES ( 5,'b',2);
 INSERT INTO course_stream( coursestreamid, stream_name, courseid)  VALUES ( 6,'c',2);
 INSERT INTO teacher_info( teacherid, staffid, login, full_name, preferred_name, userid)  VALUES ( 1,'romaA','romaB','Roman','Roma',3);
-INSERT INTO student_info( student_info_id, identifier, login, fullname, preferred_name, userid)  VALUES ( 1,'30056789','grahamgreg','Gregory Graham','Gregory',1);
-INSERT INTO student_info( student_info_id, identifier, login, fullname, preferred_name, userid)  VALUES ( 2,'30067890','boltenscott','Scott Bolten','Scott',2);
+INSERT INTO student_info( student_info_id, identifier, login, givenname, surname, preferred_name, userid)  VALUES ( 1,'30056789','grahamgreg','Gregory','Graham','Greg',1);
+INSERT INTO student_info( student_info_id, identifier, login, givenname, surname, preferred_name, userid)  VALUES ( 2,'30067890','boltenscott','Scott','Bolten','Scott',2);
 INSERT INTO teacher_course_link( teacherinfoid, courseid)  VALUES ( 1,1);
 INSERT INTO student_course_link( studentinfoid, coursestreamid)  VALUES ( 1,2);
 INSERT INTO student_course_link( studentinfoid, coursestreamid)  VALUES ( 2,2);
