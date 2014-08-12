@@ -503,6 +503,23 @@ class Main(object):
         redirect = "NO"
         status = "DB: Connection ok"
         options = " "
+        searchValue = ""
+
+        if request:
+            if request.params:
+                if request.params['searchValue']:
+                    searchValue = request.params['searchValue']
+                    cnx, status = db.connect()
+                    cursor = cnx.cursor()
+                    join = '%' + request.params['searchValue'].upper() + '%'
+                    sql = "select student_info_id,surname,givenname from student_info where UPPER(givenname) like %s or UPPER(surname) like %s"
+                    cursor.execute(sql, (join,join))
+                    for (students) in cursor:
+                        searchResult = searchResult + "<br><a href=admin_students?id=" + str(students[0]) + "&searchValue=" + searchValue + ">" + students[1] + "  " + students[2] + "</a>"  
+                    status = "search ok"
+                    cursor.close()
+                    cnx.close()
+
 
         cnx, status = db.connect()
         cursor = cnx.cursor()
@@ -526,7 +543,7 @@ class Main(object):
             redirect = "YES"
         template = lookup.get_template("admin_students.html")
         return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, STATUS=status,
-                               OPTION=options,SEARCHRESULT=searchResult)
+                               OPTION=options,SEARCHRESULT=searchResult,SEARCHVALUE=searchValue)
 
     admin_students.exposed = True
 
