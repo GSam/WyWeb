@@ -59,6 +59,7 @@
 <table><tr><td><form action="admin_students" method="post">Search Student Given Name or Surname <input type="textfield" name="searchValue" value="${SEARCHVALUE}"></td><td> <input type="submit" value="Go"></td></tr></table>
 ${SEARCHRESULT}
 <hr>
+<table width="100%"><tr><td width="50%">
 <table><tr><td width=55 align=left><img src=images/institution_small.png></td><td><h2> Current Institutions</h2></td></tr>
 <tr><td>&nbsp;</td><td><select>${OPTION}</select></td></tr></table>
 <br>
@@ -71,14 +72,11 @@ ${SEARCHRESULT}
 <table><tr><td width=55 align=left><img src=images/student_add_small.png></td><td><h2> Add New Student</h2></td></tr>
 <tr><td>&nbsp;</td><td><form method=post action=admin_students><table><tr><td>Student ID &nbsp; &nbsp; </td><td> <input name="studentID" type="textfield" size="50"></td></tr><tr><td>Student Firstname &nbsp; &nbsp; </td><td> <input name="student_firstname" type="textfield" size="50"></td></tr><tr><td>Student Surname &nbsp; &nbsp; </td><td> <input name="student_surname" type="textfield" size="50"></td></tr></table><br>
 <input type=submit value=Add class="btn btn-primary navbar-btn" ></form></td></tr></table>
+</td><td valign=top width="50%"><fieldset>  <legend>${STUDENTNAME}</legend>${STUDENTCOURSES}</fieldset></td></tr></table>
 <br><br>
- </div>
-      <div class="col-md-1">
-      sss
-      </div>
-
-   </body>
-</html>
+</div>
+</div>
+</div>
    </body>
 </html>
 

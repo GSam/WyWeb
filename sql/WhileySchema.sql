@@ -42,7 +42,7 @@ identifier  VARCHAR(1000) CHARACTER SET utf8 COLLATE utf8_bin ,
 login  VARCHAR(1000) CHARACTER SET utf8 COLLATE utf8_bin , 
 givenname  VARCHAR(1000) CHARACTER SET utf8 COLLATE utf8_bin , 
 surname  VARCHAR(1000) CHARACTER SET utf8 COLLATE utf8_bin , 
-preferred_name  VARCHAR(1000) CHARACTER SET utf8 COLLATE utf8_bin , 
+preferred_name  VARCHAR(1000) CHARACTER SET utf8 COLLATE utf8_bin ,
 userid INTEGER
 ,PRIMARY KEY (student_info_id)
 )

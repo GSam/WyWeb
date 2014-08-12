@@ -277,7 +277,7 @@ class Main(object):
 
         if request:
             if request.params:
-                if request.params['institution']:
+                if 'institution' in request.params:
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
                     query = (
@@ -321,7 +321,7 @@ class Main(object):
 
         if request:
             if request.params:
-                if request.params['institution']:
+                if 'institution' in request.params:
                     selected_value = request.params['institution']
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
@@ -400,7 +400,7 @@ class Main(object):
         
         if request:
             if request.params:
-                if request.params['institution']:
+                if 'institution' in request.params:
                     selectedValue = request.params['institution']               
                     cnx, status = db.connect()
                     cursor = cnx.cursor() 
@@ -463,7 +463,7 @@ class Main(object):
 
         if request:
             if request.params:
-                if request.params['course_code']:
+                if 'course_code' in request.params:
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
                     query = ("insert into course (course_name,code,year,institutionid) values ('" + request.params[
@@ -513,15 +513,17 @@ class Main(object):
         status = "DB: Connection ok"
         options = " "
         searchValue = ""
+        studentName = "No student selected"
+        studentCourses = ""
 
         if request:
             if request.params:
-                if request.params['searchValue']:
+                if 'searchValue' in request.params:
                     searchValue = request.params['searchValue']
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
                     join = '%' + request.params['searchValue'].upper() + '%'
-                    sql = "select student_info_id,surname,givenname from student_info where UPPER(givenname) like %s or UPPER(surname) like %s"
+                    sql = "select student_info_id,surname,givenname from student_info where UPPER(givenname) like %s or UPPER(surname) like %s order by surname"
                     cursor.execute(sql, (join,join))
                     for (students) in cursor:
                         searchResult = searchResult + "<br><a href=admin_students?id=" + str(students[0]) + "&searchValue=" + searchValue + ">" + students[1] + "  " + students[2] + "</a>"  
@@ -529,6 +531,24 @@ class Main(object):
                     cursor.close()
                     cnx.close()
 
+        if request:
+            if request.params:
+                if 'id' in request.params:
+                    studentid = request.params['id']
+                    cnx, status = db.connect()
+                    cursor = cnx.cursor()
+                    sql = "select student_info_id,surname,givenname,institution_name from student_info a,institution b  where student_info_id =  %s and a.institutionid = b.institutionid"
+                    cursor.execute(sql, (studentid))
+                    for (students) in cursor:
+                        studentName = students[2] + " " + students[1]  + " - " + students[2]
+                    sql = "select c.course_name,c.code,year from student_course_link a,course_stream b,course c where a.studentinfoid =  %s and a.coursestreamid = b.coursestreamid and b.courseid = c.courseid"
+                    cursor.execute(sql, (studentid))
+                    studentCourses = "<h4>Courses</h4>"
+                    for (courses) in cursor:
+                        studentCourses = studentCourses + courses[1] + " " + str(courses[2]) + " " + str(courses[0]) + "<br>"                   
+                    
+                    cursor.close()
+                    cnx.close()
 
         cnx, status = db.connect()
         cursor = cnx.cursor()
@@ -552,7 +572,8 @@ class Main(object):
             redirect = "YES"
         template = lookup.get_template("admin_students.html")
         return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, STATUS=status,
-                               OPTION=options,SEARCHRESULT=searchResult,SEARCHVALUE=searchValue)
+                               OPTION=options,SEARCHRESULT=searchResult,SEARCHVALUE=searchValue,STUDENTNAME=studentName,
+                               STUDENTCOURSES=studentCourses)
 
     admin_students.exposed = True
 
