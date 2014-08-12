@@ -35,10 +35,12 @@ source  BYTEA
 student_info_id  SERIAL , 
 identifier VARCHAR(1000), 
 login VARCHAR(1000), 
-fullname VARCHAR(1000), 
+givenname VARCHAR(1000), 
+surname VARCHAR(1000),
 preferred_name VARCHAR(1000), 
-userid INTEGER
-,PRIMARY KEY (student_info_id)
+userid INTEGER,
+insititionid INTEGER,
+PRIMARY KEY (student_info_id)
 )
 ;
  CREATE TABLE student_course_link(
