@@ -718,8 +718,8 @@ def compile_all(main, files, verify, dir):
         "-jar",
         config.WYJC_JAR,
         "-bootpath", config.WYRT_JAR,
-        "-whileydir", dir,
-        "-classdir", dir,
+        "-whileydir", dir + '/**',
+        "-classdir", dir + '/**',
         "-brief"
     ]
 
@@ -727,7 +727,7 @@ def compile_all(main, files, verify, dir):
         args.append("-verify")
 
     save_all(files, dir)
-    args.append(filename)
+    args.append(os.path.dirname(filename) + '/**.whiley')
     # print("DEBUG:", " ".join(args))
 
     try:
