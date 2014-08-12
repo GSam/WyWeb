@@ -177,7 +177,9 @@ class Main(object):
 
     run_all.exposed = True
 
+    # ============================================================
     # application root
+    # ============================================================
     def index(self, id="HelloWorld", *args, **kwargs):
         allow(["HEAD", "GET"])
         error = ""
@@ -229,7 +231,9 @@ class Main(object):
     index.exposed = True
     # exposed
 
+    # ============================================================
     # Admin Main Page
+    # ============================================================
     def admin(self, id="Admin Page", *args, **kwargs):
         allow(["HEAD", "GET"])
         error = ""
@@ -253,9 +257,9 @@ class Main(object):
 
     admin.exposed = True
 
-    #
+    # ============================================================
     # Admin Add Institutions Page
-    #
+    # ============================================================
 
     def admin_institutions_add(self, id="Admin Institutions", *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
@@ -295,9 +299,9 @@ class Main(object):
 
     admin_institutions_add.exposed = True
 
-    #
+    # ============================================================
     # Admin Institutions Page
-    #
+    # ============================================================
 
     def admin_institutions(self, id="Admin Institutions", *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
@@ -372,9 +376,9 @@ class Main(object):
 
     admin_institutions.exposed = True
 
-    #
+    # ============================================================
     # Admin Courses page
-    #
+    # ============================================================
 
     def admin_courses(self, id="Admin Courses", *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
@@ -437,9 +441,9 @@ class Main(object):
 
     admin_courses.exposed = True
 
-    #
+    # ============================================================
     # Admin Add Course page
-    #
+    # ============================================================
 
     def admin_course_add(self, id="Admin Courses", *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
@@ -488,13 +492,14 @@ class Main(object):
     admin_course_add.exposed = True
 
 
-    #
+    # ============================================================
     # Admin Students page
-    #
+    # ============================================================
 
     def admin_students(self, id="Admin Courses", *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
         error = ""
+        searchResult = ""
         redirect = "NO"
         status = "DB: Connection ok"
         options = " "
@@ -521,7 +526,7 @@ class Main(object):
             redirect = "YES"
         template = lookup.get_template("admin_students.html")
         return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, STATUS=status,
-                               OPTION=options)
+                               OPTION=options,SEARCHRESULT=searchResult)
 
     admin_students.exposed = True
 
