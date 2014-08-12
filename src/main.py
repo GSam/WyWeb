@@ -31,7 +31,8 @@ lookup = TemplateLookup(directories=['html'])
 # Application Entry
 # ============================================================
 
-HELLO_WORLD = """
+HELLO_WORLD = """package Project1
+
 import whiley.lang.System
 
 method main(System.Console console):
@@ -106,10 +107,18 @@ class Main(object):
     compile_all.exposed = True
 
     def private_save(self, **files):
+        projects = set()
         if cherrypy.session.get("_cp_username"):
             for filepath, source in files.items():
                 filepath = filepath.split("/")
                 project = filepath.pop(0)
+                
+                # clear existing files in project
+                if project not in projects:
+                    clear_files(project)
+                    projects.add(project)
+
+                # save
                 save(project, "/".join(filepath)[:-len(".whiley")], source)
     private_save.exposed = True
 
@@ -557,8 +566,17 @@ def save(project_name, filename, data):
     sql = "INSERT INTO file (projectid, filename, source) VALUES (%s, %s, %s)"
     cursor.execute(sql, (projectid, filename, data))
 
-    return
+def clear_files(project_name):
+    username = cherrypy.session.get("_cp_username")
+    cnx, status = db.connect()
+    cursor = cnx.cursor()
+    # Retrieve User ID
+    sql =  "SELECT p.projectid FROM project p, whiley_user w WHERE w.userid = p.userid AND w.username = %s"
+    cursor.execute(sql, (username,))
+    projectid = cursor.fetchone()[0]
 
+    sql = "DELETE FROM file WHERE projectid = %s"
+    cursor.execute(sql, (projectid,))
 
 def save_all(files, dir):
     for filename, contents in files.items():

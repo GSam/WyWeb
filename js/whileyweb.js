@@ -207,20 +207,14 @@ $(document).on('ace-loaded', function() {
         }
     })
 })
-if (isLoggedIn) {
-    // Start the timer as late as possible
-    $(document).on('ace-loaded', function() {
-        window.setInterval(saveToServer, 30*1000);
-    })
-    $(document).on('unload', saveToServer);
-}
-
 function saveToServer() {
+    _selectedFile.data = editor.getValue() // Fix, current file doesn't save correctly.
+
     var request = {};
     var $files = $('#file-browser');
     addFiles($files, "", "#", request);
 
-    $.post('/private_save',  request);
+    $.post(root_url + '/private_save',  request, function() {});
 }
 /**
  * Compile and run a given snippet of Whiley code.
