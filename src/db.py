@@ -75,40 +75,47 @@ def test_db():
 def create_schema(cnx):
     print "Creating Schema"
     try:
-        with open('sql/DropSchema.sql', 'r') as script_file:
-            drop_schema_script = script_file.read()
-            print drop_schema_script
-            cursor = cnx.cursor()
-            for result in cursor.execute(drop_schema_script, params=None, multi=True):
-                if result.with_rows:
-                    print("Rows produced by statement '{}':".format(result.statement))
-                    print(result.fetchall())
-                else:
-                    print("Number of rows affected by statement '{}': {}".format(result.statement, result.rowcount))
-            cursor.execute("commit;")
+        cursor = cnx.cursor()
+        cursor.execute("SELECT * from whiley_user;")
+        FOUND_USERS = False
+        for (whiley_user) in cursor:
+            FOUND_USERS = True
+        if (not FOUND_USERS):
+            with open('sql/DropSchema.sql', 'r') as script_file:
+                drop_schema_script = script_file.read()
+                print drop_schema_script
+                cursor = cnx.cursor()
+                for result in cursor.execute(drop_schema_script, params=None, multi=True):
+                    if result.with_rows:
+                        print("Rows produced by statement '{}':".format(result.statement))
+                        print(result.fetchall())
+                    else:
+                        print("Number of rows affected by statement '{}': {}".format(result.statement, result.rowcount))
+                cursor.execute("commit;")
 
-        with open('sql/WhileySchema.sql', 'r') as script_file:
-            create_schema_script = script_file.read()
-            print create_schema_script
-            cursor = cnx.cursor()
-            for result in cursor.execute(create_schema_script, params=None, multi=True):
-                if result.with_rows:
-                    print("Rows produced by statement '{}':".format(result.statement))
-                    print(result.fetchall())
-                else:
-                    print("Number of rows affected by statement '{}': {}".format(result.statement, result.rowcount))
-            cursor.execute("commit;")
-        with open('sql/DummyData.sql', 'r') as dummy_data_file:
-            dummy_data_script = dummy_data_file.read()
-            print dummy_data_script
-            cursor = cnx.cursor()
-            for result in cursor.execute(dummy_data_script, params=None, multi=True):
-                if result.with_rows:
-                    print("Rows produced by statement '{}':".format(result.statement))
-                    print(result.fetchall())
-                else:
-                    print("Number of rows affected by statement '{}': {}".format(result.statement, result.rowcount))
-            cursor.execute("commit;")
+            with open('sql/WhileySchema.sql', 'r') as script_file:
+                create_schema_script = script_file.read()
+                print create_schema_script
+                cursor = cnx.cursor()
+                for result in cursor.execute(create_schema_script, params=None, multi=True):
+                    if result.with_rows:
+                        print("Rows produced by statement '{}':".format(result.statement))
+                        print(result.fetchall())
+                    else:
+                        print("Number of rows affected by statement '{}': {}".format(result.statement, result.rowcount))
+                cursor.execute("commit;")
+            with open('sql/DummyData.sql', 'r') as dummy_data_file:
+                dummy_data_script = dummy_data_file.read()
+                print dummy_data_script
+                cursor = cnx.cursor()
+                for result in cursor.execute(dummy_data_script, params=None, multi=True):
+                    if result.with_rows:
+                        print("Rows produced by statement '{}':".format(result.statement))
+                        print(result.fetchall())
+                    else:
+                        print("Number of rows affected by statement '{}': {}".format(result.statement, result.rowcount))
+                cursor.execute("commit;")
+        cursor.close
     except mysql.connector.Error as err:
         print err
 
