@@ -218,7 +218,6 @@ class AuthController(object):
             laststudentinfoid = create_username(user, passwd, email, givenname, surname)
             cherrypy.session.regenerate()
             cherrypy.session[SESSION_KEY] = cherrypy.request.login = user
-            print(str(laststudentinfoid) + " last id")
             return self.user_courses(studentinfoid=laststudentinfoid)
         else:
             error_msg="Username already exists, choose another one"
@@ -253,9 +252,6 @@ class AuthController(object):
                     cursor.close()
                 if 'course_list' in request.params:
                     course_list = request.params['course_list']
-                    print (selectedValue)
-                    print (course_list)
-                    print (studentinfoid)
                     cnx, status = db.connect()
                     cursor = cnx.cursor() 
                     insertuserdetails(studentinfoid, selectedValue, course_list)
