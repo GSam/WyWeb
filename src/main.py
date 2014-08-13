@@ -776,7 +776,23 @@ def compile(code, verify, dir):
     # run the compiler
     try:
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+        # Configure Timeout
+        kill_proc = lambda p: p.kill()
+        timer = Timer(15, kill_proc, [proc])
+        timer.start()
+        # Run process        
         (out, err) = proc.communicate()
+        timer.cancel()
+        # Check what happened
+        if proc.returncode < 0:
+            return [{
+                "filename": "",
+                "line": "",
+                "start": "",
+                "end": "",
+                "text": "Compiling / Verifying your program took too long!"
+            }]
+        # Continue
         if err == None:
             return splitErrors(out)
         else:
