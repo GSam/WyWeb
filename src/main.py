@@ -513,26 +513,30 @@ class Main(object):
         redirect = "NO"
         status = "DB: Connection ok"
         options = " "
+        optionsCourse = " "
+        optionsStudent = " "
         searchValue = ""
         studentName = "No student selected"
         studentCourses = ""
         studentProjects = ""
-        whileyid = "";
+        selectedValue = ""
+        selectedValueCourse = ""
+        whileyid = ""
 
         if request:
             if request.params:
                 if 'searchValue' in request.params:
                     searchValue = request.params['searchValue']
-                    cnx, status = db.connect()
-                    cursor = cnx.cursor()
-                    join = '%' + request.params['searchValue'].upper() + '%'
-                    sql = "select student_info_id,surname,givenname from student_info where UPPER(givenname) like %s or UPPER(surname) like %s order by surname"
-                    cursor.execute(sql, (join,join))
-                    for (students) in cursor:
-                        searchResult = searchResult + "<br><a href=admin_students?id=" + str(students[0]) + "&searchValue=" + searchValue + ">" + students[1] + "  " + students[2] + "</a>"  
-                    status = "search ok"
-                    cursor.close()
-                    cnx.close()
+                    if searchValue != "":
+                        cnx, status = db.connect()
+                        cursor = cnx.cursor()
+                        join = '%' + request.params['searchValue'].upper() + '%'
+                        sql = "select student_info_id,surname,givenname from student_info where UPPER(givenname) like %s or UPPER(surname) like %s order by surname"
+                        cursor.execute(sql, (join,join))
+                        for (students) in cursor:
+                            searchResult = searchResult + "<br><a href=admin_students?id=" + str(students[0]) + "&searchValue=" + searchValue + ">" + students[1] + "  " + students[2] + "</a>"  
+                        cursor.close()
+                        cnx.close()
 
         if request:
             if request.params:
@@ -566,16 +570,70 @@ class Main(object):
                         cursorFiles.close()
                     cursor.close()
                     cnx.close()
+        
+        if request:
+            if request.params:
+                if 'institution' in request.params:
+                    selectedValue = request.params['institution']               
+                    cnx, status = db.connect()
+                    cursor = cnx.cursor() 
+                    query = ("SELECT institutionid,institution_name from institution order by institution_name")
+                    cursor.execute(query) 
+                    for (institutionid,institution_name) in cursor:
+                        if str(institutionid) == selectedValue:
+                            options = options + "<option value='" + str(institutionid) + "' selected>" + institution_name + "</option>"
+                        else:
+                            options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>"
+                    cursor.close()
 
-        cnx, status = db.connect()
-        cursor = cnx.cursor()
-        query = ("SELECT institution_name from institution order by institution_name")
-        cursor.execute(query)
-        for (institution) in cursor:
-            options = options + "<option>" + institution[0] + "</option>"
-        cursor.close()
-        cnx.close()
+        if selectedValue == "":          
+            cnx, status = db.connect()
+            cursor = cnx.cursor() 
+            query = ("SELECT institutionid,institution_name from institution order by institution_name")
+            cursor.execute(query)
+            for (institutionid,institution_name) in cursor:
+                options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>" 
+                if selectedValue == "":
+                    selectedValue = str(institutionid)
+            cursor.close() 
 
+        if request:
+            if request.params:
+                if 'course' in request.params:
+                    selectedValueCourse = request.params['course']               
+                    cnx, status = db.connect()
+                    cursor = cnx.cursor() 
+                    sql = "SELECT courseid,code from course where institutionid = %s"
+                    cursor.execute(sql, selectedValue)
+                    for (courseid,code) in cursor:
+                        if str(courseid) == selectedValueCourse:
+                            optionsCourse = optionsCourse + "<option value='" + str(courseid) + "' selected>" + code + "</option>"
+                        else:
+                            optionsCourse = optionsCourse + "<option value='" + str(courseid) + "'>" + code + "</option>"
+                    cursor.close()   
+        
+        if selectedValueCourse == "": 
+            cnx, status = db.connect()
+            cursor = cnx.cursor() 
+            sql = "SELECT courseid,code from course where institutionid = %s"
+            cursor.execute(sql, selectedValue)
+            for (courseid,code) in cursor:                
+                optionsCourse = optionsCourse + "<option value='" + str(courseid) + "'>" + code + "</option>" 
+                if selectedValueCourse == "":
+                    selectedValueCourse = str(courseid)
+            cursor.close()
+        
+        if selectedValueCourse != "":
+             cnx, status = db.connect()
+             cursor = cnx.cursor() 
+             sql = "SELECT distinct a.student_info_id,a.givenname,a.surname from student_info a,student_course_link b, course c, course_stream d where c.courseid = %s and  c.courseid = d.courseid and d.coursestreamid =b.coursestreamid and b.studentinfoid = a.student_info_id"
+             cursor.execute(sql, selectedValueCourse)
+             for (student_info_id,givenname,surname) in cursor:                
+                 optionsStudent = optionsStudent + "<a href=admin_students?id=" + str(student_info_id) + "&institution=" + selectedValue + "&course=" + selectedValueCourse +  ">"  + surname + ", " + givenname + "</br>"
+                 if selectedValueCourse == "":
+                    selectedValueCourse = str(courseid)
+             cursor.close()
+              
         try:
             # Sanitize the ID.
             safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
@@ -590,7 +648,7 @@ class Main(object):
         template = lookup.get_template("admin_students.html")
         return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, STATUS=status,
                                OPTION=options,SEARCHRESULT=searchResult,SEARCHVALUE=searchValue,STUDENTNAME=studentName,
-                               STUDENTCOURSES=studentCourses,STUDENTPROJECTS=studentProjects)
+                               STUDENTCOURSES=studentCourses,STUDENTPROJECTS=studentProjects,OPTIONCOURSE=optionsCourse,OPTIONSTUDENT=optionsStudent)
 
     admin_students.exposed = True
 

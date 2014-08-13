@@ -59,17 +59,19 @@
 <table><tr><td><form action="admin_students" method="post">Search Student Given Name or Surname <input type="textfield" name="searchValue" value="${SEARCHVALUE}"></td><td> <input type="submit" value="Go"></td></tr></table>
 ${SEARCHRESULT}
 <hr>
+<form>
 <table width="100%"><tr><td width="50%">
 <table><tr><td width=55 align=left><img src=images/institution_small.png></td><td><h2> Current Institutions</h2></td></tr>
-<tr><td>&nbsp;</td><td><select>${OPTION}</select></td></tr></table>
+<tr><td>&nbsp;</td><td><select name="institution" onchange="this.form.submit()">${OPTION}</select></td></tr></table>
 <br>
 <table><tr><td width=55 align=left><img src=images/course_small.png></td><td><h2> Current Courses</h2></td></tr>
-<tr><td>&nbsp;</td><td><select><option>Fake Course1</option><option>Fake Course2</option></select></td></tr></table>
+<tr><td>&nbsp;</td><td><select name="course" onchange="this.form.submit()">${OPTIONCOURSE}</select></td></tr></table>
 <br>
 <table><tr><td width=55 align=left><img src=images/student_small.png></td><td><h2> Current Students</h2></td></tr>
-<tr><td>&nbsp;</td><td><select><option>300000001 Fake Student</option><option>300000001 Fake Student2</option></select></td></tr></table>
+<tr><td>&nbsp;</td><td>${OPTIONSTUDENT}</td></tr></table>
 <br><hr>
 </td><td valign=top width="50%"><fieldset>  <legend>${STUDENTNAME}</legend>${STUDENTCOURSES}<br>${STUDENTPROJECTS}</fieldset></td></tr></table>
+</form>
 <br><br>
 </div>
 </div>
