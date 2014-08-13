@@ -47,11 +47,11 @@
                         <div class="form-group">
    			              <button type="button"  class="btn" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>
                         % if LOGGED is True:
-                          <button type="button" class="btn" onClick="saveToServer();" title="Save your project online.">Save</button>
+                          <button type="button" class="btn btn-primary" onClick="saveToServer();" title="Save your project online.">Save</button>
                         % endif
    			               <button type="button"  class="btn btn-primary" onClick="compile();" title="Compile your program to check it is correct.">Compile</button>
    			              <button type="button"  class="btn btn-primary" onClick="run();" title="Run your program to produce some output!">Run</button>
-   			              <a href="admin" class="btn btn-primary" title="Admin">Admin</a>
+   			              <!--<a href="admin" class="btn btn-primary" title="Admin">Admin</a>-->
    			              <label class="checkbox inline">
    			        				<input id="verification" type="checkbox" checked="checked" title="Enable or disable compile-time verification" /> Enable Verification
    			    			  </label>
