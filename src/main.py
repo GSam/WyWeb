@@ -9,6 +9,7 @@ import tempfile
 import subprocess
 import json
 import re
+import glob
 
 import db
 import codecs
@@ -31,7 +32,8 @@ lookup = TemplateLookup(directories=['html'])
 # Application Entry
 # ============================================================
 
-HELLO_WORLD = """
+HELLO_WORLD = """package Project1
+
 import whiley.lang.System
 
 method main(System.Console console):
@@ -106,10 +108,18 @@ class Main(object):
     compile_all.exposed = True
 
     def private_save(self, **files):
+        projects = set()
         if cherrypy.session.get("_cp_username"):
             for filepath, source in files.items():
                 filepath = filepath.split("/")
                 project = filepath.pop(0)
+                
+                # clear existing files in project
+                if project not in projects:
+                    clear_files(project)
+                    projects.add(project)
+
+                # save
                 save(project, "/".join(filepath)[:-len(".whiley")], source)
     private_save.exposed = True
 
@@ -268,7 +278,7 @@ class Main(object):
 
         if request:
             if request.params:
-                if request.params['institution']:
+                if 'institution' in request.params:
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
                     query = (
@@ -312,7 +322,7 @@ class Main(object):
 
         if request:
             if request.params:
-                if request.params['institution']:
+                if 'institution' in request.params:
                     selected_value = request.params['institution']
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
@@ -391,7 +401,7 @@ class Main(object):
         
         if request:
             if request.params:
-                if request.params['institution']:
+                if 'institution' in request.params:
                     selectedValue = request.params['institution']               
                     cnx, status = db.connect()
                     cursor = cnx.cursor() 
@@ -454,7 +464,7 @@ class Main(object):
 
         if request:
             if request.params:
-                if request.params['course_code']:
+                if 'course_code' in request.params:
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
                     query = ("insert into course (course_name,code,year,institutionid) values ('" + request.params[
@@ -504,15 +514,19 @@ class Main(object):
         status = "DB: Connection ok"
         options = " "
         searchValue = ""
+        studentName = "No student selected"
+        studentCourses = ""
+        studentProjects = ""
+        whileyid = "";
 
         if request:
             if request.params:
-                if request.params['searchValue']:
+                if 'searchValue' in request.params:
                     searchValue = request.params['searchValue']
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
                     join = '%' + request.params['searchValue'].upper() + '%'
-                    sql = "select student_info_id,surname,givenname from student_info where UPPER(givenname) like %s or UPPER(surname) like %s"
+                    sql = "select student_info_id,surname,givenname from student_info where UPPER(givenname) like %s or UPPER(surname) like %s order by surname"
                     cursor.execute(sql, (join,join))
                     for (students) in cursor:
                         searchResult = searchResult + "<br><a href=admin_students?id=" + str(students[0]) + "&searchValue=" + searchValue + ">" + students[1] + "  " + students[2] + "</a>"  
@@ -520,6 +534,38 @@ class Main(object):
                     cursor.close()
                     cnx.close()
 
+        if request:
+            if request.params:
+                if 'id' in request.params:
+                    studentid = request.params['id']
+                    cnx, status = db.connect()
+                    cursor = cnx.cursor()
+                    sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b  where student_info_id =  %s and a.institutionid = b.institutionid"
+                    cursor.execute(sql, (studentid))
+                    for (students) in cursor:
+                        studentName = students[2] + " " + students[1]  + " <br><h5>" + students[3] + "</h5>"
+                        whileyid = str(students[4])
+                    sql = "select c.course_name,c.code,year from student_course_link a,course_stream b,course c where a.studentinfoid =  %s and a.coursestreamid = b.coursestreamid and b.courseid = c.courseid"
+                    cursor.execute(sql, (studentid))
+                    studentCourses = "<h4>Courses</h4>"
+                    for (courses) in cursor:
+                        studentCourses = studentCourses + "<a href='#'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
+                    
+                    sql = "select projectid,project_name from project where userid = %s"
+                    cursor.execute(sql, (whileyid))
+                    studentProjects = "<h4>Projects</h4>"
+                    projectid = ""
+                    for (projects) in cursor:
+                        studentProjects = studentProjects + "<a href='#'>" + projects[1] + "</a><br>"
+                        projectid = str(projects[0]) 
+                        cursorFiles = cnx.cursor()
+                        sql2 = "select filename from file where projectid = %s"
+                        cursorFiles.execute(sql2, projectid)
+                        for (files) in cursorFiles:
+                            studentProjects = studentProjects + " &nbsp; --> &nbsp; " + files[0] + "</a><br>"  
+                        cursorFiles.close()
+                    cursor.close()
+                    cnx.close()
 
         cnx, status = db.connect()
         cursor = cnx.cursor()
@@ -543,7 +589,8 @@ class Main(object):
             redirect = "YES"
         template = lookup.get_template("admin_students.html")
         return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, STATUS=status,
-                               OPTION=options,SEARCHRESULT=searchResult,SEARCHVALUE=searchValue)
+                               OPTION=options,SEARCHRESULT=searchResult,SEARCHVALUE=searchValue,STUDENTNAME=studentName,
+                               STUDENTCOURSES=studentCourses,STUDENTPROJECTS=studentProjects)
 
     admin_students.exposed = True
 
@@ -579,8 +626,17 @@ def save(project_name, filename, data):
     sql = "INSERT INTO file (projectid, filename, source) VALUES (%s, %s, %s)"
     cursor.execute(sql, (projectid, filename, data))
 
-    return
+def clear_files(project_name):
+    username = cherrypy.session.get("_cp_username")
+    cnx, status = db.connect()
+    cursor = cnx.cursor()
+    # Retrieve User ID
+    sql =  "SELECT p.projectid FROM project p, whiley_user w WHERE w.userid = p.userid AND w.username = %s"
+    cursor.execute(sql, (username,))
+    projectid = cursor.fetchone()[0]
 
+    sql = "DELETE FROM file WHERE projectid = %s"
+    cursor.execute(sql, (projectid,))
 
 def save_all(files, dir):
     for filename, contents in files.items():
@@ -674,21 +730,21 @@ def compile(code, verify, dir):
 
 def compile_all(main, files, verify, dir):
     filename = dir + main
+    save_all(files, dir)
     args = [
         config.JAVA_CMD,
         "-jar",
         config.WYJC_JAR,
         "-bootpath", config.WYRT_JAR,
-        "-whileydir", dir,
-        "-classdir", dir,
+        "-whileydir"] + glob.glob(os.path.join(dir, "*")) + [
+        "-classdir"] + glob.glob(os.path.join(dir, "*")) + [
         "-brief"
     ]
 
     if verify == "true":
         args.append("-verify")
 
-    save_all(files, dir)
-    args.append(filename)
+    args += glob.glob(os.path.dirname(filename) + '/**.whiley')
     # print("DEBUG:", " ".join(args))
 
     try:
