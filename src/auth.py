@@ -7,6 +7,14 @@
 import cherrypy
 import db 
 
+
+import cherrypy
+from cherrypy.lib.static import serve_file
+from cherrypy.lib.cptools import allow
+from cherrypy import HTTPRedirect
+from cherrypy import request
+
+
 import uuid
 import hashlib
 
@@ -39,8 +47,8 @@ def check_credentials(user, passwd):
     cnx = db.connect()[0]  
     if cnx:      
         cursor = cnx.cursor()
-        query = ("SELECT * from whiley_user where username = '%s' and password = '%s'")
-        cursor.execute(query, (user, passwd))
+        query = ("SELECT * from whiley_user where username = %s and password = %s")
+        cursor.execute(query, (user, passwd,))
         row = cursor.fetchone()
         if cursor.rowcount > 0:
             #print("{} passwd".format(row[2]))
@@ -60,8 +68,8 @@ def check_credentials(user, passwd):
 def check_username(user):
     cnx = db.connect()[0]        
     cursor = cnx.cursor()
-    query = ("SELECT * from whiley_user where username = '%s'")
-    cursor.execute(query, (user))
+    query = ("SELECT * from whiley_user where username = %s")
+    cursor.execute(query, (user,))
     cursor.fetchall()
     if cursor.rowcount > 0:
         result = "Username not available"
@@ -75,20 +83,12 @@ def create_username(user, passwd, email, givenname, surname):
     #hashed_password = hash_password(passwd)
     cnx = db.connect()[0]        
     cursor = cnx.cursor()
-    try:
-        query = ("INSERT into whiley_user VALUES (null, '%s', '%s', '%s')")
-        cursor.execute(query, (user, passwd, email,))
-        laststudentid = cursor.lastrowid
-        query = ("INSERT into student_info VALUES (null, null, null, '%s', '%s', null, %d, null)")
-        cursor.execute(query, (givenname, surname, laststudentid))
-        lastid = cursor.lastrowid
-    except mysql.connector.Error as err:
-        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Something is wrong")
-        elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            print("Database does not exists")
-        else:
-            print(err)
+    query = "INSERT into whiley_user (username, password, email_address) VALUES (%s, %s, %s)"
+    cursor.execute(query, (user, passwd, email))
+    laststudentid = cursor.lastrowid
+    query = "INSERT into student_info (givenname, surname, userid) VALUES (%s, %s, %s)"
+    cursor.execute(query, (givenname, surname, laststudentid))
+    lastid = cursor.lastrowid
     cursor.close()
     cnx.close()
     return lastid
@@ -96,19 +96,11 @@ def create_username(user, passwd, email, givenname, surname):
 def insertuserdetails(student_infoid, institutionid, coursesid):
     cnx = db.connect()[0]        
     cursor = cnx.cursor()
-    try:
-        query = ("UPDATE student_info SET institutionid=%d WHERE student_info_id=%d")
-        cursor.execute(query, (institutionid, student_infoid))
-        for courseid in coursesid:
-            query = ("INSERT INTO student_course_link VALUES (%d, %d")
-            cursor.execute(query, (student_infoid, courseid))    
-    except mysql.connector.Error as err:
-        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Something is wrong")
-        elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            print("Database does not exists")
-        else:
-            print(err)
+    query = "UPDATE student_info SET institutionid=%s WHERE student_info_id=%s"
+    cursor.execute(query, (institutionid, student_infoid))
+    #for courseid in coursesid:
+    query = "INSERT INTO student_course_link VALUES (%s, %s)"
+    cursor.execute(query, (student_infoid, coursesid))    
     cursor.close()
     cnx.close()
 
@@ -215,39 +207,39 @@ class AuthController(object):
             error_msg="All fields are required"
             template = lookup.get_template("signup.html")
             error = True
-            return template.render(ERROR=error, ERRORMSG=error_msg, USERCREATED=False)
+            return template.render(ERROR=error, ERRORMSG=error_msg)
         elif passwd != cpasswd:
             error_msg="Passwords do not match"
             template = lookup.get_template("signup.html")
             error = True
-            return template.render(ERROR=error, ERRORMSG=error_msg, USERCREATED=False)
+            return template.render(ERROR=error, ERRORMSG=error_msg)
         error_msg = check_username(user)
         if error_msg is None:
             laststudentinfoid = create_username(user, passwd, email, givenname, surname)
-            template = lookup.get_template("user_institutions.html")
             cherrypy.session.regenerate()
             cherrypy.session[SESSION_KEY] = cherrypy.request.login = user
-            return template.render(USERCREATED=True, NOTALLOWED=False, STUDENTINFOID=laststudentinfoid)
+            print(str(laststudentinfoid) + " last id")
+            return self.user_courses(studentinfoid=laststudentinfoid)
         else:
             error_msg="Username already exists, choose another one"
             template = lookup.get_template("signup.html")
             error = True
-            return template.render(ERROR=error, ERRORMSG=error_msg, USERCREATED=False)
+            return template.render(ERROR=error, ERRORMSG=error_msg)
 
     @cherrypy.expose
-    def user_courses(self):
+    def user_courses(self, studentinfoid=None, *args, **kwargs):
+
         allow(["HEAD", "GET", "POST"])
         error = ""
         redirect = "NO"
         options = " "
         selectedValue = ""
-        studentinfoid = ""
 
         course_list = ""
 
         if request:
             if request.params:
-                if request.params['institution']:
+                if 'institution' in request.params:
                     selectedValue = request.params['institution']               
                     cnx, status = db.connect()
                     cursor = cnx.cursor() 
@@ -259,6 +251,18 @@ class AuthController(object):
                         else:
                             options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>"
                     cursor.close()
+                if 'course_list' in request.params:
+                    course_list = request.params['course_list']
+                    print (selectedValue)
+                    print (course_list)
+                    print (studentinfoid)
+                    cnx, status = db.connect()
+                    cursor = cnx.cursor() 
+                    insertuserdetails(studentinfoid, selectedValue, course_list)
+                    cursor.close()
+                    template = lookup.get_template("user_institutions.html")
+                    return template.render(USERCOMPLETE=True, NOTALLOWED=False, ROOT_URL=config.VIRTUAL_URL, REDIRECT=redirect, OPTION=None, COURSE_LIST=None, STUDENTINFOID=None)
+
 
         if selectedValue == "":          
             cnx, status = db.connect()
@@ -273,17 +277,18 @@ class AuthController(object):
                 
         cnx, status = db.connect()
         cursor = cnx.cursor() 
-        query = ("SELECT courseid,code from course where institutionid = %d order by code")
+        query = ("SELECT courseid,code from course where institutionid = %s order by code")
         cursor.execute(query, (selectedValue))
-        for (courseid,code) in cursor:
-            course_list = course_list + "<input type='checkbox' name='course_list' value='" + courseid + "'>" + code + "</input>"
+
+        for (courseid,code) in cursor.fetchall():
+            course_list = course_list + "<input type='radio' name='course_list' value='" + str(courseid) + "'> " + code + "</input><br/>"
         cursor.close()
 
 
 
         template = lookup.get_template("user_institutions.html")
 
-        return template.render(USERCREATED=True, NOTALLOWED=False, ROOT_URL=config.VIRTUAL_URL, REDIRECT=redirect, OPTION=options, COURSE_LIST=course_list, STUDENTINFOID=studentinfoid)
+        return template.render(USERCOMPLETE=False, NOTALLOWED=False, ROOT_URL=config.VIRTUAL_URL, REDIRECT=redirect, OPTION=options, COURSE_LIST=course_list, STUDENTINFOID=studentinfoid)
 
 
     @cherrypy.expose
