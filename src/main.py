@@ -737,7 +737,7 @@ def compile_all(main, files, verify, dir):
         config.WYJC_JAR,
         "-bootpath", config.WYRT_JAR,
         "-whileydir"] + glob.glob(os.path.join(dir, "*")) + [
-        "-classdir", dir,
+        "-classdir"] + glob.glob(os.path.join(dir, "*")) + [
         "-brief"
     ]
 
