@@ -5,22 +5,14 @@ from mysql.connector import errorcode
 
 import db_config
 
-import config
-import subprocess
-
-
-CONNECTED_SUCCESSFULLY = False
 
 # connection details
 def connect():
-    global CONNECTED_SUCCESSFULLY
     cnx = False
     try:
         status = "OK"
         cnx = connect_from_config()
-        if not CONNECTED_SUCCESSFULLY:
-            create_schema(cnx)
-            CONNECTED_SUCCESSFULLY = True
+        check_schema(cnx)
         #mysql.connector.connect(user='whiley', password='coyote',host='kipp-cafe.ecs.vuw.ac.nz',database='whiley')
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -72,14 +64,17 @@ def test_db():
 
 
 
-def create_schema(cnx):
+def check_schema(cnx):
     print "Creating Schema"
     try:
-        cursor = cnx.cursor()
-        cursor.execute("SELECT * from whiley_user;")
         FOUND_USERS = False
-        for (whiley_user) in cursor:
-            FOUND_USERS = True
+        try:
+            cursor = cnx.cursor()
+            cursor.execute("SELECT * from whiley_user;")
+            for (whiley_user) in cursor:
+                FOUND_USERS = True
+        except mysql.connector.Error as err:
+            print err
         if (not FOUND_USERS):
             with open('sql/DropSchema.sql', 'r') as script_file:
                 drop_schema_script = script_file.read()

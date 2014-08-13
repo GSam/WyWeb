@@ -48,7 +48,7 @@ def check_credentials(user, passwd):
     if cnx:      
         cursor = cnx.cursor()
         query = ("SELECT * from whiley_user where username = %s and password = %s")
-        cursor.execute(query, (user, passwd,))
+        cursor.execute(query, (user, passwd))
         row = cursor.fetchone()
         if cursor.rowcount > 0:
             #print("{} passwd".format(row[2]))
