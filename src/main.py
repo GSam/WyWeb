@@ -515,6 +515,8 @@ class Main(object):
         searchValue = ""
         studentName = "No student selected"
         studentCourses = ""
+        studentProjects = ""
+        whileyid = "";
 
         if request:
             if request.params:
@@ -537,16 +539,30 @@ class Main(object):
                     studentid = request.params['id']
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
-                    sql = "select student_info_id,surname,givenname,institution_name from student_info a,institution b  where student_info_id =  %s and a.institutionid = b.institutionid"
+                    sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b  where student_info_id =  %s and a.institutionid = b.institutionid"
                     cursor.execute(sql, (studentid))
                     for (students) in cursor:
-                        studentName = students[2] + " " + students[1]  + " - " + students[2]
+                        studentName = students[2] + " " + students[1]  + " <br><h5>" + students[3] + "</h5>"
+                        whileyid = str(students[4])
                     sql = "select c.course_name,c.code,year from student_course_link a,course_stream b,course c where a.studentinfoid =  %s and a.coursestreamid = b.coursestreamid and b.courseid = c.courseid"
                     cursor.execute(sql, (studentid))
                     studentCourses = "<h4>Courses</h4>"
                     for (courses) in cursor:
-                        studentCourses = studentCourses + courses[1] + " " + str(courses[2]) + " " + str(courses[0]) + "<br>"                   
+                        studentCourses = studentCourses + "<a href='#'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
                     
+                    sql = "select projectid,project_name from project where userid = %s"
+                    cursor.execute(sql, (whileyid))
+                    studentProjects = "<h4>Projects</h4>"
+                    projectid = ""
+                    for (projects) in cursor:
+                        studentProjects = studentProjects + "<a href='#'>" + projects[1] + "</a><br>"
+                        projectid = str(projects[0]) 
+                        cursorFiles = cnx.cursor()
+                        sql2 = "select filename from file where projectid = %s"
+                        cursorFiles.execute(sql2, projectid)
+                        for (files) in cursorFiles:
+                            studentProjects = studentProjects + " &nbsp; --> &nbsp; " + files[0] + "</a><br>"  
+                        cursorFiles.close()
                     cursor.close()
                     cnx.close()
 
@@ -573,7 +589,7 @@ class Main(object):
         template = lookup.get_template("admin_students.html")
         return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, STATUS=status,
                                OPTION=options,SEARCHRESULT=searchResult,SEARCHVALUE=searchValue,STUDENTNAME=studentName,
-                               STUDENTCOURSES=studentCourses)
+                               STUDENTCOURSES=studentCourses,STUDENTPROJECTS=studentProjects)
 
     admin_students.exposed = True
 
