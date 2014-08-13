@@ -9,6 +9,7 @@ import tempfile
 import subprocess
 import json
 import re
+import glob
 
 import db
 import codecs
@@ -729,21 +730,21 @@ def compile(code, verify, dir):
 
 def compile_all(main, files, verify, dir):
     filename = dir + main
+    save_all(files, dir)
     args = [
         config.JAVA_CMD,
         "-jar",
         config.WYJC_JAR,
         "-bootpath", config.WYRT_JAR,
-        "-whileydir", dir + '/**',
-        "-classdir", dir + '/**',
+        "-whileydir"] + glob.glob(os.path.join(dir, "*")) + [
+        "-classdir", dir,
         "-brief"
     ]
 
     if verify == "true":
         args.append("-verify")
 
-    save_all(files, dir)
-    args.append(os.path.dirname(filename) + '/**.whiley')
+    args += glob.glob(os.path.dirname(filename) + '/**.whiley')
     # print("DEBUG:", " ".join(args))
 
     try:
