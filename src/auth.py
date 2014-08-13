@@ -36,21 +36,25 @@ def check_credentials(user, passwd):
     """Verifies credentials for username and password.
     Returns None on success or a string describing the error on failure"""
 
-    cnx = db.connect()[0]        
-    cursor = cnx.cursor()
-    query = ("SELECT * from whiley_user where username = '" + user + "' and password = '" + passwd + "'")
-    #query = ("SELECT * from whiley_user")
-    cursor.execute(query)
-    row = cursor.fetchone()
-    if cursor.rowcount > 0:
-        #print("{} passwd".format(row[2]))
-        #hashed_password = hash_password(passwd)
-        #if check_password(hashed_password, row[2]):    
-        result = None
+    cnx = db.connect()[0]
+    if cnx:
+        cursor = cnx.cursor()
+        query = ("SELECT * from whiley_user where username = '" + user + "' and password = '" + passwd + "'")
+        #query = ("SELECT * from whiley_user")
+        cursor.execute(query)
+        row = cursor.fetchone()
+        if cursor.rowcount > 0:
+            #print("{} passwd".format(row[2]))
+            #hashed_password = hash_password(passwd)
+            #if check_password(hashed_password, row[2]):    
+            result = None
+        else:
+             result = "Incorrect username or password"
+        cursor.close()
+        cnx.close()
     else:
-        result = "Incorrect username or password"
-    cursor.close()
-    cnx.close()
+        result = "Unable to connect ot database"
+
 
     return result
 

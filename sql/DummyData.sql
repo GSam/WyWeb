@@ -1,3 +1,4 @@
+INSERT INTO student_course_link( studentinfoid, coursestreamid)  VALUES ( 2,2);
 INSERT INTO whiley_user( userid, username, password, email_address)  VALUES ( 1,'greg','gdg','gregory@gregs.co.nz');
 INSERT INTO whiley_user( userid, username, password, email_address)  VALUES ( 2,'scott','sdb','sdbolten@gmail.com');
 INSERT INTO whiley_user( userid, username, password, email_address)  VALUES ( 3,'roma','rom','roma@nowhere.com');
@@ -16,8 +17,8 @@ INSERT INTO course_stream( coursestreamid, stream_name, courseid)  VALUES ( 4,'a
 INSERT INTO course_stream( coursestreamid, stream_name, courseid)  VALUES ( 5,'b',2);
 INSERT INTO course_stream( coursestreamid, stream_name, courseid)  VALUES ( 6,'c',2);
 INSERT INTO teacher_info( teacherid, staffid, login, full_name, preferred_name, userid)  VALUES ( 1,'romaA','romaB','Roman','Roma',3);
-INSERT INTO student_info( student_info_id, identifier, login, givenname, surname, preferred_name, userid)  VALUES ( 1,'30056789','grahamgreg','Gregory','Graham','Greg',1);
-INSERT INTO student_info( student_info_id, identifier, login, givenname, surname, preferred_name, userid)  VALUES ( 2,'30067890','boltenscott','Scott','Bolten','Scott',2);
+INSERT INTO student_info( student_info_id, identifier, login, givenname, surname, preferred_name, userid, institutionid)  VALUES ( 1,'30056789','grahamgreg','Gregory','Graham','Greg',1,2);
+INSERT INTO student_info( student_info_id, identifier, login, givenname, surname, preferred_name, userid, institutionid)  VALUES ( 2,'30067890','boltenscott','Scott','Bolten','Scott',2,2);
 INSERT INTO teacher_course_link( teacherinfoid, courseid)  VALUES ( 1,1);
 INSERT INTO student_course_link( studentinfoid, coursestreamid)  VALUES ( 1,2);
 INSERT INTO student_course_link( studentinfoid, coursestreamid)  VALUES ( 2,2);
