@@ -41,10 +41,10 @@
                <nav class="navbar navbar-default" role="navigation">
                   <div class="container-fluid">
                   <form class="navbar-form">
-			              <a href="/" class="btn btn-primary navbar-btn" title="Admin">Play</a>
-						  <a href="admin" class="btn btn-primary navbar-btn" title="Admin">Admin</a>
-						  <a href="admin_institutions" class="btn btn-primary navbar-btn" title="Institutions">Institutions</a>
-						  <a href="admin_courses" class="btn btn-primary navbar-btn" title="Courses">Courses</a>
+                  		  <a href="/" class="btn btn-primary navbar-btn" title="Admin">Play</a>
+			              <a href="admin" class="btn btn-primary navbar-btn" title="Admin">Admin</a>
+			              <a href="admin_institutions" class="btn btn-primary navbar-btn" title="Institutions">Institutions</a>
+			              <a href="admin_courses" class="btn btn-primary navbar-btn" title="Courses">Courses</a>
 						  <a href="admin_students_list" class="btn btn-primary navbar-btn" title="Students">Students List</a>
 						  <a href="admin_students_search" class="btn btn-primary navbar-btn" title="Students">Students Search</a>
 			              <a href="http://www.whiley.org" class="btn btn-primary navbar-btn" title="Admin">whiley.org</a>
@@ -55,12 +55,18 @@
             </div>
             <div class="row">
               <div class="container-fluid" id="content">
-           		 <div id="ide"><div class="content"><h2>Current Status</h2><h3>${STATUS}</div>
+           		 <div id="ide">
+           		 	<div class=content>
+<h4>${INSTITUTION}</h4>
+<h4>${COURSENAME}</h4>
+<h5>${COURSECODE}</h5>
+${STUDENTS}
+<br><br><br>
  </div>
       <div class="col-md-1">
       </div>
 
+</div></div>
    </body>
 </html>
-   </body>
-</html>
+
