@@ -1,5 +1,5 @@
 # -*-python-*-
-
+import mysql.connector
 import cgi
 from itertools import starmap
 import os
@@ -544,8 +544,13 @@ class Main(object):
                     studentid = request.params['id']
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
-                    sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b  where student_info_id =  %s and a.institutionid = b.institutionid"
-                    cursor.execute(sql, (studentid))
+                    sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = %s and a.institutionid = b.institutionid"
+                    try:
+                        cursor.execute(sql, (studentid))
+                    except mysql.connector.Error as err:
+                        print("Student id = " + str(studentid))
+                        print(err)
+                        
                     for (students) in cursor:
                         studentName = students[2] + " " + students[1]  + " <br><h5>" + students[3] + "</h5>"
                         whileyid = str(students[4])
