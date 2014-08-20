@@ -489,70 +489,59 @@ class Main(object):
     admin_courses.exposed = True
     
     
-    # ============================================================
-    # Admin Courses page
-    # ============================================================
-
-    def admin_courses(self, id="Admin Courses", *args, **kwargs):
-        allow(["HEAD", "GET", "POST"])
-        error = ""
-        redirect = "NO"
-        options = " "
-        selectedValue = ""
-
-        course_list = ""
-
-        if request:
-            if request.params:
-                if 'institution' in request.params:
-                    selectedValue = request.params['institution']               
-                    cnx, status = db.connect()
-                    cursor = cnx.cursor() 
-                    query = ("SELECT institutionid,institution_name from institution order by institution_name")
-                    cursor.execute(query) 
-                    for (institutionid,institution_name) in cursor:
-                        if str(institutionid) == selectedValue:
-                            options = options + "<option value='" + str(institutionid) + "' selected>" + institution_name + "</option>"
-                        else:
-                            options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>"
-                    cursor.close()
-
-        if selectedValue == "":          
-            cnx, status = db.connect()
-            cursor = cnx.cursor() 
-            query = ("SELECT institutionid,institution_name from institution order by institution_name")
-            cursor.execute(query)
-            for (institutionid,institution_name) in cursor:
-                options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>" 
-                if selectedValue == "":
-                    selectedValue = str(institutionid)
-            cursor.close()
-
-        cnx, status = db.connect()
-        cursor = cnx.cursor() 
-        query = ("SELECT courseid,code from course where institutionid = '" + selectedValue + "' order by code")
-        cursor.execute(query)
-        for (courseid,code) in cursor:
-            course_list = course_list + "<a href=\"admin_course_details?id=" + str(courseid) + "\">" + code + "</a><br>"   
-        cursor.close()
-
-
-        try:
-            # Sanitize the ID.
-            safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
-            # Load the file
-            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
-            # Escape the code
-            code = cgi.escape(code)
-        except Exception:
-            code = ""
-            error = "Invalid ID: %s" % id
-            redirect = "YES"
-        template = lookup.get_template("admin_courses.html")
-
-        return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect,OPTION=options,COURSE_LIST=course_list)
+        # ============================================================ 
+        # Admin Add Course page 
+        # ============================================================ 
     
-    admin_courses.exposed = True
+     
+    def admin_course_add(self, id="Admin Courses", *args, **kwargs): 
+        allow(["HEAD", "GET", "POST"]) 
+        error = "" 
+        redirect = "NO" 
+        options = " " 
+        newstatus = "" 
+        validationCode = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
+
+
+        if request: 
+            if request.params: 
+                if 'course_code' in request.params: 
+                    cnx, status = db.connect() 
+                    cursor = cnx.cursor() 
+                    query = ("insert into course (course_name,code,year,institutionid,validationcode) values ('" + request.params[ 
+                        'course_name'] + "','" + request.params['course_code'].upper() + "','" + request.params[ 
+                                 'course_year'] + "','" + request.params['course_institution'] + "','" + request.params['validation_code'] + "')") 
+                    cursor.execute(query) 
+                    newstatus = "New course has been added" 
+                    cursor.close() 
+                    cnx.close() 
+
+
+        cnx, status = db.connect() 
+        cursor = cnx.cursor() 
+        query = ("SELECT institutionid,institution_name from institution order by institution_name") 
+        cursor.execute(query) 
+        for (institutionid, institution_name) in cursor: 
+            options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>" 
+        cursor.close() 
+        cnx.close() 
+
+
+        try: 
+            # Sanitize the ID. 
+            safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id) 
+            # Load the file 
+            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley") 
+            # Escape the code 
+            code = cgi.escape(code) 
+        except Exception: 
+            code = "" 
+            error = "Invalid ID: %s" % id 
+            redirect = "YES" 
+        template = lookup.get_template("admin_courses_add.html") 
+        return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, OPTION=options,NEWSTATUS=newstatus,VALIDATIONCODE=validationCode)  
+                               
+    admin_course_add.exposed = True
     
 
     # ============================================================
