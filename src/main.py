@@ -229,6 +229,7 @@ class Main(object):
             loggedin = True
             print ("logged")
             filelist = get_files(username)
+            print filelist
             files = build_file_tree(filelist)
             # print files
         return template.render(
@@ -860,11 +861,22 @@ def save(project_name, filename, data):
     username = cherrypy.session.get("_cp_username")
     cnx, status = db.connect()
     cursor = cnx.cursor()
-    sql = """SELECT p.projectid FROM project p, whiley_user w WHERE w.userid = p.userid AND w.username = '""" + username + "'"
+    sql = """SELECT p.projectid FROM project p, whiley_user w WHERE w.userid = p.userid AND w.username = '""" + username + "' AND p.project_name = '" + project_name + "'"
     cursor.execute(sql)
-    projectid = cursor.fetchone()[0]
+    projectid = cursor.fetchone()
+    print projectid
+    if projectid is None:
+        #create new project
+        sql = "SELECT userid FROM whiley_user WHERE username = %s"
+        cursor.execute(sql, (username,))
+        userid = cursor.fetchone()[0]
+        sql = "INSERT INTO project (project_name, userid) VALUES (%s, %s)"
+        cursor.execute(sql, (project_name, userid))
+        projectid = cursor.lastrowid
+
 
     sql = "INSERT INTO file (projectid, filename, source) VALUES (%s, %s, %s)"
+    print type(projectid), type(filename), type(data)
     cursor.execute(sql, (projectid, filename, data))
 
 def clear_files(project_name):
@@ -874,10 +886,11 @@ def clear_files(project_name):
     # Retrieve User ID
     sql =  "SELECT p.projectid FROM project p, whiley_user w WHERE w.userid = p.userid AND w.username = %s"
     cursor.execute(sql, (username,))
-    projectid = cursor.fetchone()[0]
+    projectids = cursor.fetchall()
 
-    sql = "DELETE FROM file WHERE projectid = %s"
-    cursor.execute(sql, (projectid,))
+    for (projectid,) in projectids:
+        sql = "DELETE FROM file WHERE projectid = %s"
+        cursor.execute(sql, (projectid,))
 
 def save_all(files, dir):
     for filename, contents in files.items():

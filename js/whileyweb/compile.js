@@ -33,7 +33,7 @@ function addFiles($files, prefix, node, query, project) {
     var data = $files.jstree('get_node', node);
     if (data.type == "file")
         query[prefix + "/" + data.text + ".whiley"] = data.data;
-    else if (data.type == "project") {
+    else if (data.type == "project" && project) {
         if (data.text == project) for (var i = 0; i < data.children.length; i++) {
             addFiles($files, data.text, data.children[i], query, project);
         }
