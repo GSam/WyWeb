@@ -37,7 +37,7 @@ function markError(error) {
             editor.getSession().setAnnotations([{
                 row: error.line - 1,
                 column: error.start,
-                text: error.text,
+                text: error.text.replace("\\n", "\n"),
                 type: "error"
             }]);
             var range = new ace.Range(error.line-1, error.start, error.line-1, error.end+1);
