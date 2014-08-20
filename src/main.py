@@ -161,7 +161,7 @@ class Main(object):
 
     run.exposed = True
 
-    def run_all(self, _verify, _main, *args, **files):
+    def run_all(self, _verify, _main, _project, *args, **files):
         allow(["HEAD", "POST"])
 
         # to start auto-save project for logged in users
@@ -171,6 +171,15 @@ class Main(object):
         dir = createWorkingDirectory()
         dir = config.DATA_DIR + "/" + dir
 
+        # Find package name
+        package = None
+        main_src = files[_main].strip()
+        if main_src.startswith('package'):
+            first_line = main_src.split('\n')[0]
+            package = first_line.replace('package', '').strip()
+
+        run_path = os.path.join(dir, os.path.dirname(_main))
+
         result = compile_all(_main, files, _verify, dir)
 
         if type(result) == str:
@@ -179,9 +188,12 @@ class Main(object):
             response = {"result": "errors", "errors": result}
         else:
             response = {"result": "success"}
+            class_to_run = os.path.split(_main[:-len(".whiley")])[1].replace('/','.')
+            if package:
+                class_to_run = package + '.' + class_to_run
+                run_path = os.path.join(dir, _project)
 
-            output = run(os.path.join(dir, os.path.dirname(_main)),
-                         os.path.split(_main[:-len(".whiley")])[1])
+            output = run(run_path, class_to_run)
             response["output"] = output
 
         # shutil.rmtree(dir)
@@ -1033,7 +1045,11 @@ def compile_all(main, files, verify, dir):
     if verify == "true":
         args.append("-verify")
 
-    args += glob.glob(os.path.dirname(filename) + '/**.whiley')
+    list_files = [os.path.join(dirpath, f)
+    for dirpath, dirnames, files in os.walk(dir)
+    for f in files if f.endswith('.whiley')]
+
+    args += list_files
     # print("DEBUG:", " ".join(args))
 
     try:
