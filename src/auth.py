@@ -211,11 +211,10 @@ class AuthController(object):
             raise cherrypy.HTTPRedirect("/")
     
     @cherrypy.expose
-    def signup(self, user=None, passwd=None, email=None, cpasswd=None, givenname=None, surname=None, enrolled=False):
+    def signup(self, user="", passwd="", email="", cpasswd="", givenname="", surname="", enrolled=False):
         #create_username("test", "ẗest", "testemail")
-        if enrolled is not False:
-            enrolled = True
-        if user is None or passwd is None or email is None or givenname is None or surname is None:
+        print user
+        if user == "" or passwd == "" or email == "" or givenname == "" or surname == "":
             error_msg="All fields are required"
             template = lookup.get_template("signup.html")
             error = True
@@ -230,14 +229,13 @@ class AuthController(object):
             laststudentinfoid = create_username(user, passwd, email, givenname, surname)
             cherrypy.session.regenerate()
             cherrypy.session[SESSION_KEY] = cherrypy.request.login = user
-            if enrolled is True:
+            if enrolled is not False:
                 #send user to institutions page
-                print "entrou aqui"
                 return self.user_courses(studentinfoid=laststudentinfoid)
             else:
                 message="User Created, Welcome! Redirecting..."
                 template = lookup.get_template("redirect.html")
-                return template.render(MESSAGE=message)
+                return template.render(STATUS="alert-success", MESSAGE=message)
         else:
             error_msg="Username already exists, choose another one"
             template = lookup.get_template("signup.html")
@@ -282,7 +280,7 @@ class AuthController(object):
                     if error is False:
                         message="User Created, Welcome! Redirecting..."
                         template = lookup.get_template("redirect.html")
-                        return template.render(MESSAGE=message)
+                        return template.render(STATUS="alert-success", MESSAGE=message)
                     else:
                         error_msg= "Wrong Validation Code"
 
