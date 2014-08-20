@@ -161,7 +161,7 @@ class Main(object):
 
     run.exposed = True
 
-    def run_all(self, _verify, _main, *args, **files):
+    def run_all(self, _verify, _main, _project, *args, **files):
         allow(["HEAD", "POST"])
 
         # to start auto-save project for logged in users
@@ -171,6 +171,15 @@ class Main(object):
         dir = createWorkingDirectory()
         dir = config.DATA_DIR + "/" + dir
 
+        # Find package name
+        package = None
+        main_src = files[_main].strip()
+        if main_src.startswith('package'):
+            first_line = main_src.split('\n')[0]
+            package = first_line.replace('package', '').strip()
+
+        run_path = os.path.join(dir, os.path.dirname(_main))
+
         result = compile_all(_main, files, _verify, dir)
 
         if type(result) == str:
@@ -179,9 +188,12 @@ class Main(object):
             response = {"result": "errors", "errors": result}
         else:
             response = {"result": "success"}
+            class_to_run = os.path.split(_main[:-len(".whiley")])[1].replace('/','.')
+            if package:
+                class_to_run = package + '.' + class_to_run
+                run_path = os.path.join(dir, _project)
 
-            output = run(os.path.join(dir, os.path.dirname(_main)),
-                         os.path.split(_main[:-len(".whiley")])[1])
+            output = run(run_path, class_to_run)
             response["output"] = output
 
         # shutil.rmtree(dir)
@@ -478,70 +490,59 @@ class Main(object):
     admin_courses.exposed = True
     
     
-    # ============================================================
-    # Admin Courses page
-    # ============================================================
-
-    def admin_courses(self, id="Admin Courses", *args, **kwargs):
-        allow(["HEAD", "GET", "POST"])
-        error = ""
-        redirect = "NO"
-        options = " "
-        selectedValue = ""
-
-        course_list = ""
-
-        if request:
-            if request.params:
-                if 'institution' in request.params:
-                    selectedValue = request.params['institution']               
-                    cnx, status = db.connect()
-                    cursor = cnx.cursor() 
-                    query = ("SELECT institutionid,institution_name from institution order by institution_name")
-                    cursor.execute(query) 
-                    for (institutionid,institution_name) in cursor:
-                        if str(institutionid) == selectedValue:
-                            options = options + "<option value='" + str(institutionid) + "' selected>" + institution_name + "</option>"
-                        else:
-                            options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>"
-                    cursor.close()
-
-        if selectedValue == "":          
-            cnx, status = db.connect()
-            cursor = cnx.cursor() 
-            query = ("SELECT institutionid,institution_name from institution order by institution_name")
-            cursor.execute(query)
-            for (institutionid,institution_name) in cursor:
-                options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>" 
-                if selectedValue == "":
-                    selectedValue = str(institutionid)
-            cursor.close()
-
-        cnx, status = db.connect()
-        cursor = cnx.cursor() 
-        query = ("SELECT courseid,code from course where institutionid = '" + selectedValue + "' order by code")
-        cursor.execute(query)
-        for (courseid,code) in cursor:
-            course_list = course_list + "<a href=\"admin_course_details?id=" + str(courseid) + "\">" + code + "</a><br>"   
-        cursor.close()
-
-
-        try:
-            # Sanitize the ID.
-            safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
-            # Load the file
-            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
-            # Escape the code
-            code = cgi.escape(code)
-        except Exception:
-            code = ""
-            error = "Invalid ID: %s" % id
-            redirect = "YES"
-        template = lookup.get_template("admin_courses.html")
-
-        return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect,OPTION=options,COURSE_LIST=course_list)
+        # ============================================================ 
+        # Admin Add Course page 
+        # ============================================================ 
     
-    admin_courses.exposed = True
+     
+    def admin_course_add(self, id="Admin Courses", *args, **kwargs): 
+        allow(["HEAD", "GET", "POST"]) 
+        error = "" 
+        redirect = "NO" 
+        options = " " 
+        newstatus = "" 
+        validationCode = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
+
+
+        if request: 
+            if request.params: 
+                if 'course_code' in request.params: 
+                    cnx, status = db.connect() 
+                    cursor = cnx.cursor() 
+                    query = ("insert into course (course_name,code,year,institutionid,validationcode) values ('" + request.params[ 
+                        'course_name'] + "','" + request.params['course_code'].upper() + "','" + request.params[ 
+                                 'course_year'] + "','" + request.params['course_institution'] + "','" + request.params['validation_code'] + "')") 
+                    cursor.execute(query) 
+                    newstatus = "New course has been added" 
+                    cursor.close() 
+                    cnx.close() 
+
+
+        cnx, status = db.connect() 
+        cursor = cnx.cursor() 
+        query = ("SELECT institutionid,institution_name from institution order by institution_name") 
+        cursor.execute(query) 
+        for (institutionid, institution_name) in cursor: 
+            options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>" 
+        cursor.close() 
+        cnx.close() 
+
+
+        try: 
+            # Sanitize the ID. 
+            safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id) 
+            # Load the file 
+            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley") 
+            # Escape the code 
+            code = cgi.escape(code) 
+        except Exception: 
+            code = "" 
+            error = "Invalid ID: %s" % id 
+            redirect = "YES" 
+        template = lookup.get_template("admin_courses_add.html") 
+        return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, OPTION=options,NEWSTATUS=newstatus,VALIDATIONCODE=validationCode)  
+                               
+    admin_course_add.exposed = True
     
 
     # ============================================================
@@ -637,28 +638,36 @@ class Main(object):
                     studentid = request.params['id']
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
-                    sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = %s and a.institutionid = b.institutionid"
+                    sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = " + str(studentid) + " and a.institutionid = b.institutionid"
                     try:
-                        cursor.execute(sql, (studentid))
+                        cursor.execute(sql)
                     except mysql.connector.Error as err:
-                        print("Student id = " + str(studentid))
-                        print(err)
+                        print("Error Student id = " + studentid)
                         
-                    for (students) in cursor:
-                        studentName = students[2] + " " + students[1]  + " <br><h5>" + students[3] + "</h5>"
-                        whileyid = str(students[4])
-                    sql = "select c.course_name,c.code,year from student_course_link a,course_stream b,course c where a.studentinfoid =  %s and a.coursestreamid = b.coursestreamid and b.courseid = c.courseid"
-                    cursor.execute(sql, (studentid))
+                    for (student_info_id,surname,givenname,institution_name,userid) in cursor:
+                        studentName = givenname + " " + surname  + " <br><h5>" + institution_name + "</h5>"
+                        whileyid = str(userid)
+                    
+                    sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(studentid)
+                    try:
+                        cursor.execute(sql)
+                    except mysql.connector.Error as err:
+                        print("fail at courses")
+                        
                     studentCourses = "<h4>Courses</h4>"
                     for (courses) in cursor:
-                        studentCourses = studentCourses + "<a href='#'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
+                        studentCourses = studentCourses + "<a href='admin_course_details?id=" + str(courses[3]) + "'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
                     
-                    sql = "select projectid,project_name from project where userid = %s"
-                    cursor.execute(sql, (whileyid))
+                    sql = "select projectid,project_name from project where userid = " + str(whileyid)
+                    try:
+                        cursor.execute(sql)
+                    except mysql.connector.Error as err:
+                        print("fail at projects")
+                        
                     studentProjects = "<h4>Projects</h4>"
                     projectid = ""
                     for (projects) in cursor:
-                        studentProjects = studentProjects + "<a href='#'>" + projects[1] + "</a><br>"
+                        studentProjects = studentProjects + "<a href='student_project?project=" + str(projects[0]) + "'>" + projects[1] + "</a><br>"
                         projectid = str(projects[0]) 
                         cursorFiles = cnx.cursor()
                         sql2 = "select filename from file where projectid = %s"
@@ -723,24 +732,32 @@ class Main(object):
                     studentid = request.params['id']
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
-                    sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = %s and a.institutionid = b.institutionid"
+                    sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = " + str(studentid) + " and a.institutionid = b.institutionid"
                     try:
-                        cursor.execute(sql, (studentid))
+                        cursor.execute(sql)
                     except mysql.connector.Error as err:
-                        print("Student id = " + str(studentid))
-                        print(err)
+                        print("Error Student id = " + studentid)
                         
-                    for (students) in cursor:
-                        studentName = students[2] + " " + students[1]  + " <br><h5>" + students[3] + "</h5>"
-                        whileyid = str(students[4])
-                    sql = "select c.course_name,c.code,year from student_course_link a,course_stream b,course c where a.studentinfoid =  %s and a.coursestreamid = b.coursestreamid and b.courseid = c.courseid"
-                    cursor.execute(sql, (studentid))
+                    for (student_info_id,surname,givenname,institution_name,userid) in cursor:
+                        studentName = givenname + " " + surname  + " <br><h5>" + institution_name + "</h5>"
+                        whileyid = str(userid)
+                    
+                    sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(studentid)
+                    try:
+                        cursor.execute(sql)
+                    except mysql.connector.Error as err:
+                        print("fail at courses")
+                        
                     studentCourses = "<h4>Courses</h4>"
                     for (courses) in cursor:
-                        studentCourses = studentCourses + "<a href='#'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
+                        studentCourses = studentCourses + "<a href='admin_course_details?id=" + str(courses[3]) + "'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
                     
-                    sql = "select projectid,project_name from project where userid = %s"
-                    cursor.execute(sql, (whileyid))
+                    sql = "select projectid,project_name from project where userid = " + str(whileyid)
+                    try:
+                        cursor.execute(sql)
+                    except mysql.connector.Error as err:
+                        print("fail at projects")
+                        
                     studentProjects = "<h4>Projects</h4>"
                     projectid = ""
                     for (projects) in cursor:
@@ -754,7 +771,7 @@ class Main(object):
                         cursorFiles.close()
                     cursor.close()
                     cnx.close()
-        
+                    
         if request:
             if request.params:
                 if 'institution' in request.params:
@@ -1030,7 +1047,11 @@ def compile_all(main, files, verify, dir):
     if verify == "true":
         args.append("-verify")
 
-    args += glob.glob(os.path.dirname(filename) + '/**.whiley')
+    list_files = [os.path.join(dirpath, f)
+    for dirpath, dirnames, files in os.walk(dir)
+    for f in files if f.endswith('.whiley')]
+
+    args += list_files
     # print("DEBUG:", " ".join(args))
 
     try:
