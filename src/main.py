@@ -665,7 +665,7 @@ class Main(object):
                     studentProjects = "<h4>Projects</h4>"
                     projectid = ""
                     for (projects) in cursor:
-                        studentProjects = studentProjects + "<a href='#'>" + projects[1] + "</a><br>"
+                        studentProjects = studentProjects + "<a href='student_project?project=" + str(projects[0]) + "'>" + projects[1] + "</a><br>"
                         projectid = str(projects[0]) 
                         cursorFiles = cnx.cursor()
                         sql2 = "select filename from file where projectid = %s"
