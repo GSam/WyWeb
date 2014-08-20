@@ -41,10 +41,10 @@
                <nav class="navbar navbar-default" role="navigation">
                   <div class="container-fluid">
                   <form class="navbar-form">
-			              <a href="/" class="btn btn-primary navbar-btn" title="Admin">Play</a>
-						  <a href="admin" class="btn btn-primary navbar-btn" title="Admin">Admin</a>
-						  <a href="admin_institutions" class="btn btn-primary navbar-btn" title="Institutions">Institutions</a>
-						  <a href="admin_courses" class="btn btn-primary navbar-btn" title="Courses">Courses</a>
+                  		  <a href="/" class="btn btn-primary navbar-btn" title="Admin">Play</a>
+			              <a href="admin" class="btn btn-primary navbar-btn" title="Admin">Admin</a>
+			              <a href="admin_institutions" class="btn btn-primary navbar-btn" title="Institutions">Institutions</a>
+			              <a href="admin_courses" class="btn btn-primary navbar-btn" title="Courses">Courses</a>
 						  <a href="admin_students_list" class="btn btn-primary navbar-btn" title="Students">Students List</a>
 						  <a href="admin_students_search" class="btn btn-primary navbar-btn" title="Students">Students Search</a>
 			              <a href="http://www.whiley.org" class="btn btn-primary navbar-btn" title="Admin">whiley.org</a>
@@ -55,12 +55,16 @@
             </div>
             <div class="row">
               <div class="container-fluid" id="content">
-           		 <div id="ide"><div class="content"><h2>Current Status</h2><h3>${STATUS}</div>
- </div>
-      <div class="col-md-1">
-      </div>
+           		 <div id="ide">
+<div class=content>
+<table><tr><td><form action="admin_students_search" method="post">Search Student Given Name or Surname <input type="textfield" name="searchValue" value="${SEARCHVALUE}"></td><td> <input type="submit" value="Go"></td></tr></table>
+${SEARCHRESULT}
+<hr>
+<h3>${STUDENTNAME}</h3>${STUDENTCOURSES}<br>${STUDENTPROJECTS}
+<br><br>
+</div>
+</div>
+</div>
+   </body>
+</html>
 
-   </body>
-</html>
-   </body>
-</html>
