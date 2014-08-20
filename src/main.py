@@ -244,6 +244,28 @@ class Main(object):
     index.exposed = True
     # exposed
 
+    def student_project(self, project):
+        allow(["HEAD", "GET"])
+        
+        # TODO This page should REALLY be secured!
+        template = lookup.get_template("index.html")
+        username = cherrypy.session.get("_cp_username")
+        if not username:
+            raise cherrypy.HTTPError(403, "Unauthorised!")
+        files = get_project(project)
+        print files
+        files = build_file_tree(files)
+        return template.render(
+                        ROOT_URL=config.VIRTUAL_URL,
+                        CODE="",
+                        ERROR="",
+                        REDIRECT="",
+                        USERNAME=username,
+                        LOGGED=username is not None,
+                        FILES=json.dumps(files)
+                )
+    student_project.exposed = True
+
     # ============================================================
     # Admin Main Page
     # ============================================================
@@ -873,6 +895,17 @@ def get_files(user):
 FROM file f, project p, whiley_user w
 WHERE f.projectid = p.projectid AND p.userid = w.userid AND w.username = '""" + user + "'"
     cursor.execute(sql)
+    result = cursor.fetchall()
+    cursor.close()
+    return result
+
+def get_project(project):
+    cnx, status = db.connect()
+    cursor = cnx.cursor()
+    sql = """SELECT f.fileid, f.filename, p.project_name, f.source
+FROM file f, project p
+WHERE f.projectid = p.projectid AND p.projectid = %s"""
+    cursor.execute(sql, (project,))
     result = cursor.fetchall()
     cursor.close()
     return result
