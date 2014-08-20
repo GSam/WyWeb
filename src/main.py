@@ -85,7 +85,7 @@ class Main(object):
 
     def compile_all(self, _verify, _main, *args, **files):
         allow(["HEAD", "POST"])
-
+        
         # to start auto-save project for logged in users
         self.private_save(**files)
 
@@ -178,7 +178,7 @@ class Main(object):
         else:
             response = {"result": "success"}
 
-            output = run(dir + os.path.dirname(_main),
+            output = run(os.path.join(dir, os.path.dirname(_main)),
                          os.path.split(_main[:-len(".whiley")])[1])
             response["output"] = output
 
@@ -216,7 +216,8 @@ class Main(object):
                         "data": HELLO_WORLD,
                         "type": 'file'
                     }
-                ]
+                ],
+                "type": 'project'
             }
         ]
         if username is None:
@@ -719,6 +720,7 @@ WHERE f.projectid = p.projectid AND p.userid = w.userid AND w.username = '""" + 
 def build_file_tree(filelist):
     result = []
     for fileid, filepath, project_name, source in filelist:
+        # find the project
         project = None
         for project_ in result:
             if project_["text"] == project_name:
@@ -729,10 +731,13 @@ def build_file_tree(filelist):
             project = {
                         "text": project_name,
                         "children": [],
+                        "type": 'project'
                       }
             result.append(project)
         
+        # for each path component ...
         for component in filepath.split("/"):
+            # Find/create it.
             subdir = None
             for child in project['children']:
                 if child["text"] == component:
@@ -747,6 +752,7 @@ def build_file_tree(filelist):
                 project['children'].append(subdir)
             project = subdir
 
+        # The last component should now be the file. 
         project['data'] = source
         project['type'] = "file"
 
@@ -803,7 +809,7 @@ def compile(code, verify, dir):
 
 
 def compile_all(main, files, verify, dir):
-    filename = dir + main
+    filename = os.path.join(dir, main)
     save_all(files, dir)
     args = [
         config.JAVA_CMD,
@@ -851,13 +857,13 @@ def compile_all(main, files, verify, dir):
 
 def run(dir, main="tmp"):
     try:
-        # print("DEBUG:", [
-        # config.JAVA_CMD,
-        #    "-Djava.security.manager",
-        #    "-Djava.security.policy=whiley.policy",
-        #    "-cp",config.WYJC_JAR + ":" + dir,
-        #    main
-        #    ])
+        ##print("DEBUG:", [
+        ## config.JAVA_CMD,
+        ##    "-Djava.security.manager",
+        ##    "-Djava.security.policy=whiley.policy",
+        ##    "-cp",config.WYJC_JAR + ":" + dir,
+        ##    main
+        ##    ])
         # run the JVM
         proc = subprocess.Popen([
                                     config.JAVA_CMD,

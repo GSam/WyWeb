@@ -42,7 +42,8 @@ $(function() {
             "file": {
                 max_children: 0,
                 icon: "/images/wylogo_small.png"
-            }
+            },
+            "project":{}
         }
     })
 });

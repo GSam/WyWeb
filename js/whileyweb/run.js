@@ -8,7 +8,7 @@ function run() {
     var $files = $('#file-browser');
     var main = getPath($files, $files.jstree('get_selected')[0]) + ".whiley";
     var request = { _main: main, _verify: verify.checked };
-    addFiles($files, "", "#", request);
+    addFiles($files, "", "#", request, main.split("/")[0]);
     $.post(root_url + "/run_all", request, function(response) {
         clearMessages();
         console.value = "";
