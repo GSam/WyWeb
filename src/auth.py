@@ -93,16 +93,26 @@ def create_username(user, passwd, email, givenname, surname):
     cnx.close()
     return lastid
 
-def insertuserdetails(student_infoid, institutionid, coursesid):
+def insertuserdetails(student_infoid, institutionid, coursesid, validationcode):
     cnx = db.connect()[0]        
     cursor = cnx.cursor()
-    query = "UPDATE student_info SET institutionid=%s WHERE student_info_id=%s"
-    cursor.execute(query, (institutionid, student_infoid))
-    #for courseid in coursesid:
-    query = "INSERT INTO student_course_link VALUES (%s, %s)"
-    cursor.execute(query, (student_infoid, coursesid))    
+    #check if validation is correct
+    query = "SELECT * FROM course WHERE courseid = %s and validationcode = %s"
+    cursor.execute(query, (coursesid, validationcode))
+    row = cursor.fetchone()
+    if cursor.rowcount > 0:
+        #validation is correct so update institution to user
+        query = "UPDATE student_info SET institutionid=%s WHERE student_info_id=%s"
+        cursor.execute(query, (institutionid, student_infoid))
+        #create link between user and course
+        query = "INSERT INTO student_course_link VALUES (%s, %s)"
+        cursor.execute(query, (student_infoid, coursesid))
+        error = False
+    else:
+        error = True
     cursor.close()
     cnx.close()
+    return error
 
 
 def check_auth(*args, **kwargs):
@@ -201,8 +211,10 @@ class AuthController(object):
             raise cherrypy.HTTPRedirect("/")
     
     @cherrypy.expose
-    def signup(self, user=None, passwd=None, email=None, cpasswd=None, givenname=None, surname=None):
+    def signup(self, user=None, passwd=None, email=None, cpasswd=None, givenname=None, surname=None, enrolled=False):
         #create_username("test", "ẗest", "testemail")
+        if enrolled is not False:
+            enrolled = True
         if user is None or passwd is None or email is None or givenname is None or surname is None:
             error_msg="All fields are required"
             template = lookup.get_template("signup.html")
@@ -218,7 +230,14 @@ class AuthController(object):
             laststudentinfoid = create_username(user, passwd, email, givenname, surname)
             cherrypy.session.regenerate()
             cherrypy.session[SESSION_KEY] = cherrypy.request.login = user
-            return self.user_courses(studentinfoid=laststudentinfoid)
+            if enrolled is True:
+                #send user to institutions page
+                print "entrou aqui"
+                return self.user_courses(studentinfoid=laststudentinfoid)
+            else:
+                message="User Created, Welcome! Redirecting..."
+                template = lookup.get_template("redirect.html")
+                return template.render(MESSAGE=message)
         else:
             error_msg="Username already exists, choose another one"
             template = lookup.get_template("signup.html")
@@ -228,8 +247,11 @@ class AuthController(object):
     @cherrypy.expose
     def user_courses(self, studentinfoid=None, *args, **kwargs):
 
+        if studentinfoid is None:
+            raise cherrypy.HTTPRedirect("/")
         allow(["HEAD", "GET", "POST"])
-        error = ""
+        error = False
+        error_msg = " "
         redirect = "NO"
         options = " "
         selectedValue = ""
@@ -251,14 +273,18 @@ class AuthController(object):
                             options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>"
                     cursor.close()
                 if 'course_list' in request.params:
-                    course_list = request.params['course_list']
+                    courseid = request.params['course_list']
+                    validationcode = request.params['validationcode']
                     cnx, status = db.connect()
                     cursor = cnx.cursor() 
-                    insertuserdetails(studentinfoid, selectedValue, course_list)
+                    error = insertuserdetails(studentinfoid, selectedValue, courseid, validationcode)
                     cursor.close()
-                    template = lookup.get_template("user_institutions.html")
-                    return template.render(USERCOMPLETE=True, NOTALLOWED=False, ROOT_URL=config.VIRTUAL_URL, REDIRECT=redirect, OPTION=None, COURSE_LIST=None, STUDENTINFOID=None)
-
+                    if error is False:
+                        message="User Created, Welcome! Redirecting..."
+                        template = lookup.get_template("redirect.html")
+                        return template.render(MESSAGE=message)
+                    else:
+                        error_msg= "Wrong Validation Code"
 
         if selectedValue == "":          
             cnx, status = db.connect()
@@ -280,12 +306,9 @@ class AuthController(object):
             course_list = course_list + "<input type='radio' name='course_list' value='" + str(courseid) + "'> " + code + "</input><br/>"
         cursor.close()
 
-
-
         template = lookup.get_template("user_institutions.html")
 
-        return template.render(USERCOMPLETE=False, NOTALLOWED=False, ROOT_URL=config.VIRTUAL_URL, REDIRECT=redirect, OPTION=options, COURSE_LIST=course_list, STUDENTINFOID=studentinfoid)
-
+        return template.render(ERROR=error, ERRORMSG=error_msg, NOTALLOWED=False, ROOT_URL=config.VIRTUAL_URL, REDIRECT=redirect, OPTION=options, COURSE_LIST=course_list, STUDENTINFOID=studentinfoid)
 
     @cherrypy.expose
     def logout(self, from_page="/"):
