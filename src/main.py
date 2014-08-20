@@ -636,24 +636,32 @@ class Main(object):
                     studentid = request.params['id']
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
-                    sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = %s and a.institutionid = b.institutionid"
+                    sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = " + str(studentid) + " and a.institutionid = b.institutionid"
                     try:
-                        cursor.execute(sql, (studentid))
+                        cursor.execute(sql)
                     except mysql.connector.Error as err:
-                        print("Student id = " + str(studentid))
-                        print(err)
+                        print("Error Student id = " + studentid)
                         
-                    for (students) in cursor:
-                        studentName = students[2] + " " + students[1]  + " <br><h5>" + students[3] + "</h5>"
-                        whileyid = str(students[4])
-                    sql = "select c.course_name,c.code,year from student_course_link a,course_stream b,course c where a.studentinfoid =  %s and a.coursestreamid = b.coursestreamid and b.courseid = c.courseid"
-                    cursor.execute(sql, (studentid))
+                    for (student_info_id,surname,givenname,institution_name,userid) in cursor:
+                        studentName = givenname + " " + surname  + " <br><h5>" + institution_name + "</h5>"
+                        whileyid = str(userid)
+                    
+                    sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(studentid)
+                    try:
+                        cursor.execute(sql)
+                    except mysql.connector.Error as err:
+                        print("fail at courses")
+                        
                     studentCourses = "<h4>Courses</h4>"
                     for (courses) in cursor:
-                        studentCourses = studentCourses + "<a href='#'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
+                        studentCourses = studentCourses + "<a href='admin_course_details?id=" + str(courses[3]) + "'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
                     
-                    sql = "select projectid,project_name from project where userid = %s"
-                    cursor.execute(sql, (whileyid))
+                    sql = "select projectid,project_name from project where userid = " + str(whileyid)
+                    try:
+                        cursor.execute(sql)
+                    except mysql.connector.Error as err:
+                        print("fail at projects")
+                        
                     studentProjects = "<h4>Projects</h4>"
                     projectid = ""
                     for (projects) in cursor:
@@ -722,24 +730,32 @@ class Main(object):
                     studentid = request.params['id']
                     cnx, status = db.connect()
                     cursor = cnx.cursor()
-                    sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = %s and a.institutionid = b.institutionid"
+                    sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = " + str(studentid) + " and a.institutionid = b.institutionid"
                     try:
-                        cursor.execute(sql, (studentid))
+                        cursor.execute(sql)
                     except mysql.connector.Error as err:
-                        print("Student id = " + str(studentid))
-                        print(err)
+                        print("Error Student id = " + studentid)
                         
-                    for (students) in cursor:
-                        studentName = students[2] + " " + students[1]  + " <br><h5>" + students[3] + "</h5>"
-                        whileyid = str(students[4])
-                    sql = "select c.course_name,c.code,year from student_course_link a,course_stream b,course c where a.studentinfoid =  %s and a.coursestreamid = b.coursestreamid and b.courseid = c.courseid"
-                    cursor.execute(sql, (studentid))
+                    for (student_info_id,surname,givenname,institution_name,userid) in cursor:
+                        studentName = givenname + " " + surname  + " <br><h5>" + institution_name + "</h5>"
+                        whileyid = str(userid)
+                    
+                    sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(studentid)
+                    try:
+                        cursor.execute(sql)
+                    except mysql.connector.Error as err:
+                        print("fail at courses")
+                        
                     studentCourses = "<h4>Courses</h4>"
                     for (courses) in cursor:
-                        studentCourses = studentCourses + "<a href='#'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
+                        studentCourses = studentCourses + "<a href='admin_course_details?id=" + str(courses[3]) + "'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
                     
-                    sql = "select projectid,project_name from project where userid = %s"
-                    cursor.execute(sql, (whileyid))
+                    sql = "select projectid,project_name from project where userid = " + str(whileyid)
+                    try:
+                        cursor.execute(sql)
+                    except mysql.connector.Error as err:
+                        print("fail at projects")
+                        
                     studentProjects = "<h4>Projects</h4>"
                     projectid = ""
                     for (projects) in cursor:
@@ -753,7 +769,7 @@ class Main(object):
                         cursorFiles.close()
                     cursor.close()
                     cnx.close()
-        
+                    
         if request:
             if request.params:
                 if 'institution' in request.params:
