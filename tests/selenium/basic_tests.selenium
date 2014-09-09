@@ -10,6 +10,7 @@
 <tr><td><b>Test Suite</b></td></tr>
 <tr><td><a href="Default Project Compiles.selenium">Default Project Compiles</a></td></tr>
 <tr><td><a href="Default Project Runs.selenium">Default Project Runs</a></td></tr>
+<tr><td><a href="Login Greg and Logout.selenium">Login Greg and Logout</a></td></tr>
 </tbody></table>
 </body>
 </html>

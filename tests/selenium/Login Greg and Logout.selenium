@@ -4,12 +4,12 @@
 <head profile="http://selenium-ide.openqa.org/profiles/test-case">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link rel="selenium.base" href="http://127.0.0.1:8070/" />
-<title>Default Project Runs</title>
+<title>Login Greg and Logout</title>
 </head>
 <body>
 <table cellpadding="1" cellspacing="1" border="1">
 <thead>
-<tr><td rowspan="1" colspan="3">Default Project Runs</td></tr>
+<tr><td rowspan="1" colspan="3">Login Greg and Logout</td></tr>
 </thead><tbody>
 <tr>
 	<td>open</td>
@@ -17,43 +17,38 @@
 	<td></td>
 </tr>
 <tr>
-	<td>click</td>
-	<td>css=i.jstree-icon.jstree-ocl</td>
-	<td></td>
+	<td>type</td>
+	<td>name=user</td>
+	<td>greg</td>
 </tr>
 <tr>
-	<td>click</td>
-	<td>link=Hello World</td>
-	<td></td>
+	<td>type</td>
+	<td>name=passwd</td>
+	<td>gdg</td>
 </tr>
 <tr>
-	<td>click</td>
-	<td>xpath=(//button[@type='button'])[3]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>waitForVisible</td>
-	<td>css=div.message.success</td>
+	<td>clickAndWait</td>
+	<td>css=button.btn.btn-default</td>
 	<td></td>
 </tr>
 <tr>
 	<td>verifyText</td>
-	<td>css=div.message.success</td>
-	<td>Compiled successfully. Running...</td>
+	<td>css=p.navbar-text.navbar-right</td>
+	<td>Logged in as greg</td>
 </tr>
 <tr>
-	<td>waitForNotVisible</td>
-	<td>css=div.message.success</td>
+	<td>clickAndWait</td>
+	<td>css=button.btn.btn-default</td>
 	<td></td>
 </tr>
 <tr>
 	<td>verifyValue</td>
-	<td>id=console</td>
-	<td>Hello World</td>
+	<td>name=user</td>
+	<td></td>
 </tr>
 <tr>
-	<td>runScript</td>
-	<td>localStorage.clear()</td>
+	<td>verifyValue</td>
+	<td>name=passwd</td>
 	<td></td>
 </tr>
 
