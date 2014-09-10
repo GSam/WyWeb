@@ -1099,7 +1099,7 @@ def run(dir, main="tmp"):
                                     config.JAVA_CMD,
                                     "-Djava.security.manager",
                                     "-Djava.security.policy=whiley.policy",
-                                    "-cp", config.WYJC_JAR + ":" + dir,
+                                    "-cp", config.WYJC_JAR + ";" + dir,
                                     main
                                 ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
         # Configure Timeout
