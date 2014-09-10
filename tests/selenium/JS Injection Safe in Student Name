@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://127.0.0.1:8080/" />
+<title>JS Injection Safe in Student Name</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">JS Injection Safe in Student Name</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>/admin_students_search</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Students Search</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=searchValue</td>
+	<td>No</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=input[type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>link=Where, No&lt;script&gt;alert(&quot;FAILED&quot;);&lt;/script&gt;</td>
+	<td>Where, No&lt;script&gt;alert(&quot;FAILED&quot;);&lt;/script&gt;</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Where, No&lt;script&gt;alert(&quot;FAILED&quot;);&lt;/script&gt;</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>css=h3</td>
+	<td>No&lt;script&gt;alert(&quot;FAILED&quot;);&lt;/script&gt; Where</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=SWEN244</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>css=#ide &gt; div.content</td>
+	<td>Victoria University of Wellington Next Generation Languages SWEN244 Where, No<br />Where, No&lt;script&gt;alert(&quot;FAILED&quot;);&lt;/script&gt;</td>
+</tr>
+
+</tbody></table>
+</body>
+</html>
