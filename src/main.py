@@ -349,7 +349,7 @@ class Main(object):
         redirect = "NO"
         options = " "
 
-        if request and request.params and 'institution' in request.params:
+        if institutions:
             cnx, status = db.connect()
             cursor = cnx.cursor()
             query = ("SELECT institution_name, institutionid from institution order by institution_name")
@@ -405,42 +405,40 @@ class Main(object):
     # Admin Courses page
     # ============================================================
 
-    def admin_courses(self, *args, **kwargs):
+    def admin_courses(self, institution="", *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
         error = ""
         redirect = "NO"
         options = " "
-        selectedValue = ""
 
         course_list = ""
         
-        if request and request.params and 'institution' in request.params:
-            selectedValue = request.params['institution']               
+        if institution:
             cnx, status = db.connect()
             cursor = cnx.cursor() 
             query = ("SELECT institutionid,institution_name from institution order by institution_name")
             cursor.execute(query) 
             for (institutionid,institution_name) in cursor:
-                if str(institutionid) == selectedValue:
+                if str(institutionid) == institution:
                     options = options + "<option value='" + str(institutionid) + "' selected>" + institution_name + "</option>"
                 else:
                     options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>"
             cursor.close()
 
-        if selectedValue == "":          
+        if institution == "":          
             cnx, status = db.connect()
             cursor = cnx.cursor() 
             query = ("SELECT institutionid,institution_name from institution order by institution_name")
             cursor.execute(query)
             for (institutionid,institution_name) in cursor:
                 options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>" 
-                if selectedValue == "":
-                    selectedValue = str(institutionid)
+                if institution == "":
+                    institution = str(institutionid)
             cursor.close()
                 
         cnx, status = db.connect()
         cursor = cnx.cursor() 
-        query = ("SELECT courseid,code from course where institutionid = '" + selectedValue + "' order by code")
+        query = ("SELECT courseid,code from course where institutionid = '" + institution + "' order by code")
         cursor.execute(query)
         for (courseid,code) in cursor:
             course_list = course_list + "<a href=\"admin_course_details?id=" + str(courseid) + "\">" + code + "</a><br>"   
@@ -458,7 +456,7 @@ class Main(object):
         # ============================================================ 
     
      
-    def admin_course_add(self, *args, **kwargs): 
+    def admin_course_add(self, course_name=None, course_code=None, course_year=None, course_institution=None, validation_code=None, *args, **kwargs): 
         allow(["HEAD", "GET", "POST"]) 
         error = "" 
         redirect = "NO" 
@@ -467,12 +465,11 @@ class Main(object):
         validationCode = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
 
 
-        if request and request.params and 'course_code' in request.params: 
+        if course_code: 
             cnx, status = db.connect() 
             cursor = cnx.cursor() 
-            query = ("insert into course (course_name,code,year,institutionid,validationcode) values ('" + request.params[ 
-                'course_name'] + "','" + request.params['course_code'].upper() + "','" + request.params[ 
-                         'course_year'] + "','" + request.params['course_institution'] + "','" + request.params['validation_code'] + "')") 
+            query = ("insert into course (course_name,code,year,institutionid,validationcode) values ('" + course_name + "','" + course_code.upper() + "','" + 
+                         course_year + "','" + course_institution + "','" + validation_code + "')") 
             cursor.execute(query) 
             newstatus = "New course has been added" 
             cursor.close() 
@@ -498,7 +495,7 @@ class Main(object):
     # Admin Course details page
     # ============================================================
 
-    def admin_course_details(self, *args, **kwargs):
+    def admin_course_details(self, id, *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
         error = ""
         redirect = "NO"
@@ -506,24 +503,22 @@ class Main(object):
         newstatus = "" 
         students = ""
 
-        if request and request.params and 'id' in request.params:
-            selectedValue = request.params['id']               
-            cnx, status = db.connect()
-            cursor = cnx.cursor() 
-           
-            query = ("SELECT courseid,course_name,code,year,institution_name from course a, institution b where a.institutionid = b.institutionid and a.courseid = %s")
-            cursor.execute(query, (selectedValue))
-            for (courseid,course_name,code,year,instition_name) in cursor:
-                courseName = course_name
-                courseCode = code
-                institution = instition_name
-                courseID = courseid
+        cnx, status = db.connect()
+        cursor = cnx.cursor() 
+       
+        query = ("SELECT courseid,course_name,code,year,institution_name from course a, institution b where a.institutionid = b.institutionid and a.courseid = %s")
+        cursor.execute(query, (id))
+        for (courseid,course_name,code,year,instition_name) in cursor:
+            courseName = course_name
+            courseCode = code
+            institution = instition_name
+            courseID = courseid
 
-            sql = "SELECT distinct a.student_info_id,a.givenname,a.surname from student_info a,student_course_link b, course c, course_stream d where c.courseid = %s and  c.courseid = d.courseid and d.coursestreamid =b.coursestreamid and b.studentinfoid = a.student_info_id"
-            cursor.execute(sql, str(courseID))
-            for (student_info_id,givenname,surname) in cursor:                
-                students = students + web.safe(surname) + ", " + web.safe(givenname) + "</br>"
-            cursor.close()
+        sql = "SELECT distinct a.student_info_id,a.givenname,a.surname from student_info a,student_course_link b, course c, course_stream d where c.courseid = %s and  c.courseid = d.courseid and d.coursestreamid =b.coursestreamid and b.studentinfoid = a.student_info_id"
+        cursor.execute(sql, str(courseID))
+        for (student_info_id,givenname,surname) in cursor:                
+            students = students + web.safe(surname) + ", " + web.safe(givenname) + "</br>"
+        cursor.close()
 
         template = lookup.get_template("admin_course_details.html")
         
@@ -536,7 +531,7 @@ class Main(object):
     # Admin Students search page
     # ============================================================
 
-    def admin_students_search(self, *args, **kwargs):
+    def admin_students_search(self, searchValue="", id=None, *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
         error = ""
         searchResult = ""
