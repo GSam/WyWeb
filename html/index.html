@@ -9,7 +9,8 @@
       <link rel="stylesheet" href="css/jstree.css">
       <script type="text/javascript" src="js/jquery.js"></script>
       <script type="text/javascript" src="js/jquery-ui.js"></script>
-	  <script type="text/javascript" src="js/ace.js" charset="utf-8"></script>
+	  <script src="js/ace.js" type="text/javascript" charset="utf-8"></script>
+
       <script type="text/javascript" src="js/jstree.js"></script>
       <script type="text/javascript" src="js/mode-whiley.js"></script>
       <script type="text/javascript">
@@ -94,6 +95,12 @@
                     </nav>
                 </div>
                 <div id="code" class="col-md-10"></div>
+                  <script>
+					      var editor = ace.edit("code");
+					       editor.setTheme("ace/theme/twilight");
+						   editor.getSession().setMode("ace/mode/javascript");
+
+	  </script>
               </div>
                </div>
             <div id="messages"></div>
