@@ -282,7 +282,7 @@ class Main(object):
     # ============================================================
     # Admin Main Page
     # ============================================================
-    def admin(self, id="Admin Page", *args, **kwargs):
+    def admin(self, *args, **kwargs):
         """
         The admin homepage should return a template for the admin page.
 
@@ -310,41 +310,31 @@ class Main(object):
     # Admin Add Institutions Page
     # ============================================================
 
-    def admin_institutions_add(self, id="Admin Institutions", *args, **kwargs):
+    def admin_institutions_add(self, institution=None, description=None, contact=None, website=None,
+            *args, **kwargs):
+        """
+        Adds an institution to the database.         
+        """
         allow(["HEAD", "GET", "POST"])
         options = " "
         status = ""
 
-        if request:
-            if request.params:
-                if 'institution' in request.params:
-                    cnx, status = db.connect()
-                    cursor = cnx.cursor()
-                    query = (
-                        "insert into institution (institution_name,description,contact,website) values ('" +
-                        db.safe(request.params['institution']) + "','" +
-                        db.safe(request.params['description']) + "','" +
-                        db.safe(request.params['contact']) + "','" +
-                        db.safe(request.params['website']) + "')")
-                    cursor.execute(query)
-                    status = "New institution has been added"
-                    cursor.close()
-                    cnx.close()
+        if institution:
+            cnx, status = db.connect()
+            cursor = cnx.cursor()
+            query = (
+                "insert into institution (institution_name,description,contact,website) values ('" +
+                institution + "','" +
+                description + "','" +
+                contact + "','" +
+                website + "')")
+            cursor.execute(query)
+            status = "New institution has been added"
+            cursor.close()
+            cnx.close()
 
-        try:
-            # Sanitize the ID.
-            safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
-            # Load the file
-            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
-            # Escape the code
-            code = cgi.escape(code)
-        except Exception:
-            code = ""
-            error = "Invalid ID: %s" % id
-            redirect = "YES"
         template = lookup.get_template("admin_institutions_add.html")
-        return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, OPTION=options,
-                               STATUS=status)
+        return template.render(ROOT_URL=config.VIRTUAL_URL, ERROR="", REDIRECT="", OPTION=options, STATUS=status)
 
     admin_institutions_add.exposed = True
 
@@ -352,43 +342,38 @@ class Main(object):
     # Admin Institutions Page
     # ============================================================
 
-    def admin_institutions(self, id="Admin Institutions", *args, **kwargs):
+    def admin_institutions(self, institution="", *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
         redirect = "NO"
         options = " "
 
-        selected_value = ""
-
-        if request:
-            if request.params:
-                if 'institution' in request.params:
-                    selected_value = request.params['institution']
-                    cnx, status = db.connect()
-                    cursor = cnx.cursor()
-                    query = ("SELECT institution_name, institutionid from institution order by institution_name")
-                    cursor.execute(query)
-                    for (institution) in cursor:
-                        if str(institution[1]) == selected_value:
-                            options = options + "<option value='"+str(institution[1])+"' selected>" + institution[0] + "</option>"
-                        else:
-                            options = options + "<option value='"+str(institution[1])+"'>" + institution[0] + "</option>"
-                    cursor.close()
-                    cnx.close()
+        if request and request.params and 'institution' in request.params:
+            cnx, status = db.connect()
+            cursor = cnx.cursor()
+            query = ("SELECT institution_name, institutionid from institution order by institution_name")
+            cursor.execute(query)
+            for (institute) in cursor:
+                if str(institute[1]) == institution:
+                    options = options + "<option value='"+str(institute[1])+"' selected>" + institute[0] + "</option>"
+                else:
+                    options = options + "<option value='"+str(institute[1])+"'>" + institute[0] + "</option>"
+            cursor.close()
+            cnx.close()
         displayInstitution = ""
         displayContact = ""
         displayWebsite = ""
         displayDescription = ""
 
-        if selected_value == "":
+        if institution == "":
             cnx, status = db.connect()
             cursor = cnx.cursor()
             query = ("SELECT institution_name, institutionid from institution order by institution_name")
             cursor.execute(query)
-            selected_value = ""
-            for (institution) in cursor:
-                options = options + "<option value='"+str(institution[1])+"'>" + institution[0] + "</option>"
-                if selected_value == "":
-                    selected_value = institution[1]
+            institution = ""
+            for (institute) in cursor:
+                options = options + "<option value='"+str(institute[1])+"'>" + institute[0] + "</option>"
+                if institution == "":
+                    institution = institute[1]
 
             cursor.close()
             cnx.close()
@@ -396,30 +381,19 @@ class Main(object):
         cnx, status = db.connect()
         cursor = cnx.cursor()
         query = (
-            "SELECT institution_name,description,contact,website from institution where institutionid = '" + str(selected_value) + "'")
+            "SELECT institution_name,description,contact,website from institution where institutionid = '" + str(institution) + "'")
         cursor.execute(query)
         for (institution_name, description, contact, website) in cursor:
             displayInstitution = institution_name
             displayDescription = description
             displayContact = contact
             displayWebsite = website
-        selected_value = ""
+        institution = ""
         cursor.close()
         cnx.close()
 
-        try:
-            # Sanitize the ID.
-            safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
-            # Load the file
-            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
-            # Escape the code
-            code = cgi.escape(code)
-        except Exception:
-            code = ""
-            error = "Invalid ID: %s" % id
-            redirect = "YES"
         template = lookup.get_template("admin_institutions.html")
-        return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, OPTION=options,
+        return template.render(ROOT_URL=config.VIRTUAL_URL, ERROR="", REDIRECT=redirect, OPTION=options,
                                INSTITUTION=displayInstitution, CONTACT=displayContact, WEBSITE=displayWebsite,
                                DESCRIPTION=displayDescription)
 
@@ -429,7 +403,7 @@ class Main(object):
     # Admin Courses page
     # ============================================================
 
-    def admin_courses(self, id="Admin Courses", *args, **kwargs):
+    def admin_courses(self, *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
         error = ""
         redirect = "NO"
@@ -438,20 +412,18 @@ class Main(object):
 
         course_list = ""
         
-        if request:
-            if request.params:
-                if 'institution' in request.params:
-                    selectedValue = request.params['institution']               
-                    cnx, status = db.connect()
-                    cursor = cnx.cursor() 
-                    query = ("SELECT institutionid,institution_name from institution order by institution_name")
-                    cursor.execute(query) 
-                    for (institutionid,institution_name) in cursor:
-                        if str(institutionid) == selectedValue:
-                            options = options + "<option value='" + str(institutionid) + "' selected>" + institution_name + "</option>"
-                        else:
-                            options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>"
-                    cursor.close()
+        if request and request.params and 'institution' in request.params:
+            selectedValue = request.params['institution']               
+            cnx, status = db.connect()
+            cursor = cnx.cursor() 
+            query = ("SELECT institutionid,institution_name from institution order by institution_name")
+            cursor.execute(query) 
+            for (institutionid,institution_name) in cursor:
+                if str(institutionid) == selectedValue:
+                    options = options + "<option value='" + str(institutionid) + "' selected>" + institution_name + "</option>"
+                else:
+                    options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>"
+            cursor.close()
 
         if selectedValue == "":          
             cnx, status = db.connect()
@@ -472,21 +444,9 @@ class Main(object):
             course_list = course_list + "<a href=\"admin_course_details?id=" + str(courseid) + "\">" + code + "</a><br>"   
         cursor.close()
 
-            
-        try:
-            # Sanitize the ID.
-            safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
-            # Load the file
-            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
-            # Escape the code
-            code = cgi.escape(code)
-        except Exception:
-            code = ""
-            error = "Invalid ID: %s" % id
-            redirect = "YES"
         template = lookup.get_template("admin_courses.html")
 
-        return template.render(ROOT_URL=config.VIRTUAL_URL,CODE=code,ERROR=error,REDIRECT=redirect,OPTION=options,COURSE_LIST=course_list)
+        return template.render(ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, OPTION=options, COURSE_LIST=course_list)
 
     admin_courses.exposed = True
     
@@ -496,7 +456,7 @@ class Main(object):
         # ============================================================ 
     
      
-    def admin_course_add(self, id="Admin Courses", *args, **kwargs): 
+    def admin_course_add(self, *args, **kwargs): 
         allow(["HEAD", "GET", "POST"]) 
         error = "" 
         redirect = "NO" 
@@ -505,18 +465,16 @@ class Main(object):
         validationCode = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
 
 
-        if request: 
-            if request.params: 
-                if 'course_code' in request.params: 
-                    cnx, status = db.connect() 
-                    cursor = cnx.cursor() 
-                    query = ("insert into course (course_name,code,year,institutionid,validationcode) values ('" + request.params[ 
-                        'course_name'] + "','" + request.params['course_code'].upper() + "','" + request.params[ 
-                                 'course_year'] + "','" + request.params['course_institution'] + "','" + request.params['validation_code'] + "')") 
-                    cursor.execute(query) 
-                    newstatus = "New course has been added" 
-                    cursor.close() 
-                    cnx.close() 
+        if request and request.params and 'course_code' in request.params: 
+            cnx, status = db.connect() 
+            cursor = cnx.cursor() 
+            query = ("insert into course (course_name,code,year,institutionid,validationcode) values ('" + request.params[ 
+                'course_name'] + "','" + request.params['course_code'].upper() + "','" + request.params[ 
+                         'course_year'] + "','" + request.params['course_institution'] + "','" + request.params['validation_code'] + "')") 
+            cursor.execute(query) 
+            newstatus = "New course has been added" 
+            cursor.close() 
+            cnx.close() 
 
 
         cnx, status = db.connect() 
@@ -528,20 +486,8 @@ class Main(object):
         cursor.close() 
         cnx.close() 
 
-
-        try: 
-            # Sanitize the ID. 
-            safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id) 
-            # Load the file 
-            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley") 
-            # Escape the code 
-            code = cgi.escape(code) 
-        except Exception: 
-            code = "" 
-            error = "Invalid ID: %s" % id 
-            redirect = "YES" 
         template = lookup.get_template("admin_courses_add.html") 
-        return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, OPTION=options,NEWSTATUS=newstatus,VALIDATIONCODE=validationCode)  
+        return template.render(ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, OPTION=options, NEWSTATUS=newstatus, VALIDATIONCODE=validationCode)  
                                
     admin_course_add.exposed = True
     
@@ -550,7 +496,7 @@ class Main(object):
     # Admin Course details page
     # ============================================================
 
-    def admin_course_details(self, id="Admin Courses", *args, **kwargs):
+    def admin_course_details(self, *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
         error = ""
         redirect = "NO"
@@ -558,41 +504,28 @@ class Main(object):
         newstatus = "" 
         students = ""
 
-        if request:
-            if request.params:
-                if 'id' in request.params:
-                    selectedValue = request.params['id']               
-                    cnx, status = db.connect()
-                    cursor = cnx.cursor() 
-                   
-                    query = ("SELECT courseid,course_name,code,year,institution_name from course a, institution b where a.institutionid = b.institutionid and a.courseid = %s")
-                    cursor.execute(query, (selectedValue))
-                    for (courseid,course_name,code,year,instition_name) in cursor:
-                        courseName = course_name
-                        courseCode = code
-                        institution = instition_name
-                        courseID = courseid
+        if request and request.params and 'id' in request.params:
+            selectedValue = request.params['id']               
+            cnx, status = db.connect()
+            cursor = cnx.cursor() 
+           
+            query = ("SELECT courseid,course_name,code,year,institution_name from course a, institution b where a.institutionid = b.institutionid and a.courseid = %s")
+            cursor.execute(query, (selectedValue))
+            for (courseid,course_name,code,year,instition_name) in cursor:
+                courseName = course_name
+                courseCode = code
+                institution = instition_name
+                courseID = courseid
 
-                    sql = "SELECT distinct a.student_info_id,a.givenname,a.surname from student_info a,student_course_link b, course c, course_stream d where c.courseid = %s and  c.courseid = d.courseid and d.coursestreamid =b.coursestreamid and b.studentinfoid = a.student_info_id"
-                    cursor.execute(sql, str(courseID))
-                    for (student_info_id,givenname,surname) in cursor:                
-                        students = students + surname + ", " + givenname + "</br>"
-                    cursor.close()
+            sql = "SELECT distinct a.student_info_id,a.givenname,a.surname from student_info a,student_course_link b, course c, course_stream d where c.courseid = %s and  c.courseid = d.courseid and d.coursestreamid =b.coursestreamid and b.studentinfoid = a.student_info_id"
+            cursor.execute(sql, str(courseID))
+            for (student_info_id,givenname,surname) in cursor:                
+                students = students + surname + ", " + givenname + "</br>"
+            cursor.close()
 
-        try:
-            # Sanitize the ID.
-            safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
-            # Load the file
-            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
-            # Escape the code
-            code = cgi.escape(code)
-        except Exception:
-            code = ""
-            error = "Invalid ID: %s" % id
-            redirect = "YES"
         template = lookup.get_template("admin_course_details.html")
         
-        return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, OPTION=options,
+        return template.render(ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, OPTION=options,
             COURSENAME = courseName, COURSECODE = courseCode, INSTITUTION = institution, STUDENTS = students)    
     admin_course_details.exposed = True
     
@@ -601,7 +534,7 @@ class Main(object):
     # Admin Students search page
     # ============================================================
 
-    def admin_students_search(self, id="Admin Courses", *args, **kwargs):
+    def admin_students_search(self, *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
         error = ""
         searchResult = ""
@@ -618,83 +551,68 @@ class Main(object):
         selectedValueCourse = ""
         whileyid = ""
 
-        if request:
-            if request.params:
-                if 'searchValue' in request.params:
-                    searchValue = request.params['searchValue']
-                    if searchValue != "":
-                        cnx, status = db.connect()
-                        cursor = cnx.cursor()
-                        join = '%' + request.params['searchValue'].upper() + '%'
-                        sql = "select student_info_id,surname,givenname from student_info where UPPER(givenname) like %s or UPPER(surname) like %s order by surname"
-                        cursor.execute(sql, (join,join))
-                        for (students) in cursor:
-                            searchResult = searchResult + "<br><a href=admin_students_search?id=" + str(students[0]) + "&searchValue=" + searchValue + ">" + students[1] + ", " + students[2] + "</a>"  
-                        cursor.close()
-                        cnx.close()
+        if request and request.params and 'searchValue' in request.params:
+            searchValue = request.params['searchValue']
+            if searchValue != "":
+                cnx, status = db.connect()
+                cursor = cnx.cursor()
+                join = '%' + request.params['searchValue'].upper() + '%'
+                sql = "select student_info_id,surname,givenname from student_info where UPPER(givenname) like %s or UPPER(surname) like %s order by surname"
+                cursor.execute(sql, (join,join))
+                for (students) in cursor:
+                    searchResult = searchResult + "<br><a href=admin_students_search?id=" + str(students[0]) + "&searchValue=" + searchValue + ">" + students[1] + ", " + students[2] + "</a>"  
+                cursor.close()
+                cnx.close()
 
-        if request:
-            if request.params:
-                if 'id' in request.params:
-                    studentid = request.params['id']
-                    cnx, status = db.connect()
-                    cursor = cnx.cursor()
-                    sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = " + str(studentid) + " and a.institutionid = b.institutionid"
-                    try:
-                        cursor.execute(sql)
-                    except mysql.connector.Error as err:
-                        print("Error Student id = " + studentid)
-                        
-                    for (student_info_id,surname,givenname,institution_name,userid) in cursor:
-                        studentName = givenname + " " + surname  + " <br><h5>" + institution_name + "</h5>"
-                        whileyid = str(userid)
-                    
-                    sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(studentid)
-                    try:
-                        cursor.execute(sql)
-                    except mysql.connector.Error as err:
-                        print("fail at courses")
-                        
-                    studentCourses = "<h4>Courses</h4>"
-                    for (courses) in cursor:
-                        studentCourses = studentCourses + "<a href='admin_course_details?id=" + str(courses[3]) + "'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
-                    
-                    sql = "select projectid,project_name from project where userid = " + str(whileyid)
-                    try:
-                        cursor.execute(sql)
-                    except mysql.connector.Error as err:
-                        print("fail at projects")
-                        
-                    studentProjects = "<h4>Projects</h4>"
-                    projectid = ""
-                    for (projects) in cursor:
-                        studentProjects = studentProjects + "<a href='student_project?project=" + str(projects[0]) + "'>" + projects[1] + "</a><br>"
-                        projectid = str(projects[0]) 
-                        cursorFiles = cnx.cursor()
-                        sql2 = "select filename from file where projectid = %s"
-                        cursorFiles.execute(sql2, projectid)
-                        for (files) in cursorFiles:
-                            studentProjects = studentProjects + " &nbsp; --> &nbsp; " + files[0] + "</a><br>"  
-                        cursorFiles.close()
-                    cursor.close()
-                    cnx.close()
+        if request and request.params and 'id' in request.params:
+            studentid = request.params['id']
+            cnx, status = db.connect()
+            cursor = cnx.cursor()
+            sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = " + str(studentid) + " and a.institutionid = b.institutionid"
+            try:
+                cursor.execute(sql)
+            except mysql.connector.Error as err:
+                print("Error Student id = " + studentid)
+                
+            for (student_info_id,surname,givenname,institution_name,userid) in cursor:
+                studentName = givenname + " " + surname  + " <br><h5>" + institution_name + "</h5>"
+                whileyid = str(userid)
+            
+            sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(studentid)
+            try:
+                cursor.execute(sql)
+            except mysql.connector.Error as err:
+                print("fail at courses")
+                
+            studentCourses = "<h4>Courses</h4>"
+            for (courses) in cursor:
+                studentCourses = studentCourses + "<a href='admin_course_details?id=" + str(courses[3]) + "'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
+            
+            sql = "select projectid,project_name from project where userid = " + str(whileyid)
+            try:
+                cursor.execute(sql)
+            except mysql.connector.Error as err:
+                print("fail at projects")
+                
+            studentProjects = "<h4>Projects</h4>"
+            projectid = ""
+            for (projects) in cursor:
+                studentProjects = studentProjects + "<a href='student_project?project=" + str(projects[0]) + "'>" + projects[1] + "</a><br>"
+                projectid = str(projects[0]) 
+                cursorFiles = cnx.cursor()
+                sql2 = "select filename from file where projectid = %s"
+                cursorFiles.execute(sql2, projectid)
+                for (files) in cursorFiles:
+                    studentProjects = studentProjects + " &nbsp; --> &nbsp; " + files[0] + "</a><br>"  
+                cursorFiles.close()
+            cursor.close()
+            cnx.close()
         
-              
-        try:
-            # Sanitize the ID.
-            safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
-            # Load the file
-            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
-            # Escape the code
-            code = cgi.escape(code)
-        except Exception:
-            code = ""
-            error = "Invalid ID: %s" % id
-            redirect = "YES"
+        
         template = lookup.get_template("admin_students_search.html")
-        return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, STATUS=status,
-                               OPTION=options,SEARCHRESULT=searchResult,SEARCHVALUE=searchValue,STUDENTNAME=studentName,
-                               STUDENTCOURSES=studentCourses,STUDENTPROJECTS=studentProjects,OPTIONCOURSE=optionsCourse,OPTIONSTUDENT=optionsStudent)
+        return template.render(ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, STATUS=status,
+                               OPTION=options, SEARCHRESULT=searchResult, SEARCHVALUE=searchValue, STUDENTNAME=studentName,
+                               STUDENTCOURSES=studentCourses, STUDENTPROJECTS=studentProjects, OPTIONCOURSE=optionsCourse, OPTIONSTUDENT=optionsStudent)
 
     admin_students_search.exposed = True
 
@@ -710,7 +628,7 @@ class Main(object):
     # Admin Students  List page
     # ============================================================
 
-    def admin_students_list(self, id="Admin Courses", *args, **kwargs):
+    def admin_students_list(self, *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
         error = ""
         searchResult = ""
@@ -727,66 +645,62 @@ class Main(object):
         selectedValueCourse = ""
         whileyid = ""
 
-        if request:
-            if request.params:
-                if 'id' in request.params:
-                    studentid = request.params['id']
-                    cnx, status = db.connect()
-                    cursor = cnx.cursor()
-                    sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = " + str(studentid) + " and a.institutionid = b.institutionid"
-                    try:
-                        cursor.execute(sql)
-                    except mysql.connector.Error as err:
-                        print("Error Student id = " + studentid)
-                        
-                    for (student_info_id,surname,givenname,institution_name,userid) in cursor:
-                        studentName = givenname + " " + surname  + " <br><h5>" + institution_name + "</h5>"
-                        whileyid = str(userid)
+        if request and request.params and 'id' in request.params:
+            studentid = request.params['id']
+            cnx, status = db.connect()
+            cursor = cnx.cursor()
+            sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = " + str(studentid) + " and a.institutionid = b.institutionid"
+            try:
+                cursor.execute(sql)
+            except mysql.connector.Error as err:
+                print("Error Student id = " + studentid)
+                
+            for (student_info_id,surname,givenname,institution_name,userid) in cursor:
+                studentName = givenname + " " + surname  + " <br><h5>" + institution_name + "</h5>"
+                whileyid = str(userid)
+            
+            sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(studentid)
+            try:
+                cursor.execute(sql)
+            except mysql.connector.Error as err:
+                print("fail at courses")
+                
+            studentCourses = "<h4>Courses</h4>"
+            for (courses) in cursor:
+                studentCourses = studentCourses + "<a href='admin_course_details?id=" + str(courses[3]) + "'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
+            
+            sql = "select projectid,project_name from project where userid = " + str(whileyid)
+            try:
+                cursor.execute(sql)
+            except mysql.connector.Error as err:
+                print("fail at projects")
+                
+            studentProjects = "<h4>Projects</h4>"
+            projectid = ""
+            for (projects) in cursor:
+                studentProjects = studentProjects + "<a href='#'>" + projects[1] + "</a><br>"
+                projectid = str(projects[0]) 
+                cursorFiles = cnx.cursor()
+                sql2 = "select filename from file where projectid = %s"
+                cursorFiles.execute(sql2, projectid)
+                for (files) in cursorFiles:
+                    studentProjects = studentProjects + " &nbsp; --> &nbsp; " + files[0] + "</a><br>"  
+                cursorFiles.close()
+            cursor.close()
+            cnx.close()
                     
-                    sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(studentid)
-                    try:
-                        cursor.execute(sql)
-                    except mysql.connector.Error as err:
-                        print("fail at courses")
-                        
-                    studentCourses = "<h4>Courses</h4>"
-                    for (courses) in cursor:
-                        studentCourses = studentCourses + "<a href='admin_course_details?id=" + str(courses[3]) + "'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
-                    
-                    sql = "select projectid,project_name from project where userid = " + str(whileyid)
-                    try:
-                        cursor.execute(sql)
-                    except mysql.connector.Error as err:
-                        print("fail at projects")
-                        
-                    studentProjects = "<h4>Projects</h4>"
-                    projectid = ""
-                    for (projects) in cursor:
-                        studentProjects = studentProjects + "<a href='#'>" + projects[1] + "</a><br>"
-                        projectid = str(projects[0]) 
-                        cursorFiles = cnx.cursor()
-                        sql2 = "select filename from file where projectid = %s"
-                        cursorFiles.execute(sql2, projectid)
-                        for (files) in cursorFiles:
-                            studentProjects = studentProjects + " &nbsp; --> &nbsp; " + files[0] + "</a><br>"  
-                        cursorFiles.close()
-                    cursor.close()
-                    cnx.close()
-                    
-        if request:
-            if request.params:
-                if 'institution' in request.params:
-                    selectedValue = request.params['institution']               
-                    cnx, status = db.connect()
-                    cursor = cnx.cursor() 
-                    query = ("SELECT institutionid,institution_name from institution order by institution_name")
-                    cursor.execute(query) 
-                    for (institutionid,institution_name) in cursor:
-                        if str(institutionid) == selectedValue:
-                            options = options + "<option value='" + str(institutionid) + "' selected>" + institution_name + "</option>"
-                        else:
-                            options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>"
-                    cursor.close()
+        if request and request.params and 'institution' in request.params:
+            selectedValue = request.params['institution']               
+            cnx, status = db.connect()
+            cursor = cnx.cursor() 
+            query = ("SELECT institutionid,institution_name from institution order by institution_name")
+            cursor.execute(query) 
+            for (institutionid,institution_name) in cursor:
+                if str(institutionid) == selectedValue:
+                    options = options + "<option value='" + str(institutionid) + "' selected>" + institution_name + "</option>"
+                else:
+                    options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>"
+            cursor.close()
 
         if selectedValue == "":          
             cnx, status = db.connect()
@@ -799,20 +713,18 @@ class Main(object):
                     selectedValue = str(institutionid)
             cursor.close() 
 
-        if request:
-            if request.params:
-                if 'course' in request.params:
-                    selectedValueCourse = request.params['course']               
-                    cnx, status = db.connect()
-                    cursor = cnx.cursor() 
-                    sql = "SELECT courseid,code from course where institutionid = %s"
-                    cursor.execute(sql, selectedValue)
-                    for (courseid,code) in cursor:
-                        if str(courseid) == selectedValueCourse:
-                            optionsCourse = optionsCourse + "<option value='" + str(courseid) + "' selected>" + code + "</option>"
-                        else:
-                            optionsCourse = optionsCourse + "<option value='" + str(courseid) + "'>" + code + "</option>"
-                    cursor.close()   
+        if request and request.params and 'course' in request.params:
+            selectedValueCourse = request.params['course']               
+            cnx, status = db.connect()
+            cursor = cnx.cursor() 
+            sql = "SELECT courseid,code from course where institutionid = %s"
+            cursor.execute(sql, selectedValue)
+            for (courseid,code) in cursor:
+                if str(courseid) == selectedValueCourse:
+                    optionsCourse = optionsCourse + "<option value='" + str(courseid) + "' selected>" + code + "</option>"
+                else:
+                    optionsCourse = optionsCourse + "<option value='" + str(courseid) + "'>" + code + "</option>"
+            cursor.close()   
         
         if selectedValueCourse == "": 
             cnx, status = db.connect()
@@ -836,21 +748,11 @@ class Main(object):
                     selectedValueCourse = str(courseid)
              cursor.close()
               
-        try:
-            # Sanitize the ID.
-            safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
-            # Load the file
-            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
-            # Escape the code
-            code = cgi.escape(code)
-        except Exception:
-            code = ""
-            error = "Invalid ID: %s" % id
-            redirect = "YES"
+
         template = lookup.get_template("admin_students_list.html")
-        return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, STATUS=status,
-                               OPTION=options,STUDENTNAME=studentName,
-                               STUDENTCOURSES=studentCourses,STUDENTPROJECTS=studentProjects,OPTIONCOURSE=optionsCourse,OPTIONSTUDENT=optionsStudent)
+        return template.render(ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, STATUS=status,
+                               OPTION=options, STUDENTNAME=studentName,
+                               STUDENTCOURSES=studentCourses, STUDENTPROJECTS=studentProjects, OPTIONCOURSE=optionsCourse, OPTIONSTUDENT=optionsStudent)
 
     admin_students_list.exposed = True
 
