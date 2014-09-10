@@ -8,6 +8,10 @@ import db_config
 
 # connection details
 def connect():
+    """Return the connection.
+    >>> connect()[1]
+    'OK'
+    """
     cnx = False
     try:
         status = "OK"
@@ -25,9 +29,9 @@ def connect():
 
 
 def connect_from_config():
-    print db_config.HOST
-    print db_config.DATABASE
-    print db_config.USER
+##    print db_config.HOST
+##    print db_config.DATABASE
+##    print db_config.USER
     #     print db_config.PASSWORD
     return mysql.connector.connect(
         host=db_config.HOST,
@@ -65,7 +69,7 @@ def test_db():
 
 
 def check_schema(cnx):
-    print "Creating Schema"
+##    print "Creating Schema"
     try:
         FOUND_USERS = False
         try:

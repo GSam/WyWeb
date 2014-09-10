@@ -28,6 +28,8 @@ from cherrypy import request
 from mako.template import Template
 from mako.lookup import TemplateLookup
 
+import templating # Testing facade. 
+
 lookup = TemplateLookup(directories=['html'])
 
 # ============================================================
@@ -283,25 +285,26 @@ class Main(object):
     # Admin Main Page
     # ============================================================
     def admin(self, id="Admin Page", *args, **kwargs):
+        """
+        The admin homepage should return a template for the admin page.
+
+        >>> self = Main()
+        >>> results = self.admin()
+        >>> results.ERROR
+        ''
+        >>> results.REDIRECT
+        'NO'
+        >>> results.STATUS
+        'DB: Connection ok'
+        """
         allow(["HEAD", "GET"])
         error = ""
         redirect = "NO"
         status = "DB: Connection ok"
         cnx = db.connect()
 
-        try:
-            # Sanitize the ID.
-            safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
-            # Load the file
-            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley")
-            # Escape the code
-            code = cgi.escape(code)
-        except Exception:
-            code = ""
-            error = "Invalid ID: %s" % id
-            redirect = "YES"
-        template = lookup.get_template("admin.html")
-        return template.render(ROOT_URL=config.VIRTUAL_URL, CODE=code, ERROR=error, REDIRECT=redirect, STATUS=status)
+ ##       template = lookup.get_template("admin.html")
+        return templating.render("admin.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, STATUS=status)
 
     admin.exposed = True
 
