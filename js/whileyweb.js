@@ -300,6 +300,7 @@ var editor;
 
 // Run this code when the page has loaded.
 $(function() {
+    editor.markers = [];
     ace.Range = require('ace/range').Range;
     // Enable the editor with Whiley syntax.
     editor = ace.edit("code");
@@ -313,7 +314,6 @@ $(function() {
     editor.setShowPrintMargin(false);
     editor.getSession().setUseSoftTabs(true);
     editor.getSession().setTabSize(4);
-    editor.markers = [];
 
     $("#code").resizable({
         resize: function() {
