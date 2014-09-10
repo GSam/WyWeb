@@ -41,8 +41,15 @@ SESSION_KEY = '_cp_username'
 
 
 def check_credentials(user, passwd):
-    """Verifies credentials for username and password.
-    Returns None on success or a string describing the error on failure"""
+    """
+    Verifies credentials for username and password.
+    Returns None on success or a string describing the error on failure
+
+    >>> check_credentials("greg", "gdg")
+
+    >>> check_credentials("wrong", "used")
+    'Incorrect username or password'
+    """
 
     cnx = db.connect()[0]  
     if cnx:      
@@ -66,6 +73,16 @@ def check_credentials(user, passwd):
     return result
 
 def check_username(user):
+    """
+    Checks if username exists.
+    Returns None on success or a string describing the error on failure
+
+    >>> check_credentials("newuser")
+
+    >>> check_credentials("greg")
+    'Username not available'
+    """
+
     cnx = db.connect()[0]        
     cursor = cnx.cursor()
     query = ("SELECT * from whiley_user where username = %s")
@@ -80,20 +97,38 @@ def check_username(user):
     return result
     
 def create_username(user, passwd, email, givenname, surname):
+    """
+    Create username with given information.
+    Returns last created ID on success
+
+    >>> create_username("newuser", "newpass", "newmail@gmail.com", "newname", "newsurname")
+    65
+    """
+
     #hashed_password = hash_password(passwd)
     cnx = db.connect()[0]        
     cursor = cnx.cursor()
     query = "INSERT into whiley_user (username, password, email_address) VALUES (%s, %s, %s)"
-    cursor.execute(query, (user, passwd, email))
+    try:
+        cursor.execute(query, (user, passwd, email))
+    except mysql.connector.Error, err:
+        print("Error  = %s" % err)
     laststudentid = cursor.lastrowid
     query = "INSERT into student_info (givenname, surname, userid) VALUES (%s, %s, %s)"
-    cursor.execute(query, (givenname, surname, laststudentid))
+    try:
+        cursor.execute(query, (givenname, surname, laststudentid))
+    except mysql.connector.Error, err:
+        print("Error  = %s" % err)
     lastid = cursor.lastrowid
     cursor.close()
     cnx.close()
     return lastid
 
 def insertuserdetails(student_infoid, institutionid, coursesid, validationcode):
+    """
+    Create username with given information.
+    Returns error= False if user is updated | error = True if course id or validationcode is wrong
+    """
     cnx = db.connect()[0]        
     cursor = cnx.cursor()
     #check if validation is correct
@@ -112,7 +147,7 @@ def insertuserdetails(student_infoid, institutionid, coursesid, validationcode):
         error = True
     cursor.close()
     cnx.close()
-    return error
+    return result
 
 
 def check_auth(*args, **kwargs):
@@ -193,6 +228,14 @@ class AuthController(object):
     
     @cherrypy.expose
     def login(self, user=None, passwd="", from_page="/"):
+        """Login the user
+        Success: Create session and redirect to 'from_page'
+        Wrong user: Render login page with error message
+        User = None: Show login page
+        
+
+        """
+
         if user is None:
             #return self.get_loginform("", from_page=from_page)
             template = lookup.get_template("login.html")
@@ -208,10 +251,15 @@ class AuthController(object):
             cherrypy.session.regenerate()
             cherrypy.session[SESSION_KEY] = cherrypy.request.login = user
             #return cherrypy.session[SESSION_KEY]
-            raise cherrypy.HTTPRedirect("/")
+            raise cherrypy.HTTPRedirect(from_page)
     
     @cherrypy.expose
     def signup(self, user="", passwd="", email="", cpasswd="", givenname="", surname="", enrolled=False):
+        """Sign the user up
+        Success: Create session and redirect to root
+        Errors: Empty fields, passwords do no match, username already exists
+        
+        """
         #create_username("test", "ẗest", "testemail")
         print user
         if user == "" or passwd == "" or email == "" or givenname == "" or surname == "":
@@ -244,7 +292,9 @@ class AuthController(object):
 
     @cherrypy.expose
     def user_courses(self, studentinfoid=None, *args, **kwargs):
-
+        """Assign user to select course
+        
+        """
         if studentinfoid is None:
             raise cherrypy.HTTPRedirect("/")
         allow(["HEAD", "GET", "POST"])
@@ -317,15 +367,3 @@ class AuthController(object):
             cherrypy.request.login = None
             #self.on_logout(username)
         raise cherrypy.HTTPRedirect(from_page or "/")
-
-    @cherrypy.expose
-    def testdb(self): 
-
-        cnx = db.connect()[0]        
-        cursor = cnx.cursor()
-        query = ("SELECT username from whiley_user")
-        cursor.execute(query)
-        for (username) in cursor:
-            print("{} name".format(username)) 
-        cursor.close()
-        cnx.close()
