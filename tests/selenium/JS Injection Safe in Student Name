@@ -56,7 +56,31 @@
 	<td>css=#ide &gt; div.content</td>
 	<td>Victoria University of Wellington Next Generation Languages SWEN244 Where, No<br />Where, No&lt;script&gt;alert(&quot;FAILED&quot;);&lt;/script&gt;</td>
 </tr>
-
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Students List</td>
+	<td></td>
+</tr>
+<tr>
+	<td>selectAndWait</td>
+	<td>name=institution</td>
+	<td>label=Victoria University of Wellington</td>
+</tr>
+<tr>
+	<td>selectAndWait</td>
+	<td>name=course</td>
+	<td>label=SWEN302</td>
+</tr>
+<tr>
+	<td>selectAndWait</td>
+	<td>name=course</td>
+	<td>label=SWEN244</td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>link=Where, No&lt;script&gt;alert(&quot;FAILED&quot;);&lt;/script&gt;</td>
+	<td>Where, No&lt;script&gt;alert(&quot;FAILED&quot;);&lt;/script&gt;</td>
+</tr>
 </tbody></table>
 </body>
 </html>

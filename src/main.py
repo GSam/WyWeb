@@ -652,7 +652,7 @@ class Main(object):
                 print("Error Student id = " + studentid)
                 
             for (student_info_id,surname,givenname,institution_name,userid) in cursor:
-                studentName = givenname + " " + surname  + " <br><h5>" + institution_name + "</h5>"
+                studentName = web.safe(givenname) + " " + web.safe(surname)  + " <br><h5>" + institution_name + "</h5>"
                 whileyid = str(userid)
             
             sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(studentid)
@@ -739,7 +739,7 @@ class Main(object):
              sql = "SELECT distinct a.student_info_id,a.givenname,a.surname from student_info a,student_course_link b, course c, course_stream d where c.courseid = %s and  c.courseid = d.courseid and d.coursestreamid =b.coursestreamid and b.studentinfoid = a.student_info_id"
              cursor.execute(sql, selectedValueCourse)
              for (student_info_id,givenname,surname) in cursor:                
-                 optionsStudent = optionsStudent + "<a href=admin_students_list?id=" + str(student_info_id) + "&institution=" + selectedValue + "&course=" + selectedValueCourse +  ">"  + surname + ", " + givenname + "</br>"
+                 optionsStudent = optionsStudent + "<a href=admin_students_list?id=" + str(student_info_id) + "&institution=" + selectedValue + "&course=" + selectedValueCourse +  ">"  + web.safe(surname) + ", " + web.safe(givenname) + "</br>"
                  if selectedValueCourse == "":
                     selectedValueCourse = str(courseid)
              cursor.close()
