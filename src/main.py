@@ -349,7 +349,7 @@ class Main(object):
         redirect = "NO"
         options = " "
 
-        if institutions:
+        if institution:
             cnx, status = db.connect()
             cursor = cnx.cursor()
             query = ("SELECT institution_name, institutionid from institution order by institution_name")
