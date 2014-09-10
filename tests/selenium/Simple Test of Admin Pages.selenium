@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://127.0.0.1:8080/" />
+<title>Simple Test of Admin Pages</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">Simple Test of Admin Pages</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>/admin</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Admin</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>css=h3</td>
+	<td>exact:DB: Connection ok</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Institutions</td>
+	<td></td>
+</tr>
+<tr>
+	<td>selectAndWait</td>
+	<td>name=institution</td>
+	<td>label=Victoria University of Wellington</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Courses</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>link=FFF</td>
+	<td>FFF</td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>link=GGG</td>
+	<td>GGG</td>
+</tr>
+<tr>
+	<td>selectAndWait</td>
+	<td>name=institution</td>
+	<td>label=Victoria University of Wellington</td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>link=SWEN302</td>
+	<td>SWEN302</td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>link=SWEN244</td>
+	<td>SWEN244</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Students List</td>
+	<td></td>
+</tr>
+<tr>
+	<td>selectAndWait</td>
+	<td>name=institution</td>
+	<td>label=Victoria University of Wellington</td>
+</tr>
+<tr>
+	<td>selectAndWait</td>
+	<td>name=course</td>
+	<td>label=SWEN302</td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>link=Graham, Gregory</td>
+	<td>Graham, Gregory</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Students Search</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=searchValue</td>
+	<td>Greg</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=input[type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>link=Graham, Gregory</td>
+	<td>Graham, Gregory</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Admin</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>css=h3</td>
+	<td>exact:DB: Connection ok</td>
+</tr>
+
+</tbody></table>
+</body>
+</html>
