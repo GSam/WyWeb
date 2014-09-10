@@ -36,9 +36,7 @@ lookup = TemplateLookup(directories=['html'])
 # Application Entry
 # ============================================================
 
-HELLO_WORLD = """package Project1
-
-import whiley.lang.System
+HELLO_WORLD = """import whiley.lang.System
 
 method main(System.Console console):
     console.out.println("Hello World")
