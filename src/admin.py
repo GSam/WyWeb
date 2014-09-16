@@ -134,19 +134,14 @@ class Admin(object):
         redirect = "NO"
         options = []
 
-        course_list = ""
+        course_list = []
         
         if institution:
             cnx, status = db.connect()
             cursor = cnx.cursor() 
             query = ("SELECT institutionid,institution_name from institution order by institution_name")
             cursor.execute(query) 
-            for (institutionid,institution_name) in cursor:
-                options.append((institutionid, institution_name))
-##                if str(institutionid) == institution:
-##                    options = options + "<option value='" + str(institutionid) + "' selected>" + institution_name + "</option>"
-##                else:
-##                    options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>"
+            options = list(cursor)
             cursor.close()
 
         if institution == "":          
@@ -156,7 +151,6 @@ class Admin(object):
             cursor.execute(query)
             for (institutionid,institution_name) in cursor:
                 options.append((institutionid, institution_name))
-##                options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>" 
                 if institution == "":
                     institution = str(institutionid)
             cursor.close()
@@ -165,8 +159,7 @@ class Admin(object):
         cursor = cnx.cursor() 
         query = ("SELECT courseid,code from course where institutionid = '" + institution + "' order by code")
         cursor.execute(query)
-        for (courseid,code) in cursor:
-            course_list = course_list + "<a href=\"admin_course_details?id=" + str(courseid) + "\">" + code + "</a><br>"   
+        course_list = list(cursor)
         cursor.close()
 
         return templating.render("admin_courses.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error,
@@ -187,7 +180,7 @@ class Admin(object):
         allow(["HEAD", "GET", "POST"]) 
         error = "" 
         redirect = "NO" 
-        options = " " 
+        options = []
         newstatus = "" 
         validationCode = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
 
@@ -207,8 +200,7 @@ class Admin(object):
         cursor = cnx.cursor() 
         query = ("SELECT institutionid,institution_name from institution order by institution_name") 
         cursor.execute(query) 
-        for (institutionid, institution_name) in cursor: 
-            options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>" 
+        options = list(cursor)
         cursor.close() 
         cnx.close() 
 
@@ -329,13 +321,6 @@ class Admin(object):
                                STUDENTCOURSES=studentCourses, STUDENTPROJECTS=studentProjects, OPTIONCOURSE=optionsCourse, OPTIONSTUDENT=optionsStudent)
 
     admin_students_search.exposed = True
-
-
-    # Everything else should redirect to the main page.
-    def default(self, *args, **kwargs):
-        raise HTTPRedirect("/")
-
-    default.exposed = True
 
 
     # ============================================================
