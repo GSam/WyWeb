@@ -61,7 +61,12 @@
 		<table width="100%" border="0">
 			<tr><td width=55 align=left valign="top"><img src=images/institution_small.png></td><td valign="top"><h2 style="margin-top:0px;padding-top:0px;"> Current Institutions</h2></td><td rowspan="2" width="50%"> <fieldset>  <legend>${INSTITUTION}</legend>
 ${DESCRIPTION}<br>${CONTACT}<br>${WEBSITE}</fieldset></td></tr>
-			<tr><td>&nbsp;</td><td valign="top"><select name="institution" onchange="this.form.submit()">${OPTION}</select></td></tr>
+			<tr><td>&nbsp;</td><td valign="top"><select name="institution" onchange="this.form.submit()">
+                % for label, value in OPTION:
+                    <option value="${str(value)}" ${"selected" if str(value) == INSTITUTION_ID else ""}>
+                        ${label}</option>
+                % endfor
+            </select></td></tr>
 		</table>
 		</form>
 	<br><br>

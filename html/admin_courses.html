@@ -59,7 +59,12 @@
            		 	<div class=content><div align="right"><a href="admin_course_add">Add Courses</a></div>
 <form>
 		<table width="100%" border="0">
-			<tr><td width=55 align=left valign="top"><img src=images/institution_small.png></td><td valign="top"><h2 style="margin-top:0px;padding-top:0px;"> Current Institutions</h2><select name="institution" onchange="this.form.submit()">${OPTION}</select></td><td width="50%"> <fieldset>  <legend>Courses</legend>
+			<tr><td width=55 align=left valign="top"><img src=images/institution_small.png></td><td valign="top"><h2 style="margin-top:0px;padding-top:0px;"> Current Institutions</h2><select name="institution" onchange="this.form.submit()">
+                % for value, label in OPTION:
+                    <option value="${value}" ${"selected" if str(value) == INSTITUTION else ""}>
+                        ${label}</option>
+                % endfor
+            </select></td><td width="50%"> <fieldset>  <legend>Courses</legend>
 ${COURSE_LIST}</fieldset></td></tr>
 
 		</table>

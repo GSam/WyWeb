@@ -335,8 +335,7 @@ class Main(object):
             cursor.close()
             cnx.close()
 
-        template = lookup.get_template("admin_institutions_add.html")
-        return template.render(ROOT_URL=config.VIRTUAL_URL, ERROR="", REDIRECT="", OPTION=options, STATUS=status)
+        return templating.render("admin_institutions_add.html", ROOT_URL=config.VIRTUAL_URL, ERROR="", REDIRECT="", OPTION=options, STATUS=status)
 
     admin_institutions_add.exposed = True
 
@@ -347,18 +346,14 @@ class Main(object):
     def admin_institutions(self, institution="", *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
         redirect = "NO"
-        options = " "
+        options = []
 
         if institution:
             cnx, status = db.connect()
             cursor = cnx.cursor()
             query = ("SELECT institution_name, institutionid from institution order by institution_name")
             cursor.execute(query)
-            for (institute) in cursor:
-                if str(institute[1]) == institution:
-                    options = options + "<option value='"+str(institute[1])+"' selected>" + institute[0] + "</option>"
-                else:
-                    options = options + "<option value='"+str(institute[1])+"'>" + institute[0] + "</option>"
+            options = list(cursor)
             cursor.close()
             cnx.close()
         displayInstitution = ""
@@ -373,7 +368,7 @@ class Main(object):
             cursor.execute(query)
             institution = ""
             for (institute) in cursor:
-                options = options + "<option value='"+str(institute[1])+"'>" + institute[0] + "</option>"
+                options.append(institute)
                 if institution == "":
                     institution = institute[1]
 
@@ -390,12 +385,11 @@ class Main(object):
             displayDescription = description
             displayContact = contact
             displayWebsite = website
-        institution = ""
         cursor.close()
         cnx.close()
 
-        template = lookup.get_template("admin_institutions.html")
-        return template.render(ROOT_URL=config.VIRTUAL_URL, ERROR="", REDIRECT=redirect, OPTION=options,
+        return templating.render("admin_institutions.html", ROOT_URL=config.VIRTUAL_URL, ERROR="", 
+                               REDIRECT=redirect, OPTION=options, INSTITUTION_ID=institution,
                                INSTITUTION=displayInstitution, CONTACT=displayContact, WEBSITE=displayWebsite,
                                DESCRIPTION=displayDescription)
 
@@ -409,7 +403,7 @@ class Main(object):
         allow(["HEAD", "GET", "POST"])
         error = ""
         redirect = "NO"
-        options = " "
+        options = []
 
         course_list = ""
         
@@ -419,10 +413,11 @@ class Main(object):
             query = ("SELECT institutionid,institution_name from institution order by institution_name")
             cursor.execute(query) 
             for (institutionid,institution_name) in cursor:
-                if str(institutionid) == institution:
-                    options = options + "<option value='" + str(institutionid) + "' selected>" + institution_name + "</option>"
-                else:
-                    options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>"
+                options.append((institutionid, institution_name))
+##                if str(institutionid) == institution:
+##                    options = options + "<option value='" + str(institutionid) + "' selected>" + institution_name + "</option>"
+##                else:
+##                    options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>"
             cursor.close()
 
         if institution == "":          
@@ -431,7 +426,8 @@ class Main(object):
             query = ("SELECT institutionid,institution_name from institution order by institution_name")
             cursor.execute(query)
             for (institutionid,institution_name) in cursor:
-                options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>" 
+                options.append((institutionid, institution_name))
+##                options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>" 
                 if institution == "":
                     institution = str(institutionid)
             cursor.close()
@@ -444,9 +440,9 @@ class Main(object):
             course_list = course_list + "<a href=\"admin_course_details?id=" + str(courseid) + "\">" + code + "</a><br>"   
         cursor.close()
 
-        template = lookup.get_template("admin_courses.html")
-
-        return template.render(ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, OPTION=options, COURSE_LIST=course_list)
+        return templating.render("admin_courses.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error,
+                                REDIRECT=redirect, OPTION=options, INSTITUTION=institution, 
+                                COURSE_LIST=course_list)
 
     admin_courses.exposed = True
     
@@ -456,7 +452,8 @@ class Main(object):
         # ============================================================ 
     
      
-    def admin_course_add(self, course_name=None, course_code=None, course_year=None, course_institution=None, validation_code=None, *args, **kwargs): 
+    def admin_course_add(self, course_name=None, course_code=None, course_year=None, 
+                        course_institution=None, validation_code=None, *args, **kwargs): 
         allow(["HEAD", "GET", "POST"]) 
         error = "" 
         redirect = "NO" 
@@ -485,8 +482,7 @@ class Main(object):
         cursor.close() 
         cnx.close() 
 
-        template = lookup.get_template("admin_courses_add.html") 
-        return template.render(ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, OPTION=options, NEWSTATUS=newstatus, VALIDATIONCODE=validationCode)  
+        return templating.render("admin_courses_add.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, OPTION=options, NEWSTATUS=newstatus, VALIDATIONCODE=validationCode)  
                                
     admin_course_add.exposed = True
     
@@ -519,11 +515,10 @@ class Main(object):
         for (student_info_id,givenname,surname) in cursor:                
             students = students + web.safe(surname) + ", " + web.safe(givenname) + "</br>"
         cursor.close()
-
-        template = lookup.get_template("admin_course_details.html")
         
-        return template.render(ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, OPTION=options,
-            COURSENAME = courseName, COURSECODE = courseCode, INSTITUTION = institution, STUDENTS = students)    
+        return templating.render("admin_course_details.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, 
+            REDIRECT=redirect, OPTION=options,
+            COURSENAME=courseName, COURSECODE=courseCode, INSTITUTION=institution, STUDENTS=students)    
     admin_course_details.exposed = True
     
 
@@ -585,7 +580,7 @@ class Main(object):
             for (courses) in cursor:
                 studentCourses = studentCourses + "<a href='admin_course_details?id=" + str(courses[3]) + "'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
             
-            sql = "select projectid,project_name from project where userid = " + str(whileyid)
+            sql = "select projectid,project_name, filename from project, file where userid = " + str(whileyid) +" and file.projectid = project.projectid"
             try:
                 cursor.execute(sql)
             except mysql.connector.Error as err:
@@ -593,20 +588,13 @@ class Main(object):
                 
             studentProjects = "<h4>Projects</h4>"
             projectid = ""
-            for (projects) in cursor:
+            for (projects, files) in cursor:
                 studentProjects = studentProjects + "<a href='student_project?project=" + str(projects[0]) + "'>" + projects[1] + "</a><br>"
-                projectid = str(projects[0]) 
-                cursorFiles = cnx.cursor()
-                sql2 = "select filename from file where projectid = %s"
-                cursorFiles.execute(sql2, projectid)
-                for (files) in cursorFiles:
-                    studentProjects = studentProjects + " &nbsp; --> &nbsp; " + files[0] + "</a><br>"  
-                cursorFiles.close()
+                studentProjects = studentProjects + " &nbsp; --> &nbsp; " + files[0] + "</a><br>" 
             cursor.close()
             cnx.close()
         
-        template = lookup.get_template("admin_students_search.html")
-        return template.render(ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, STATUS=status,
+        return templating.render("admin_students_search.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, STATUS=status,
                                OPTION=options, SEARCHRESULT=searchResult, SEARCHVALUE=searchValue, STUDENTNAME=studentName,
                                STUDENTCOURSES=studentCourses, STUDENTPROJECTS=studentProjects, OPTIONCOURSE=optionsCourse, OPTIONSTUDENT=optionsStudent)
 
