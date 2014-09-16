@@ -63,11 +63,10 @@ var JavaScriptHighlightRules = function() {
             "JSON|Math|"                                                               + // Other
             "this|arguments|prototype|window|document"                                 , // Pseudo
         "keyword":
-            "const|yield|import|get|set|" +
-            "break|case|catch|continue|default|delete|do|else|finally|for|function|" +
-            "if|in|instanceof|new|return|switch|throw|try|typeof|let|var|while|with|debugger|" +
-            "__parent__|__count__|escape|unescape|with|__proto__|" +
-            "class|enum|extends|super|export|implements|private|public|interface|package|protected|static",
+        	"all|any|assert|assume|bool|break|byte|catch|case|catch|char|continue|" +
+			"constant|debug|default|do|else|ensures|export|false|finite|for|" +
+			"function|from|if|import|in|int|is|method|native|new|no|null|package|" +
+			"private|protected|public|real|requires|return|skip|some|string|",
         "storage.type":
             "const|let|var|function",
         "constant.language":
@@ -680,7 +679,7 @@ var CstyleBehaviour = function() {
 
 };
 
-    
+
 CstyleBehaviour.isSaneInsertion = function(editor, session) {
     var cursor = editor.getCursorPosition();
     var iterator = new TokenIterator(session, cursor.row, cursor.column);
@@ -784,16 +783,16 @@ oop.inherits(FoldMode, BaseFoldMode);
 
             if (match[1])
                 return this.openingBracketBlock(session, match[1], row, i);
-                
+
             var range = session.getCommentFoldRange(row, i + match[0].length, 1);
-            
+
             if (range && !range.isMultiLine()) {
                 if (forceMultiline) {
                     range = this.getSectionRange(session, row);
                 } else if (foldStyle != "all")
                     range = null;
             }
-            
+
             return range;
         }
 
@@ -810,7 +809,7 @@ oop.inherits(FoldMode, BaseFoldMode);
             return session.getCommentFoldRange(row, i, -1);
         }
     };
-    
+
     this.getSectionRange = function(session, row) {
         var line = session.getLine(row);
         var startIndent = line.search(/\S/);
@@ -827,7 +826,7 @@ oop.inherits(FoldMode, BaseFoldMode);
             if  (startIndent > indent)
                 break;
             var subRange = this.getFoldWidgetRange(session, "all", row);
-            
+
             if (subRange) {
                 if (subRange.start.row <= startRow) {
                     break;
@@ -839,7 +838,7 @@ oop.inherits(FoldMode, BaseFoldMode);
             }
             endRow = row;
         }
-        
+
         return new Range(startRow, startColumn, endRow, session.getLine(endRow).length);
     };
 
@@ -861,7 +860,7 @@ var CStyleFoldMode = require("./folding/cstyle").FoldMode;
 
 var Mode = function() {
     this.HighlightRules = JavaScriptHighlightRules;
-    
+
     this.$outdent = new MatchingBraceOutdent();
     this.$behaviour = new CstyleBehaviour();
     this.foldingRules = new CStyleFoldMode();

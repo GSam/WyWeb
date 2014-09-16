@@ -42,16 +42,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>verifyText</td>
-	<td>link=FFF</td>
-	<td>FFF</td>
-</tr>
-<tr>
-	<td>verifyText</td>
-	<td>link=GGG</td>
-	<td>GGG</td>
-</tr>
-<tr>
 	<td>selectAndWait</td>
 	<td>name=institution</td>
 	<td>label=Victoria University of Wellington</td>
