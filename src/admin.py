@@ -331,12 +331,6 @@ class Admin(object):
     admin_students_search.exposed = True
 
 
-    # Everything else should redirect to the main page.
-    def default(self, *args, **kwargs):
-        raise HTTPRedirect("/")
-
-    default.exposed = True
-
 
     # ============================================================
     # Admin Students  List page
