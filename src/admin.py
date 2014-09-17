@@ -2,12 +2,8 @@ import cherrypy, config, web
 import templating, db
 from cherrypy.lib.cptools import allow
 
-# TODO Remove these imports
+# TODO Remove this imports
 import mysql.connector
-from cherrypy import request
-
-from mako.lookup import TemplateLookup
-lookup = TemplateLookup(directories=['html'])
 
 class Admin(object):
     # ============================================================
@@ -32,7 +28,6 @@ class Admin(object):
         status = "DB: Connection ok"
         cnx = db.connect()
 
- ##       template = lookup.get_template("admin.html")
         return templating.render("admin.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, STATUS=status)
 
     admin.exposed = True
@@ -109,11 +104,7 @@ class Admin(object):
         query = (
             "SELECT institution_name,description,contact,website from institution where institutionid = '" + str(institution) + "'")
         cursor.execute(query)
-        for (institution_name, description, contact, website) in cursor:
-            displayInstitution = institution_name
-            displayDescription = description
-            displayContact = contact
-            displayWebsite = website
+        displayInstitution, displayDescription, displayContact, displayWebsite = cursor.fetchone()
         cursor.close()
         cnx.close()
 
@@ -226,25 +217,19 @@ class Admin(object):
        
         query = ("SELECT courseid,course_name,code,year,validationcode,institution_name from course a, institution b where a.institutionid = b.institutionid and a.courseid = %s")
         cursor.execute(query, (id,))
-        row = cursor.fetchone()
-        print "aa"
-        courseID = row[0]
-        courseName = row[1]
-        courseCode = row[2]
-        year = row[3]
-        validationcode = row[4]
-        institution = row[5]
+        courseID, courseName, courseCode, year, validationcode, insitution = cursor.fetchone()
 
         sql = "SELECT distinct a.student_info_id,a.givenname,a.surname from student_info a,student_course_link b, course c, course_stream d where c.courseid = %s and  c.courseid = d.courseid and d.coursestreamid =b.coursestreamid and b.studentinfoid = a.student_info_id"
 
         cursor.execute(sql, (str(courseID),))
-        students = [web.safe(surname) + ", " + web.safe(givenname) for _, givenname, surname in cursor]
+        students = [name(givenname, surname) for _, givenname, surname in cursor]
 
         cursor.close()
         
         return templating.render("admin_course_details.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, 
             REDIRECT=redirect, OPTION=options,
-            COURSENAME=courseName, COURSECODE=courseCode, YEAR=year, VALIDATIONCODE=validationcode, INSTITUTION=institution, STUDENTS=students)    
+            COURSENAME=courseName, COURSECODE=courseCode, YEAR=year, VALIDATIONCODE=validationcode,
+            INSTITUTION=institution, STUDENTS=students)    
     admin_course_details.exposed = True
     
 
@@ -284,10 +269,9 @@ class Admin(object):
             except mysql.connector.Error as err:
                 print("Error Student id = " + str(id))
                 
-            for (student_info_id,surname,givenname,institution_name,userid) in cursor:
-                studentName = web.safe(givenname) + " " + web.safe(surname)
-                institutionName = institution_name
-                whileyid = str(userid)
+            _, surname, givenname, institutionName, userid = cursor.fetchone()
+            studentName = fullname(givenname, surname)
+            whileyid = str(userid)
             
             sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(id)
             try:
@@ -353,10 +337,9 @@ class Admin(object):
             except mysql.connector.Error as err:
                 print("Error Student id = " + id)
                 
-            for (student_info_id,surname,givenname,institution_name,userid) in cursor:
-                studentInstitution = institution_name
-                studentName = web.safe(givenname) + " " + web.safe(surname)
-                whileyid = str(userid)
+            _, surname, givenname, institution_name, userid = cursor.fetchone()
+            studentName = fullname(givenname, surname)
+            whileyid = str(userid)
             
             sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(id)
             try:
@@ -399,7 +382,7 @@ class Admin(object):
             query = ("SELECT institutionid,institution_name from institution order by institution_name")
             cursor.execute(query)
             for (institutionid,institution_name) in cursor:
-                options.append((institutionid, institutionname))
+                options.append((institutionid, institution_name))
                 if institution == "":
                     institution = str(institutionid)
             cursor.close() 
@@ -428,7 +411,7 @@ class Admin(object):
              sql = "SELECT distinct a.student_info_id,a.givenname,a.surname from student_info a,student_course_link b, course c, course_stream d where c.courseid = %s and  c.courseid = d.courseid and d.coursestreamid =b.coursestreamid and b.studentinfoid = a.student_info_id"
              cursor.execute(sql, (course,))
              for (student_info_id,givenname,surname) in cursor:
-                 optionsStudent.append((student_info_id, web.safe(surname) + ", " + web.safe(givenname)))
+                 optionsStudent.append((student_info_id, name(givenname, surname)))
                  if course == "":
                     course = str(courseid)
              cursor.close()
@@ -442,3 +425,9 @@ class Admin(object):
                                 OPTIONCOURSE=optionsCourse, COURSE=course, OPTIONSTUDENT=optionsStudent)
 
     admin_students_list.exposed = True
+
+def name(given, sur):
+    return web.safe(sur) + ", " + web.safe(given)
+
+def fullname(given, sur):
+    return web.safe(given) + " " + web.safe(sur)
