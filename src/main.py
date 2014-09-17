@@ -1,37 +1,25 @@
 # -*-python-*-
-import mysql.connector
 import cgi
-from itertools import starmap
 import os
-from parser import st2list
 import shutil
 import tempfile
 import subprocess
 import json
 import re
 import glob
-import random
-import string
-
-import db
 import codecs
 from threading import Timer
-
-import config
-
-import web
 
 import cherrypy
 from cherrypy.lib.static import serve_file
 from cherrypy.lib.cptools import allow
 from cherrypy import HTTPRedirect
-from cherrypy import request
-
-from mako.template import Template
 from mako.lookup import TemplateLookup
 
-import templating # Testing facade. 
+import db
+import config
 import admin
+
 
 lookup = TemplateLookup(directories=['html'])
 
@@ -116,6 +104,7 @@ class Main(admin.Admin):
         projects = set()
         if cherrypy.session.get("_cp_username"):
             for filepath, source in files.items():
+                print filepath
                 filepath = filepath.split("/")
                 project = filepath.pop(0)
                 
@@ -311,21 +300,24 @@ def save(project_name, filename, data):
     FROM whiley_user w left outer join project p on ( w.userid = p.userid)
     WHERE w.username = '""" + username + "' AND p.project_name = '" + project_name + "'"
     cursor.execute(sql)
-    projectid = cursor.fetchone()
-    print projectid
-    if projectid is None:
-        #create new project
-        sql = "SELECT userid FROM whiley_user WHERE username = %s"
-        cursor.execute(sql, (username,))
-        userid = cursor.fetchone()[0]
-        sql = "INSERT INTO project (project_name, userid) VALUES (%s, %s)"
-        cursor.execute(sql, (project_name, userid))
-        projectid = cursor.lastrowid
+    project = cursor.fetchone()
+    if project:
+        projectid = project[0]
+        print projectid
+        if projectid is None:
+            #create new project
+            sql = "SELECT userid FROM whiley_user WHERE username = %s"
+            cursor.execute(sql, (username,))
+            userid = cursor.fetchone()[0]
+            sql = "INSERT INTO project (project_name, userid) VALUES (%s, %s)"
+            cursor.execute(sql, (project_name, userid))
+            projectid = cursor.lastrowid
 
 
-    sql = "INSERT INTO file (projectid, filename, source) VALUES (%s, %s, %s)"
-    print type(projectid), type(filename), type(data)
-    cursor.execute(sql, (projectid, filename, data))
+        sql = "INSERT INTO file (projectid, filename, source) VALUES (%s, %s, %s)"
+        print type(projectid), type(filename), type(data)
+        print sql
+        cursor.execute(sql, (projectid, filename, data))
 
 def clear_files(project_name):
     username = cherrypy.session.get("_cp_username")
@@ -352,11 +344,11 @@ def save_all(files, dir):
 def get_files(user):
     cnx, status = db.connect()
     cursor = cnx.cursor()
-    sql = """SELECT f.fileid, f.filename, p.project_name, f.source
-FROM whiley_user w
-left outer join project p on (p.userid = w.userid)
-left outer join file f on (f.projectid = p.projectid)
-WHERE w.username = '""" + user + "'"
+    sql = """SELECT f.fileid, f.filename, p.projectid, p.project_name, f.source
+            FROM whiley_user w
+            left outer join project p on (p.userid = w.userid)
+            left outer join file f on (f.projectid = p.projectid)
+            WHERE w.username = '""" + user + "'"
     cursor.execute(sql)
     result = cursor.fetchall()
     cursor.close()
@@ -365,9 +357,9 @@ WHERE w.username = '""" + user + "'"
 def get_project(project):
     cnx, status = db.connect()
     cursor = cnx.cursor()
-    sql = """SELECT f.fileid, f.filename, p.project_name, f.source
-FROM file f, project p
-WHERE f.projectid = p.projectid AND p.projectid = %s"""
+    sql = """SELECT f.fileid, f.filename, p.projectid, p.project_name, f.source
+            FROM file f, project p
+            WHERE f.projectid = p.projectid AND p.projectid = %s"""
     cursor.execute(sql, (project,))
     result = cursor.fetchall()
     cursor.close()
@@ -375,7 +367,7 @@ WHERE f.projectid = p.projectid AND p.projectid = %s"""
 
 def build_file_tree(filelist):
     result = []
-    for fileid, filepath, project_name, source in filelist:
+    for fileid, filepath, projectid, project_name, source in filelist:
         # find the project
         project = None
         for project_ in result:
@@ -387,7 +379,8 @@ def build_file_tree(filelist):
             project = {
                         "text": project_name,
                         "children": [],
-                        "type": 'project'
+                        "type": 'project',
+                        "projectid": projectid
                       }
             result.append(project)
 
@@ -395,7 +388,6 @@ def build_file_tree(filelist):
             lastComponent = None
             # for each path component ...
             for component in filepath.split("/"):
-                lastComponent = component
                 # Find/create it.
                 subdir = None
                 for child in project['children']:
@@ -410,10 +402,12 @@ def build_file_tree(filelist):
                           }
                     project['children'].append(subdir)
                 project = subdir
+                lastComponent = subdir
 
             # The last component should now be the file.
             lastComponent['data'] = source
             lastComponent['type'] = "file"
+            lastComponent['fileid'] = fileid
 
     return result
 
@@ -469,6 +463,7 @@ def compile(code, verify, dir):
 
 def compile_all(main, files, verify, dir):
     filename = os.path.join(dir, main)
+    print filename
     save_all(files, dir)
     args = [
         config.JAVA_CMD,
