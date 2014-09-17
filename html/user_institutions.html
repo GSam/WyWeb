@@ -47,12 +47,19 @@
                               <div class="form-group">
                                 <label for="institution" class="col-sm-2 control-label">Institution:</label>
                                 <div class="col-sm-10">
-                                  <select name="institution" onchange="this.form.submit()">${OPTION}</select>
+                                  <select name="institution" onchange="this.form.submit()">
+                                    % for value, label in OPTION:
+                                    <option value="${value}" ${"selected" if str(value) == INSTITUTION else ""}>
+                                    ${label}</option>
+                                  % endfor
+                                  </select>
                                 </div>
                               </div>
                               <div class="form-group">
                                 <div class="col-sm-10">
-                                   <fieldset>  <legend>Courses</legend>${COURSE_LIST}</fieldset></td>
+                                  % for courseid, code in COURSE_LIST:
+                                    <input type='radio' name='courseid' value="${str(courseid)}">${code}</input><br/>
+                                  % endfor
                                 </div>
                               </div>
                               % if COURSE_LIST is not "":
