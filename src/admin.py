@@ -366,24 +366,23 @@ class Admin(object):
                 
             studentCourses = list(cursor)
             
-            sql = "select projectid,project_name from project where userid = " + str(whileyid)
+            sql = "select project.projectid,project_name, filename from project left outer join file on (file.projectid = project.projectid) where userid = " + str(whileyid)
+            print sql
             try:
                 cursor.execute(sql)
             except mysql.connector.Error as err:
+                print err
                 print("fail at projects")
                 
+            # Handle the pain of databases returning objects twice. 
             studentProjects = []
-            for (projects) in cursor:
-                projectid = str(projects[0]) 
-                cursorFiles = cnx.cursor()
-                sql2 = "select filename from file where projectid = %s"
-                cursorFiles.execute(sql2, projectid)
-                files = []
-                for (file,) in cursorFiles:
-                    files.append(file)
-                cursorFiles.close()
-                print projects + (files,)
-                studentProjects.append(projects + (files,))
+            projectFiles = {}
+            for (projectid, projectname, filename) in cursor:
+                if projectid not in projectFiles:
+                    files = projectFiles[projectid] = []
+                    studentProjects.append((projectid, projectname, files))
+                if filename:
+                    projectFiles[projectid].append(filename) 
             cursor.close()
             cnx.close()
                     
