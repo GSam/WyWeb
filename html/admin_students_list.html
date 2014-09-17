@@ -75,7 +75,11 @@
 </select></td></tr></table>
 <br>
 <table><tr><td width=55 align=left><img src=images/student_small.png></td><td><h2> Current Students</h2></td></tr>
-<tr><td>&nbsp;</td><td>${OPTIONSTUDENT}</td></tr></table>
+<tr><td>&nbsp;</td><td>
+    % for student_id, name in OPTIONSTUDENT:
+        <a href="?id=${student_id}&institution=${INSTITUTION}&course=${COURSE}">${name}</a><br />
+    % endfor
+</td></tr></table>
 <br><hr>
 </td><td valign=top width="50%"><fieldset>  <legend>
         ${STUDENTNAME}<br />

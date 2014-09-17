@@ -333,13 +333,11 @@ class Admin(object):
     def admin_students_list(self, id=None, institution="", course=None, *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
         error = ""
-        searchResult = ""
         redirect = "NO"
         status = "DB: Connection ok"
         options = []
-        optionsCourse = " "
-        optionsStudent = " "
-        searchValue = ""
+        optionsCourse = []
+        optionsStudent = []
         studentName = "No student selected"
         studentInstitution = ""
         studentCourses = ""
@@ -413,11 +411,6 @@ class Admin(object):
             sql = "SELECT courseid,code from course where institutionid = %s"
             cursor.execute(sql, institution)
             optionsCourse = list(cursor)
-##            for (courseid,code) in cursor:
-##                if str(courseid) == course:
-##                    optionsCourse = optionsCourse + "<option value='" + str(courseid) + "' selected>" + code + "</option>"
-##                else:
-##                    optionsCourse = optionsCourse + "<option value='" + str(courseid) + "'>" + code + "</option>"
             cursor.close()   
         else:
             cnx, status = db.connect()
@@ -426,7 +419,6 @@ class Admin(object):
             cursor.execute(sql, institution)
             for (courseid,code) in cursor:
                 optionsCourse.append((courseid, code))
-##                optionsCourse = optionsCourse + "<option value='" + str(courseid) + "'>" + code + "</option>" 
                 if course == "":
                     course = str(courseid)
             cursor.close()
@@ -436,8 +428,8 @@ class Admin(object):
              cursor = cnx.cursor() 
              sql = "SELECT distinct a.student_info_id,a.givenname,a.surname from student_info a,student_course_link b, course c, course_stream d where c.courseid = %s and  c.courseid = d.courseid and d.coursestreamid =b.coursestreamid and b.studentinfoid = a.student_info_id"
              cursor.execute(sql, (course,))
-             for (student_info_id,givenname,surname) in cursor:                
-                 optionsStudent = optionsStudent + "<a href=admin_students_list?id=" + str(student_info_id) + "&institution=" + institution + "&course=" + course +  ">"  + web.safe(surname) + ", " + web.safe(givenname) + "</br>"
+             for (student_info_id,givenname,surname) in cursor:
+                 optionsStudent.append((student_info_id, web.safe(surname) + ", " + web.safe(givenname)))
                  if course == "":
                     course = str(courseid)
              cursor.close()
