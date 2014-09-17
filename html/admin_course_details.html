@@ -63,7 +63,9 @@
 <h5>Year: ${YEAR}</h5>
 <h5>Validation Code: ${VALIDATIONCODE}</h5>
 
-${STUDENTS}
+% for name in STUDENTS:
+    ${name}<br />
+% endfor
 <br><br><br>
  </div>
       <div class="col-md-1">
