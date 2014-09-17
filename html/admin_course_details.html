@@ -60,7 +60,9 @@
 <h4>${INSTITUTION}</h4>
 <h4>${COURSENAME}</h4>
 <h5>${COURSECODE}</h5>
-${STUDENTS}
+% for name in STUDENTS:
+    ${name}<br />
+% endfor
 <br><br><br>
  </div>
       <div class="col-md-1">

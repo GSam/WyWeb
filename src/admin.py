@@ -219,7 +219,7 @@ class Admin(object):
         redirect = "NO"
         options = " "
         newstatus = "" 
-        students = ""
+        students = []
 
         cnx, status = db.connect()
         cursor = cnx.cursor() 
@@ -234,8 +234,7 @@ class Admin(object):
 
         sql = "SELECT distinct a.student_info_id,a.givenname,a.surname from student_info a,student_course_link b, course c, course_stream d where c.courseid = %s and  c.courseid = d.courseid and d.coursestreamid =b.coursestreamid and b.studentinfoid = a.student_info_id"
         cursor.execute(sql, str(courseID))
-        for (student_info_id,givenname,surname) in cursor:                
-            students = students + web.safe(surname) + ", " + web.safe(givenname) + "</br>"
+        students = [web.safe(surname) + ", " + web.safe(givenname) for _, givenname, surname in cursor]
         cursor.close()
         
         return templating.render("admin_course_details.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, 
@@ -251,74 +250,73 @@ class Admin(object):
     def admin_students_search(self, searchValue="", id=None, *args, **kwargs):
         allow(["HEAD", "GET", "POST"])
         error = ""
-        searchResult = ""
+        searchResult = []
         redirect = "NO"
         status = "DB: Connection ok"
-        options = " "
-        optionsCourse = " "
-        optionsStudent = " "
-        searchValue = ""
         studentName = ""
-        studentCourses = ""
-        studentProjects = ""
-        selectedValue = ""
-        selectedValueCourse = ""
+        institutionName = ""
+        studentCourses = []
+        studentProjects = []
         whileyid = ""
 
-        if request and request.params and 'searchValue' in request.params:
-            searchValue = request.params['searchValue']
-            if searchValue != "":
-                cnx, status = db.connect()
-                cursor = cnx.cursor()
-                join = '%' + request.params['searchValue'].upper() + '%'
-                sql = "select student_info_id,surname,givenname from student_info where UPPER(givenname) like %s or UPPER(surname) like %s order by surname"
-                cursor.execute(sql, (join,join))
-                for (students) in cursor:
-                    searchResult = searchResult + "<br><a href=admin_students_search?id=" + str(students[0]) + "&searchValue=" + searchValue + ">" + web.safe(students[1]) + ", " + web.safe(students[2]) + "</a>"
-                cursor.close()
-                cnx.close()
-
-        if request and request.params and 'id' in request.params:
-            studentid = request.params['id']
+        if searchValue:
             cnx, status = db.connect()
             cursor = cnx.cursor()
-            sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = " + str(studentid) + " and a.institutionid = b.institutionid"
+            join = '%' + searchValue.upper() + '%'
+            sql = "select student_info_id,surname,givenname from student_info where UPPER(givenname) like %s or UPPER(surname) like %s order by surname"
+            cursor.execute(sql, (join,join))
+            searchResult = [(id_, web.safe(surname) + ", " + web.safe(givenname)) 
+                            for id_, surname, givenname in cursor]
+            cursor.close()
+            cnx.close()
+
+        if id:
+            cnx, status = db.connect()
+            cursor = cnx.cursor()
+            sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a left outer join institution b on (a.institutionid = b.institutionid) where student_info_id = " + str(id)
             try:
                 cursor.execute(sql)
             except mysql.connector.Error as err:
-                print("Error Student id = " + studentid)
+                print("Error Student id = " + str(id))
                 
             for (student_info_id,surname,givenname,institution_name,userid) in cursor:
-                studentName = web.safe(givenname) + " " + web.safe(surname)  + " <br><h5>" + institution_name + "</h5>"
+                studentName = web.safe(givenname) + " " + web.safe(surname)
+                institutionName = institution_name
                 whileyid = str(userid)
             
-            sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(studentid)
+            sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(id)
             try:
                 cursor.execute(sql)
             except mysql.connector.Error as err:
                 print("fail at courses")
                 
-            studentCourses = "<h4>Courses</h4>"
-            for (courses) in cursor:
-                studentCourses = studentCourses + "<a href='admin_course_details?id=" + str(courses[3]) + "'>" + courses[1] + "</a> " + str(courses[2]) + " " + str(courses[0]) + "<br>"   
+            studentCourses = list(cursor)
             
-            sql = "select projectid,project_name, filename from project, file where userid = " + str(whileyid) +" and file.projectid = project.projectid"
+            sql = "select project.projectid,project_name, filename from project left outer join file on (file.projectid = project.projectid) where userid = " + str(whileyid)
+            print sql
             try:
                 cursor.execute(sql)
             except mysql.connector.Error as err:
+                print err
                 print("fail at projects")
                 
-            studentProjects = "<h4>Projects</h4>"
-            projectid = ""
-            for (projects, files) in cursor:
-                studentProjects = studentProjects + "<a href='student_project?project=" + str(projects[0]) + "'>" + projects[1] + "</a><br>"
-                studentProjects = studentProjects + " &nbsp; --> &nbsp; " + files[0] + "</a><br>" 
+            # Handle the pain of databases returning objects twice. 
+            studentProjects = []
+            projectFiles = {}
+            for (projectid, projectname, filename) in cursor:
+                if projectid not in projectFiles:
+                    files = projectFiles[projectid] = []
+                    studentProjects.append((projectid, projectname, files))
+                if filename:
+                    projectFiles[projectid].append(filename) 
             cursor.close()
             cnx.close()
         
-        return templating.render("admin_students_search.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, STATUS=status,
-                               OPTION=options, SEARCHRESULT=searchResult, SEARCHVALUE=searchValue, STUDENTNAME=studentName,
-                               STUDENTCOURSES=studentCourses, STUDENTPROJECTS=studentProjects, OPTIONCOURSE=optionsCourse, OPTIONSTUDENT=optionsStudent)
+        return templating.render("admin_students_search.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error,
+                                REDIRECT=redirect, STATUS=status,
+                                SEARCHRESULT=searchResult, SEARCHVALUE=searchValue,
+                                STUDENTNAME=studentName, INSTITUTIONNAME=institutionName,
+                                STUDENTCOURSES=studentCourses, STUDENTPROJECTS=studentProjects)
 
     admin_students_search.exposed = True
 

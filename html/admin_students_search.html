@@ -57,10 +57,28 @@
               <div class="container-fluid" id="content">
            		 <div id="ide">
 <div class=content>
-<table><tr><td><form action="admin_students_search" method="post">Search Student Given Name or Surname <input type="textfield" name="searchValue" value="${SEARCHVALUE}"></td><td> <input type="submit" value="Go"></td></tr></table>
-${SEARCHRESULT}
+<table><tr><td><form action="?" method="post">Search Student Given Name or Surname <input type="textfield" name="searchValue" value="${SEARCHVALUE}"></td><td> <input type="submit" value="Go"></td></tr></table>
+% for id, name in SEARCHRESULT:
+    <a href="?id=${str(id)}&searchValue=${SEARCHVALUE}">${name}</a><br />
+% endfor
 <hr>
-<h3>${STUDENTNAME}</h3>${STUDENTCOURSES}<br>${STUDENTPROJECTS}
+<h3>${STUDENTNAME}</h3><h5>${INSTITUTIONNAME}</h5>
+% if STUDENTCOURSES:
+    <h4>Courses</h4>
+    % for courseName, courseCode, courseYear, courseId in STUDENTCOURSES:
+        <a href="admin_course_details?id=${str(courseId)}">${courseCode}</a> ${str(courseYear)} ${str(courseName)}<br />
+    % endfor
+% endif
+<br>
+% if STUDENTPROJECTS:
+    <h4>Projects</h4>
+    % for projectid, projectname, files in STUDENTPROJECTS:
+        <a href="student_project?project=${str(projectid)}">${str(projectname)}</a><br />
+        % for filename in files:
+            &nbsp; --> &nbsp; ${filename}
+        % endfor
+    % endfor
+% endif
 <br><br>
 </div>
 </div>
