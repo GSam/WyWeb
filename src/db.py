@@ -5,6 +5,7 @@ from mysql.connector import errorcode
 
 import db_config
 
+DBError = mysql.connector.Error
 
 # connection details
 def connect():
@@ -18,7 +19,7 @@ def connect():
         cnx = connect_from_config()
         check_schema(cnx)
         #mysql.connector.connect(user='whiley', password='coyote',host='kipp-cafe.ecs.vuw.ac.nz',database='whiley')
-    except mysql.connector.Error as err:
+    except DBError as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             status = "Something is wrong with your user name or password"
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
@@ -77,7 +78,7 @@ def check_schema(cnx):
             cursor.execute("SELECT * from whiley_user;")
             for (whiley_user) in cursor:
                 FOUND_USERS = True
-        except mysql.connector.Error as err:
+        except DBError as err:
             print err
         if (not FOUND_USERS):
             with open('sql/DropSchema.sql', 'r') as script_file:
@@ -115,6 +116,6 @@ def check_schema(cnx):
                         print("Number of rows affected by statement '{}': {}".format(result.statement, result.rowcount))
                 cursor.execute("commit;")
         cursor.close
-    except mysql.connector.Error as err:
+    except DBError as err:
         print err
 
