@@ -2,9 +2,6 @@ import cherrypy, config, web
 import templating, db
 from cherrypy.lib.cptools import allow
 
-# TODO Remove this imports
-import mysql.connector
-
 class Admin(object):
     # ============================================================
     # Admin Main Page
@@ -266,7 +263,7 @@ class Admin(object):
             sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a left outer join institution b on (a.institutionid = b.institutionid) where student_info_id = " + str(id)
             try:
                 cursor.execute(sql)
-            except mysql.connector.Error as err:
+            except db.DBError as err:
                 print("Error Student id = " + str(id))
                 
             _, surname, givenname, institutionName, userid = cursor.fetchone()
@@ -276,7 +273,7 @@ class Admin(object):
             sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(id)
             try:
                 cursor.execute(sql)
-            except mysql.connector.Error as err:
+            except db.DBError as err:
                 print("fail at courses")
                 
             studentCourses = list(cursor)
@@ -285,7 +282,7 @@ class Admin(object):
             print sql
             try:
                 cursor.execute(sql)
-            except mysql.connector.Error as err:
+            except db.DBError as err:
                 print err
                 print("fail at projects")
                 
@@ -334,7 +331,7 @@ class Admin(object):
             sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = " + str(id) + " and a.institutionid = b.institutionid"
             try:
                 cursor.execute(sql)
-            except mysql.connector.Error as err:
+            except db.DBError as err:
                 print("Error Student id = " + id)
                 
             _, surname, givenname, institution_name, userid = cursor.fetchone()
@@ -344,7 +341,7 @@ class Admin(object):
             sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(id)
             try:
                 cursor.execute(sql)
-            except mysql.connector.Error as err:
+            except db.DBError as err:
                 print("fail at courses")
                 
             studentCourses = list(cursor)
@@ -353,7 +350,7 @@ class Admin(object):
             print sql
             try:
                 cursor.execute(sql)
-            except mysql.connector.Error as err:
+            except db.DBError as err:
                 print err
                 print("fail at projects")
                 
