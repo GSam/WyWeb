@@ -60,15 +60,44 @@
 <form>
 <table width="100%"><tr><td width="50%">
 <table><tr><td width=55 align=left><img src=images/institution_small.png></td><td><h2> Current Institutions</h2></td></tr>
-<tr><td>&nbsp;</td><td><select name="institution" onchange="this.form.submit()">${OPTION}</select></td></tr></table>
+<tr><td>&nbsp;</td><td><select name="institution" onchange="this.form.submit()">
+    % for institutionid, institutionname in OPTION:
+        <option value="${str(institutionid)}" ${"selected" if str(institutionid) == INSTITUTION else ""}>
+            ${institutionname}</option>
+    % endfor
+</select></td></tr></table>
 <br>
 <table><tr><td width=55 align=left><img src=images/course_small.png></td><td><h2> Current Courses</h2></td></tr>
-<tr><td>&nbsp;</td><td><select name="course" onchange="this.form.submit()">${OPTIONCOURSE}</select></td></tr></table>
+<tr><td>&nbsp;</td><td><select name="course" onchange="this.form.submit()">
+    % for courseid, code in OPTIONCOURSE:
+        <option value="${str(courseid)}" ${"selected" if str(courseid) == COURSE else ""}>${code}</option>
+    % endfor
+</select></td></tr></table>
 <br>
 <table><tr><td width=55 align=left><img src=images/student_small.png></td><td><h2> Current Students</h2></td></tr>
 <tr><td>&nbsp;</td><td>${OPTIONSTUDENT}</td></tr></table>
 <br><hr>
-</td><td valign=top width="50%"><fieldset>  <legend>${STUDENTNAME}</legend>${STUDENTCOURSES}<br>${STUDENTPROJECTS}</fieldset></td></tr></table>
+</td><td valign=top width="50%"><fieldset>  <legend>
+        ${STUDENTNAME}<br />
+        <h5>${STUDENTINSTITUTION}</h5>
+</legend>
+% if STUDENTCOURSES:
+    <h4>Courses</h4>
+    % for courseName, courseCode, courseYear, courseId in STUDENTCOURSES:
+        <a href="admin_course_details?id=${str(courseId)}">${courseCode}</a> ${courseYear} ${courseName}<br />
+    % endfor
+% endif
+<br>
+% if STUDENTPROJECTS:
+    <h4>Projects</h4>
+    % for projectid, projectname, files in STUDENTPROJECTS:
+        <a href="#">${projectname}</a><br />
+        % for filename in files:
+            &nbsp; --> &nbsp; ${filename}
+        % endfor
+    % endfor
+% endif
+</fieldset></td></tr></table>
 </form>
 <br><br>
 </div>
