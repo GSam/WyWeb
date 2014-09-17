@@ -9,10 +9,10 @@
       <link rel="stylesheet" href="css/jstree.css">
       <script type="text/javascript" src="js/jquery.js"></script>
       <script type="text/javascript" src="js/jquery-ui.js"></script>
+      <script type="text/javascript" src="require.js"></script>
 	  <script src="js/ace.js" type="text/javascript" charset="utf-8"></script>
 
       <script type="text/javascript" src="js/jstree.js"></script>
-      <script type="text/javascript" src="js/mode-whiley.js"></script>
       <script type="text/javascript">
          var root_url = "${ROOT_URL}";
          var error = "${ERROR}";
@@ -22,8 +22,32 @@
 
       </script>
       <script type="text/javascript" src="js/whileyweb.js"></script>
+<script>
+function commentCode() {
+var oldText = editor.session.getTextRange(editor.getSelectionRange());
+var newText = "";
+var lines = oldText.split('\n');
+for(var i = 0;i < lines.length;i++){
+   newText = newText + "// " + lines[i] + "\n";
+}
+editor.session.replace(editor.getSelectionRange(),newText);
+}
+
+function indentCode() {
+var oldText = editor.session.getTextRange(editor.getSelectionRange());
+var newText = "";
+var lines = oldText.split('\n');
+for(var i = 0;i < lines.length;i++){
+   newText = newText + "\t " + lines[i] + "\n";
+}
+newText = newText.substring(0, newText.length-1);
+editor.session.replace(editor.getSelectionRange(),newText);
+}
+
+</script>
    </head>
    <body>
+
       <div class="container-fluid content">
       <div class="col-md-1">
       </div>
@@ -93,9 +117,12 @@
                     <nav>
                         <button class="btn" onclick="addProject()" title="Create a Project...">+</button>
                     </nav>
-                </div>
+                </div><div><table><tr><td><a href=" javascript:commentCode();"><img src="images/blockquote.gif" border="0" alt="Blockquote selected text"></a></td><td> &nbsp; &nbsp; </td><td>
+                <td><a href=" javascript:indentCode();"><img src="images/indent.png" border="0" alt="Indent selected text"></a></td></tr></table>
+</div>
                 <div id="code" class="col-md-10"></div>
                   <script>
+
 					var editor = ace.edit("code");
 					editor.setTheme("ace/theme/eclipse");
 					editor.getSession().setMode("ace/mode/javascript");
