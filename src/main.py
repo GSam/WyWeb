@@ -1,37 +1,25 @@
 # -*-python-*-
-import mysql.connector
 import cgi
-from itertools import starmap
 import os
-from parser import st2list
 import shutil
 import tempfile
 import subprocess
 import json
 import re
 import glob
-import random
-import string
-
-import db
 import codecs
 from threading import Timer
-
-import config
-
-import web
 
 import cherrypy
 from cherrypy.lib.static import serve_file
 from cherrypy.lib.cptools import allow
 from cherrypy import HTTPRedirect
-from cherrypy import request
-
-from mako.template import Template
 from mako.lookup import TemplateLookup
 
-import templating # Testing facade. 
+import db
+import config
 import admin
+
 
 lookup = TemplateLookup(directories=['html'])
 

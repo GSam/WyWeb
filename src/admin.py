@@ -399,7 +399,7 @@ class Admin(object):
             query = ("SELECT institutionid,institution_name from institution order by institution_name")
             cursor.execute(query)
             for (institutionid,institution_name) in cursor:
-                options.append((institutionid, institutionname))
+                options.append((institutionid, institution_name))
                 if institution == "":
                     institution = str(institutionid)
             cursor.close() 
