@@ -581,3 +581,4 @@ def createWorkingDirectory():
     dir = tempfile.mkdtemp(prefix="", dir=config.DATA_DIR)
     tail, head = os.path.split(dir)
     return head
+

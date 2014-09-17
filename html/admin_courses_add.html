@@ -63,7 +63,11 @@ ${NEWSTATUS}
 <tr><td>Course Code&nbsp; &nbsp; </td><td> <input name="course_code" type="textfield" size="20" style="text-transform:uppercase" ></td></tr>
 <tr><td>Course Name&nbsp; &nbsp; </td><td> <input name="course_name" type="textfield" size="50"></td></tr>
 <tr><td>Validation Code&nbsp; &nbsp; </td><td> <input name="validation_code" type="textfield" size="4" value="${VALIDATIONCODE}"></td></tr>
-<tr><td>Institution &nbsp; &nbsp; </td><td><select name="course_institution">${OPTION}</select></td></tr>
+<tr><td>Institution &nbsp; &nbsp; </td><td><select name="course_institution">
+    % for value, label in OPTION:
+        <option value="${value}">${label}</option>
+    % endfor
+</select></td></tr>
 <tr><td>Year&nbsp; &nbsp; </td><td> <input name="course_year" type="textfield" size="5"></td></tr>
 
 </table><br>

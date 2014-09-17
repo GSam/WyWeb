@@ -65,7 +65,10 @@
                         ${label}</option>
                 % endfor
             </select></td><td width="50%"> <fieldset>  <legend>Courses</legend>
-${COURSE_LIST}</fieldset></td></tr>
+                % for courseid, code in COURSE_LIST:
+                    <a href="admin_course_details?id=${str(courseid)}">${code}</a><br />
+                % endfor
+            </fieldset></td></tr>
 
 		</table>
 		<br><br>
