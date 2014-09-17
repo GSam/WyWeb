@@ -224,22 +224,27 @@ class Admin(object):
         cnx, status = db.connect()
         cursor = cnx.cursor() 
        
-        query = ("SELECT courseid,course_name,code,year,institution_name from course a, institution b where a.institutionid = b.institutionid and a.courseid = %s")
-        cursor.execute(query, (id))
-        for (courseid,course_name,code,year,instition_name) in cursor:
-            courseName = course_name
-            courseCode = code
-            institution = instition_name
-            courseID = courseid
+        query = ("SELECT courseid,course_name,code,year,validationcode,institution_name from course a, institution b where a.institutionid = b.institutionid and a.courseid = %s")
+        cursor.execute(query, (id,))
+        row = cursor.fetchone()
+        print "aa"
+        courseID = row[0]
+        courseName = row[1]
+        courseCode = row[2]
+        year = row[3]
+        validationcode = row[4]
+        institution = row[5]
 
         sql = "SELECT distinct a.student_info_id,a.givenname,a.surname from student_info a,student_course_link b, course c, course_stream d where c.courseid = %s and  c.courseid = d.courseid and d.coursestreamid =b.coursestreamid and b.studentinfoid = a.student_info_id"
-        cursor.execute(sql, str(courseID))
+
+        cursor.execute(sql, (str(courseID),))
         students = [web.safe(surname) + ", " + web.safe(givenname) for _, givenname, surname in cursor]
+
         cursor.close()
         
         return templating.render("admin_course_details.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, 
             REDIRECT=redirect, OPTION=options,
-            COURSENAME=courseName, COURSECODE=courseCode, INSTITUTION=institution, STUDENTS=students)    
+            COURSENAME=courseName, COURSECODE=courseCode, YEAR=year, VALIDATIONCODE=validationcode, INSTITUTION=institution, STUDENTS=students)    
     admin_course_details.exposed = True
     
 
