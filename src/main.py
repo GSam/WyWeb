@@ -307,7 +307,9 @@ def save(project_name, filename, data):
     username = cherrypy.session.get("_cp_username")
     cnx, status = db.connect()
     cursor = cnx.cursor()
-    sql = """SELECT p.projectid FROM project p, whiley_user w WHERE w.userid = p.userid AND w.username = '""" + username + "' AND p.project_name = '" + project_name + "'"
+    sql = """SELECT p.projectid
+    FROM whiley_user w left outer join project p on ( w.userid = p.userid)
+    WHERE w.username = '""" + username + "' AND p.project_name = '" + project_name + "'"
     cursor.execute(sql)
     projectid = cursor.fetchone()
     print projectid
@@ -351,8 +353,10 @@ def get_files(user):
     cnx, status = db.connect()
     cursor = cnx.cursor()
     sql = """SELECT f.fileid, f.filename, p.project_name, f.source
-FROM file f, project p, whiley_user w
-WHERE f.projectid = p.projectid AND p.userid = w.userid AND w.username = '""" + user + "'"
+FROM whiley_user w
+left outer join project p on (p.userid = w.userid)
+left outer join file f on (f.projectid = p.projectid)
+WHERE w.username = '""" + user + "'"
     cursor.execute(sql)
     result = cursor.fetchall()
     cursor.close()
@@ -386,27 +390,30 @@ def build_file_tree(filelist):
                         "type": 'project'
                       }
             result.append(project)
-        
-        # for each path component ...
-        for component in filepath.split("/"):
-            # Find/create it.
-            subdir = None
-            for child in project['children']:
-                if child["text"] == component:
-                    subdir = child
-                    break
 
-            if not subdir:
-                subdir = {
-                        "text": component,
-                        "children": [],
-                      }
-                project['children'].append(subdir)
-            project = subdir
+        if filepath:
+            lastComponent = None
+            # for each path component ...
+            for component in filepath.split("/"):
+                lastComponent = component
+                # Find/create it.
+                subdir = None
+                for child in project['children']:
+                    if child["text"] == component:
+                        subdir = child
+                        break
 
-        # The last component should now be the file. 
-        project['data'] = source
-        project['type'] = "file"
+                if not subdir:
+                    subdir = {
+                            "text": component,
+                            "children": [],
+                          }
+                    project['children'].append(subdir)
+                project = subdir
+
+            # The last component should now be the file.
+            lastComponent['data'] = source
+            lastComponent['type'] = "file"
 
     return result
 

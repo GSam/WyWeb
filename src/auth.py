@@ -5,8 +5,8 @@
 #
 
 import cherrypy
-import db 
-
+import db
+import templating
 
 import cherrypy
 from cherrypy.lib.static import serve_file
@@ -25,18 +25,18 @@ import config
 lookup = TemplateLookup(directories=['html'])
 
 SESSION_KEY = '_cp_username'
- 
+
 #def hash_password(password):
     # uuid is used to generate a random number
 #    salt = uuid.uuid4().hex
 #    return hashlib.sha256(salt.encode() + password.encode()).hexdigest() + ':' + salt
-    
+
 #def check_password(hashed_password, user_password):
 #    password, salt = hashed_password.split(':')
 #    return password == hashlib.sha256(salt.encode() + user_password.encode()).hexdigest()
- 
 
-#TO HASH PASSWORD hashed_password = hash_password(new_pass) 
+
+#TO HASH PASSWORD hashed_password = hash_password(new_pass)
 #check_password(hashed_password, old_pass)
 
 
@@ -51,8 +51,8 @@ def check_credentials(user, passwd):
     'Incorrect username or password'
     """
 
-    cnx = db.connect()[0]  
-    if cnx:      
+    cnx = db.connect()[0]
+    if cnx:
         cursor = cnx.cursor()
         query = ("SELECT * from whiley_user where username = %s and password = %s")
         cursor.execute(query, (user, passwd))
@@ -60,7 +60,7 @@ def check_credentials(user, passwd):
         if cursor.rowcount > 0:
             #print("{} passwd".format(row[2]))
             #hashed_password = hash_password(passwd)
-            #if check_password(hashed_password, row[2]):    
+            #if check_password(hashed_password, row[2]):
             result = None
         else:
              result = "Incorrect username or password"
@@ -83,7 +83,7 @@ def check_username(user):
     'Username not available'
     """
 
-    cnx = db.connect()[0]        
+    cnx = db.connect()[0]
     cursor = cnx.cursor()
     query = ("SELECT * from whiley_user where username = %s")
     cursor.execute(query, (user,))
@@ -95,18 +95,18 @@ def check_username(user):
     cursor.close()
     cnx.close()
     return result
-    
+
 def create_username(user, passwd, email, givenname, surname):
     """
     Create username with given information.
     Returns last created ID on success
 
     >>> create_username("newuser", "newpass", "newmail@gmail.com", "newname", "newsurname")
-    65
+    XX # - LASTSID - Change the XX with the last id to be created
     """
 
     #hashed_password = hash_password(passwd)
-    cnx = db.connect()[0]        
+    cnx = db.connect()[0]
     cursor = cnx.cursor()
     query = "INSERT into whiley_user (username, password, email_address) VALUES (%s, %s, %s)"
     try:
@@ -129,7 +129,7 @@ def insertuserdetails(student_infoid, institutionid, coursesid, validationcode):
     Create username with given information.
     Returns error= False if user is updated | error = True if course id or validationcode is wrong
     """
-    cnx = db.connect()[0]        
+    cnx = db.connect()[0]
     cursor = cnx.cursor()
     #check if validation is correct
     query = "SELECT * FROM course WHERE courseid = %s and validationcode = %s"
@@ -147,7 +147,7 @@ def insertuserdetails(student_infoid, institutionid, coursesid, validationcode):
         error = True
     cursor.close()
     cnx.close()
-    return result
+    return error
 
 
 def check_auth(*args, **kwargs):
@@ -165,7 +165,7 @@ def check_auth(*args, **kwargs):
                     raise cherrypy.HTTPRedirect("/auth/login")
         else:
             raise cherrypy.HTTPRedirect("/auth/login")
-    
+
 cherrypy.tools.auth = cherrypy.Tool('before_handler', check_auth)
 
 
@@ -225,14 +225,14 @@ def all_of(*conditions):
 # Controller to provide login and logout actions
 
 class AuthController(object):
-    
+
     @cherrypy.expose
     def login(self, user=None, passwd="", from_page="/"):
         """Login the user
         Success: Create session and redirect to 'from_page'
         Wrong user: Render login page with error message
         User = None: Show login page
-        
+
 
         """
 
@@ -252,13 +252,13 @@ class AuthController(object):
             cherrypy.session[SESSION_KEY] = cherrypy.request.login = user
             #return cherrypy.session[SESSION_KEY]
             raise cherrypy.HTTPRedirect(from_page)
-    
+
     @cherrypy.expose
     def signup(self, user="", passwd="", email="", cpasswd="", givenname="", surname="", enrolled=False):
         """Sign the user up
         Success: Create session and redirect to root
         Errors: Empty fields, passwords do no match, username already exists
-        
+
         """
         #create_username("test", "ẗest", "testemail")
         print user
@@ -291,7 +291,7 @@ class AuthController(object):
             return template.render(ERROR=error, ERRORMSG=error_msg)
 
     @cherrypy.expose
-    def user_courses(self, studentinfoid=None, *args, **kwargs):
+    def user_courses(self, studentinfoid=None, institution="", validationcode="", courseid="", *args, **kwargs):
         """Assign user to select course
         
         """
@@ -301,62 +301,53 @@ class AuthController(object):
         error = False
         error_msg = " "
         redirect = "NO"
-        options = " "
-        selectedValue = ""
+        options = []
 
-        course_list = ""
+        course_list = []
+        
+        if institution:
+            cnx, status = db.connect()
+            cursor = cnx.cursor() 
+            query = ("SELECT institutionid,institution_name from institution order by institution_name")
+            cursor.execute(query) 
+            options = list(cursor)
+            cursor.close()
 
-        if request:
-            if request.params:
-                if 'institution' in request.params:
-                    selectedValue = request.params['institution']               
-                    cnx, status = db.connect()
-                    cursor = cnx.cursor() 
-                    query = ("SELECT institutionid,institution_name from institution order by institution_name")
-                    cursor.execute(query) 
-                    for (institutionid,institution_name) in cursor:
-                        if str(institutionid) == selectedValue:
-                            options = options + "<option value='" + str(institutionid) + "' selected>" + institution_name + "</option>"
-                        else:
-                            options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>"
-                    cursor.close()
-                if 'course_list' in request.params:
-                    courseid = request.params['course_list']
-                    validationcode = request.params['validationcode']
-                    cnx, status = db.connect()
-                    cursor = cnx.cursor() 
-                    error = insertuserdetails(studentinfoid, selectedValue, courseid, validationcode)
-                    cursor.close()
-                    if error is False:
-                        message="User Created, Welcome! Redirecting..."
-                        template = lookup.get_template("redirect.html")
-                        return template.render(STATUS="alert-success", MESSAGE=message)
-                    else:
-                        error_msg= "Wrong Validation Code"
+        if courseid:
+            cnx, status = db.connect()
+            cursor = cnx.cursor() 
+            error = insertuserdetails(studentinfoid, institution, courseid, validationcode)
+            cursor.close()
+            if error is False:
+                message="User Created, Welcome! Redirecting..."
+                template = lookup.get_template("redirect.html")
+                return template.render(STATUS="alert-success", MESSAGE=message)
+            else:
+                error_msg= "Wrong Validation Code"
 
-        if selectedValue == "":          
+        if institution == "":          
             cnx, status = db.connect()
             cursor = cnx.cursor() 
             query = ("SELECT institutionid,institution_name from institution order by institution_name")
             cursor.execute(query)
             for (institutionid,institution_name) in cursor:
-                options = options + "<option value='" + str(institutionid) + "'>" + institution_name + "</option>" 
-                if selectedValue == "":
-                    selectedValue = str(institutionid)
+                options.append((institutionid, institution_name))
+                if institution == "":
+                    institution = str(institutionid)
             cursor.close()
-                
+
+        ##get courses list
         cnx, status = db.connect()
         cursor = cnx.cursor() 
-        query = ("SELECT courseid,code from course where institutionid = %s order by code")
-        cursor.execute(query, (selectedValue))
-
-        for (courseid,code) in cursor.fetchall():
-            course_list = course_list + "<input type='radio' name='course_list' value='" + str(courseid) + "'> " + code + "</input><br/>"
+        query = ("SELECT courseid,code from course where institutionid = '" + institution + "' order by code")
+        cursor.execute(query)
+        course_list = list(cursor)
         cursor.close()
 
-        template = lookup.get_template("user_institutions.html")
+        return templating.render("user_institutions.html", ERROR=error, ERRORMSG=error_msg, NOTALLOWED=False, 
+                                ROOT_URL=config.VIRTUAL_URL, OPTION=options, 
+                                COURSE_LIST=course_list, STUDENTINFOID=studentinfoid, INSTITUTION=institution)
 
-        return template.render(ERROR=error, ERRORMSG=error_msg, NOTALLOWED=False, ROOT_URL=config.VIRTUAL_URL, REDIRECT=redirect, OPTION=options, COURSE_LIST=course_list, STUDENTINFOID=studentinfoid)
 
     @cherrypy.expose
     def logout(self, from_page="/"):
