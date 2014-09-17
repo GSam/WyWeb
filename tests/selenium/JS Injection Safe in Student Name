@@ -53,8 +53,28 @@
 </tr>
 <tr>
 	<td>verifyText</td>
+	<td>css=h4</td>
+	<td>Victoria University of Wellington</td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>//div[@id='ide']/div/h4[2]</td>
+	<td>Next Generation Languages</td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>css=h5</td>
+	<td>SWEN244</td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>//div[@id='ide']/div/h5[3]</td>
+	<td>Validation Code: aaaa</td>
+</tr>
+<tr>
+	<td>verifyText</td>
 	<td>css=#ide &gt; div.content</td>
-	<td>Victoria University of Wellington Next Generation Languages SWEN244 Where, No<br />Where, No&lt;script&gt;alert(&quot;FAILED&quot;);&lt;/script&gt;</td>
+	<td>Victoria University of Wellington Next Generation Languages SWEN244 Year: 2014 Validation Code: aaaa Where, No<br /> Where, No&lt;script&gt;alert(&quot;FAILED&quot;);&lt;/script&gt;</td>
 </tr>
 <tr>
 	<td>clickAndWait</td>
