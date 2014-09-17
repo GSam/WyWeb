@@ -24,13 +24,7 @@
       <script type="text/javascript" src="js/whileyweb.js"></script>
 <script>
 function commentCode() {
-var oldText = editor.session.getTextRange(editor.getSelectionRange());
-var newText = "";
-var lines = oldText.split('\n');
-for(var i = 0;i < lines.length;i++){
-   newText = newText + "// " + lines[i] + "\n";
-}
-editor.session.replace(editor.getSelectionRange(),newText);
+editor.toggleCommentLines();
 }
 
 function indentCode() {
