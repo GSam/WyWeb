@@ -217,7 +217,7 @@ class Admin(object):
        
         query = ("SELECT courseid,course_name,code,year,validationcode,institution_name from course a, institution b where a.institutionid = b.institutionid and a.courseid = %s")
         cursor.execute(query, (id,))
-        courseID, courseName, courseCode, year, validationcode, insitution = cursor.fetchone()
+        courseID, courseName, courseCode, year, validationcode, institution = cursor.fetchone()
 
         sql = "SELECT distinct a.student_info_id,a.givenname,a.surname from student_info a,student_course_link b, course c, course_stream d where c.courseid = %s and  c.courseid = d.courseid and d.coursestreamid =b.coursestreamid and b.studentinfoid = a.student_info_id"
 
@@ -229,7 +229,7 @@ class Admin(object):
         return templating.render("admin_course_details.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, 
             REDIRECT=redirect, OPTION=options,
             COURSENAME=courseName, COURSECODE=courseCode, YEAR=year, VALIDATIONCODE=validationcode,
-            INSTITUTION=institution, STUDENTS=students)    
+            INSTITUTION=institution, STUDENTS=students)
     admin_course_details.exposed = True
     
 
