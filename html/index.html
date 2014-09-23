@@ -28,14 +28,7 @@ editor.toggleCommentLines();
 }
 
 function indentCode() {
-var oldText = editor.session.getTextRange(editor.getSelectionRange());
-var newText = "";
-var lines = oldText.split('\n');
-for(var i = 0;i < lines.length;i++){
-   newText = newText + "\t " + lines[i] + "\n";
-}
-newText = newText.substring(0, newText.length-1);
-editor.session.replace(editor.getSelectionRange(),newText);
+	editor.indent();
 }
 
 </script>
