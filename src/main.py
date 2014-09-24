@@ -224,7 +224,7 @@ class Main(admin.Admin):
                 "text": "Project 1",
                 "children": [
                     {
-                        "text": "temp" if code != "" else "Hello World",
+                        "text": "Hello World",
                         "data": code if code != "" else HELLO_WORLD,
                         "type": 'file'
                     }
