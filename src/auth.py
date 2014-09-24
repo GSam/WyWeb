@@ -46,10 +46,13 @@ def check_credentials(user, passwd):
     Verifies credentials for username and password.
     Returns None on success or a string describing the error on failure
 
-    >>> check_credentials("greg", "gdg")
+    >>> type(check_credentials("greg", "gdg"))
+    <type 'int'>
 
     >>> check_credentials("wrong", "used")
-    'Incorrect username or password'
+    Traceback (most recent call last):
+        ...
+    LookupError: Incorrect username or password
     """
 
     cnx = db.connect()[0]
@@ -64,11 +67,11 @@ def check_credentials(user, passwd):
             #if check_password(hashed_password, row[2]):
             result = row[0]
         else:
-             raise "Incorrect username or password"
+             raise LookupError("Incorrect username or password")
         cursor.close()
         cnx.close()
     else:
-        raise "Unable to connect to database"
+        raise Exception("Unable to connect to database")
 
 
     return result
@@ -102,8 +105,10 @@ def create_username(user, passwd, email, givenname, surname):
     Create username with given information.
     Returns last created ID on success
 
-    >>> create_username("newuser", "newpass", "newmail@gmail.com", "newname", "newsurname")
-    XX # - LASTSID - Change the XX with the last id to be created
+    >>> type(create_username("newuser", "newpass", "newmail@gmail.com", "newname", "newsurname"))
+    <type 'int'>
+
+    # TODO - LASTSID - Change to test with the last id to be created
     """
 
     #hashed_password = hash_password(passwd)
