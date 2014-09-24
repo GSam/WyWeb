@@ -240,7 +240,7 @@ class Main(admin.Admin):
                 "type": 'project'
             }
         ]
-        if username is None:
+        if userid is None:
             loggedin = False
             print ("not logged in")
         else:
