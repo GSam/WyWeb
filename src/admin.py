@@ -4,7 +4,21 @@ from cherrypy.lib.cptools import allow
 import auth
 from auth import AuthController, requireAdmin
 
+def authorizeTests():
+    global requireAdmin
+    cherrypy.session = {}
+    def innerRequireAdmin(_):
+        return True
+    requireAdmin = innerRequireAdmin
+
 class Admin(object):
+    """Contains methods associated with the admin. 
+
+    If any tests in this class fails, check the database first.
+
+    Test that it can be instantiated, methods tested seperately.
+    >>> self = Admin()
+    """
     # ============================================================
     # Admin Main Page
     # ============================================================
@@ -12,7 +26,8 @@ class Admin(object):
         """
         The admin homepage should return a template for the admin page.
 
-        >>> self = Main()
+        >>> authorizeTests()
+        >>> self = Admin()
         >>> results = self.admin()
         >>> results.ERROR
         ''
@@ -95,7 +110,7 @@ class Admin(object):
     def admin_institutions_add(self, institution=None, description=None, contact=None, website=None,
             *args, **kwargs):
         """
-        Adds an institution to the database.         
+        Adds an institution to the database.
         """
         userid = cherrypy.session.get(auth.SESSION_USERID)
         requireAdmin(userid)
@@ -122,11 +137,40 @@ class Admin(object):
 
     admin_institutions_add.exposed = True
 
+    def admin_institutions_remove(self, id):
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
+        allow(["POST"])
+
+        cnx, status = db.connect()
+        cursor = cnx.cursor()
+        query = "DELETE FROM institution WHERE institutionid=%s"
+        cursor.execute(query, (id,))
+        cursor.close()
+        cnx.close()
+
+        return templating.render("redirect.html", STATUS="alert-success", 
+                                MESSAGE="Institution deleted...")
+    admin_institution_remove.exposed = True
+
     # ============================================================
     # Admin Institutions Page
     # ============================================================
 
     def admin_institutions(self, institution="", *args, **kwargs):
+        """
+        Lists available institutions.
+
+        >>> authorizeTests()
+        >>> self = Admin()
+        >>> ret = self.admin_institutions()
+        >>> ('Victoria University of Wellington', 2) in ret.OPTION
+        True
+        >>> ret = self.admin_institutions(2)
+        >>> ret.INSTITUTION_ID, ret.INSTITUTION, ret.CONTACT, ret.WEBSITE, ret.DESCRIPTION
+        (2, 'Victoria University of Wellington', None, None, None)
+        """
         userid = cherrypy.session.get(auth.SESSION_USERID)
         requireAdmin(userid)
 
@@ -182,6 +226,22 @@ class Admin(object):
     # ============================================================
 
     def admin_courses(self, institution="", *args, **kwargs):
+        """
+        Lists all available courses. 
+
+        >>> authorizeTests()
+        >>> self = Admin()
+        >>> ret = self.admin_courses()
+        >>> (2, 'Victoria University of Wellington') in ret.OPTION
+        True
+        >>> ret = self.admin_courses('2')
+        >>> (2, 'Victoria University of Wellington') in ret.OPTION
+        True
+        >>> ret.INSTITUTION
+        '2'
+        >>> (1, 'SWEN302') in ret.COURSE_LIST
+        True
+        """
         userid = cherrypy.session.get(auth.SESSION_USERID)
         requireAdmin(userid)
 
@@ -199,8 +259,7 @@ class Admin(object):
             cursor.execute(query) 
             options = list(cursor)
             cursor.close()
-
-        if institution == "":          
+        else:          
             cnx, status = db.connect()
             cursor = cnx.cursor() 
             query = ("SELECT institutionid,institution_name from institution order by institution_name")
@@ -234,6 +293,9 @@ class Admin(object):
                         course_institution=None, validation_code=None, *args, **kwargs): 
         userid = cherrypy.session.get(auth.SESSION_USERID)
         requireAdmin(userid)
+        """
+        Adds a course to the database. 
+        """
 
         import random, string
         allow(["HEAD", "GET", "POST"]) 
@@ -267,6 +329,22 @@ class Admin(object):
                                
     admin_course_add.exposed = True
     
+    def admin_course_remove(self, id):
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
+        allow(["POST"])
+
+        cnx, status = db.connect()
+        cursor = cnx.cursor()
+        query = "DELETE FROM course WHERE courseid=%s"
+        cursor.execute(query, (id,))
+        cursor.close()
+        cnx.close()
+
+        return templating.render("redirect.html", STATUS="alert-success", 
+                                MESSAGE="Course deleted...")
+    admin_course_remove.exposed = True
 
     # ============================================================
     # Admin Course details page
@@ -275,11 +353,23 @@ class Admin(object):
     def admin_course_details(self, id, *args, **kwargs):
         userid = cherrypy.session.get(auth.SESSION_USERID)
         requireAdmin(userid)
+        """
+        Retrieves course details.
+
+        >>> authorizeTests()
+        >>> self = Admin()
+        >>> ret = self.admin_course_details('1')
+        >>> ret.COURSENAME, ret.COURSECODE, ret.YEAR
+        ('Agile Methods', 'SWEN302', 2014)
+        >>> ret.VALIDATIONCODE, ret.INSTITUTION
+        (u'aaaa', 'Victoria University of Wellington')
+        >>> 'dave, dave' in ret.STUDENTS
+        True
+        """
 
         allow(["HEAD", "GET", "POST"])
         error = ""
         redirect = "NO"
-        options = " "
         newstatus = "" 
         students = []
 
@@ -298,7 +388,7 @@ class Admin(object):
         cursor.close()
         
         return templating.render("admin_course_details.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, 
-            REDIRECT=redirect, OPTION=options,
+            REDIRECT=redirect,
             COURSENAME=courseName, COURSECODE=courseCode, YEAR=year, VALIDATIONCODE=validationcode,
             INSTITUTION=institution, STUDENTS=students)
     admin_course_details.exposed = True
@@ -311,17 +401,43 @@ class Admin(object):
     def admin_students_search(self, searchValue="", id=None, *args, **kwargs):
         userid = cherrypy.session.get(auth.SESSION_USERID)
         requireAdmin(userid)
+        """
+        Searches students by searchValue, displaying information for student number id. 
+
+        >>> authorizeTests()
+        >>> self = Admin()
+        >>> ret = self.admin_students_search()
+        >>> ret.SEARCHRESULT, ret.SEARCHVALUE
+        ([], '')
+        >>> ret.STUDENTNAME, ret.INSTITUTIONNAME, ret.STUDENTCOURSES, ret.STUDENTPROJECTS
+        ('', '', [], [])
+
+        >>> ret = self.admin_students_search("dav")
+        >>> ret.SEARCHVALUE
+        'dav'
+        >>> (70, 'dave, dave') in ret.SEARCHRESULT
+        True
+        >>> ret.STUDENTNAME, ret.INSTITUTIONNAME, ret.STUDENTCOURSES, ret.STUDENTPROJECTS
+        ('', '', [], [])
+
+        >>> ret = self.admin_students_search("dav", 70)
+        >>> ret.SEARCHVALUE
+        'dav'
+        >>> (70, 'dave, dave') in ret.SEARCHRESULT
+        True
+        >>> ret.STUDENTNAME, ret.INSTITUTIONNAME
+        ('dave dave', 'Victoria University of Wellington')
+        >>> ('Agile Methods', 'SWEN302', 2014, 1) in ret.STUDENTCOURSES
+        True
+        """
 
         allow(["HEAD", "GET", "POST"])
         error = ""
         searchResult = []
         redirect = "NO"
         status = "DB: Connection ok"
-        studentName = ""
-        institutionName = ""
         studentCourses = []
         studentProjects = []
-        whileyid = ""
 
         if searchValue:
             cnx, status = db.connect()
@@ -329,51 +445,13 @@ class Admin(object):
             join = '%' + searchValue.upper() + '%'
             sql = "select student_info_id,surname,givenname from student_info where UPPER(givenname) like %s or UPPER(surname) like %s order by surname"
             cursor.execute(sql, (join,join))
-            searchResult = [(id_, web.safe(surname) + ", " + web.safe(givenname)) 
+            searchResult = [(id_, name(givenname, surname)) 
                             for id_, surname, givenname in cursor]
             cursor.close()
             cnx.close()
 
-        if id:
-            cnx, status = db.connect()
-            cursor = cnx.cursor()
-            sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a left outer join institution b on (a.institutionid = b.institutionid) where student_info_id = " + str(id)
-            try:
-                cursor.execute(sql)
-            except db.DBError as err:
-                print("Error Student id = " + str(id))
-                
-            _, surname, givenname, institutionName, userid = cursor.fetchone()
-            studentName = fullname(givenname, surname)
-            whileyid = str(userid)
-            
-            sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(id)
-            try:
-                cursor.execute(sql)
-            except db.DBError as err:
-                print("fail at courses")
-                
-            studentCourses = list(cursor)
-            
-            sql = "select project.projectid,project_name, filename from project left outer join file on (file.projectid = project.projectid) where userid = " + str(whileyid)
-            print sql
-            try:
-                cursor.execute(sql)
-            except db.DBError as err:
-                print err
-                print("fail at projects")
-                
-            # Handle the pain of databases returning objects twice. 
-            studentProjects = []
-            projectFiles = {}
-            for (projectid, projectname, filename) in cursor:
-                if projectid not in projectFiles:
-                    files = projectFiles[projectid] = []
-                    studentProjects.append((projectid, projectname, files))
-                if filename:
-                    projectFiles[projectid].append(filename) 
-            cursor.close()
-            cnx.close()
+        status, studentName, institutionName, studentCourses, studentProjects = \
+                studentInfo(id)
         
         return templating.render("admin_students_search.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error,
                                 REDIRECT=redirect, STATUS=status,
@@ -391,61 +469,69 @@ class Admin(object):
     def admin_students_list(self, id=None, institution="", course=None, *args, **kwargs):
         userid = cherrypy.session.get(auth.SESSION_USERID)
         requireAdmin(userid)
+        """
+        Lists students under a institution and course. 
+
+        >>> authorizeTests()
+        >>> self = Admin().admin_students_list
+        >>> ret = self()
+        >>> (2, 'Victoria University of Wellington') in ret.OPTION
+        True
+        >>> ret.STUDENTNAME, ret.STUDENTCOURSES
+        ('No student selected', [])
+
+        >>> ret = self(institution='2')
+        >>> (2, 'Victoria University of Wellington') in ret.OPTION
+        True
+        >>> (1, 'SWEN302') in ret.OPTIONCOURSE
+        True
+        >>> ret.INSTITUTION
+        '2'
+        >>> ret.STUDENTNAME, ret.STUDENTCOURSES
+        ('No student selected', [])
+
+        >>> ret = self(institution='2', course='1')
+        >>> (2, 'Victoria University of Wellington') in ret.OPTION
+        True
+        >>> ret.INSTITUTION
+        '2'
+        >>> (1, 'SWEN302') in ret.OPTIONCOURSE
+        True
+        >>> ret.COURSE
+        '1'
+        >>> (70, 'dave, dave') in ret.OPTIONSTUDENT
+        True
+        >>> ret.STUDENTNAME, ret.STUDENTCOURSES
+        ('No student selected', [])
+        
+        >>> ret = self(70, '2', '1')
+        >>> (2, 'Victoria University of Wellington') in ret.OPTION
+        True
+        >>> ret.INSTITUTION
+        '2'
+        >>> (1, 'SWEN302') in ret.OPTIONCOURSE
+        True
+        >>> ret.COURSE
+        '1'
+        >>> (70, 'dave, dave') in ret.OPTIONSTUDENT
+        True
+        >>> ret.STUDENTNAME
+        'dave dave'
+        >>> ('Agile Methods', 'SWEN302', 2014, 1) in ret.STUDENTCOURSES
+        True
+        """
 
         allow(["HEAD", "GET", "POST"])
         error = ""
         redirect = "NO"
-        status = "DB: Connection ok"
         options = []
         optionsCourse = []
         optionsStudent = []
-        studentName = "No student selected"
         studentInstitution = ""
-        studentCourses = ""
-        studentProjects = ""
-        whileyid = ""
 
-        if id:
-            cnx, status = db.connect()
-            cursor = cnx.cursor()
-            sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = " + str(id) + " and a.institutionid = b.institutionid"
-            try:
-                cursor.execute(sql)
-            except db.DBError as err:
-                print("Error Student id = " + id)
-                
-            _, surname, givenname, institution_name, userid = cursor.fetchone()
-            studentName = fullname(givenname, surname)
-            whileyid = str(userid)
-            
-            sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(id)
-            try:
-                cursor.execute(sql)
-            except db.DBError as err:
-                print("fail at courses")
-                
-            studentCourses = list(cursor)
-            
-            sql = "select project.projectid,project_name, filename from project left outer join file on (file.projectid = project.projectid) where userid = " + str(whileyid)
-            print sql
-            try:
-                cursor.execute(sql)
-            except db.DBError as err:
-                print err
-                print("fail at projects")
-                
-            # Handle the pain of databases returning objects twice. 
-            studentProjects = []
-            projectFiles = {}
-            for (projectid, projectname, filename) in cursor:
-                if projectid not in projectFiles:
-                    files = projectFiles[projectid] = []
-                    studentProjects.append((projectid, projectname, files))
-                if filename:
-                    projectFiles[projectid].append(filename) 
-            cursor.close()
-            cnx.close()
-                    
+        status, studentName, studentInstitution, studentCourses, studentProjects = \
+                studentInfo(id, "No student selected")
+
         if institution:
             cnx, status = db.connect()
             cursor = cnx.cursor() 
@@ -504,7 +590,72 @@ class Admin(object):
     admin_students_list.exposed = True
 
 def name(given, sur):
+    """
+    Formats a name in a websafe "lastname, firstname" format.
+
+    >>> name("david", "pearce")
+    'pearce, david'
+    >>> name("<em>attacker</em>", "nefarious<script>alert('BOO!')</script>")
+    "nefarious&lt;script&gt;alert('BOO!')&lt;/script&gt;, &lt;em&gt;attacker&lt;/em&gt;"
+    """
     return web.safe(sur) + ", " + web.safe(given)
 
 def fullname(given, sur):
+    """
+    Formats a name in a websafe "firstname lastname" format.
+
+    >>> fullname("david", "pearce")
+    'david pearce'
+    >>> fullname("<em>attacker</em>", "nefarious<script>alert('BOO!')</script>")
+    "&lt;em&gt;attacker&lt;/em&gt; nefarious&lt;script&gt;alert('BOO!')&lt;/script&gt;"
+    """
     return web.safe(given) + " " + web.safe(sur)
+
+def studentInfo(id, defaultName=""):
+    status = "DB: Connection ok"
+    studentName = defaultName
+    institution_name = ""
+    whileyid = None
+    studentCourses = studentProjects = []
+
+    if id:
+        cnx, status = db.connect()
+        cursor = cnx.cursor()
+        sql = "select student_info_id,surname,givenname,institution_name,userid from student_info a,institution b where student_info_id = " + str(id) + " and a.institutionid = b.institutionid"
+        try:
+            cursor.execute(sql)
+        except db.DBError as err:
+            print("Error Student id = " + id)
+            
+        _, surname, givenname, institution_name, userid = cursor.fetchone()
+        studentName = fullname(givenname, surname)
+        whileyid = str(userid)
+        
+        sql = "select c.course_name,c.code,year,c.courseid from student_course_link a left outer join course_stream b on a.coursestreamid = b.coursestreamid left outer join course c on b.courseid = c.courseid where a.studentinfoid = " + str(id)
+        try:
+            cursor.execute(sql)
+        except db.DBError as err:
+            print("fail at courses")
+            
+        studentCourses = list(cursor)
+        
+        sql = "select project.projectid,project_name, filename from project left outer join file on (file.projectid = project.projectid) where userid = " + str(whileyid)
+        try:
+            cursor.execute(sql)
+        except db.DBError as err:
+            print err
+            print("fail at projects")
+            
+        # Handle the pain of databases returning objects twice. 
+        studentProjects = []
+        projectFiles = {}
+        for (projectid, projectname, filename) in cursor:
+            if projectid not in projectFiles:
+                files = projectFiles[projectid] = []
+                studentProjects.append((projectid, projectname, files))
+            if filename:
+                projectFiles[projectid].append(filename) 
+        cursor.close()
+        cnx.close()
+
+    return status, studentName, institution_name, studentCourses, studentProjects

@@ -301,7 +301,7 @@ var editor;
 // Run this code when the page has loaded.
 $(function() {
     editor.markers = [];
-    ace.Range = require('ace/range').Range;
+    /*ace.Range = require('ace/range').Range;
     // Enable the editor with Whiley syntax.
     editor = ace.edit("code");
     var WhileyMode = require("ace/mode/whiley").Mode;
@@ -322,7 +322,7 @@ $(function() {
         handles: "s",
         cursor: "default",
         minHeight: $("#code").height()
-    });
+    });*/
 
     // If there is an error, display the error message for 5 seconds.
     if(error != "") {
