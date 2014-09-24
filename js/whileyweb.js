@@ -66,7 +66,7 @@ function getPath($files, node) {
 function showErrors(errors) {
     clearErrors();
     for(var i=0;i!=errors.length;++i) {
-		var error = errors[i];
+        var error = errors[i];
         markError(error);
     }
 }
@@ -211,12 +211,14 @@ function clearMessages() {
 }
 
 var _selectedFile, _fileLoading = false;
+var _newFile = false;
 
 $(function() {
     $('#file-browser').on('changed.jstree', function(evt, data) {
         if (data && data.node && "data" in data.node) {
             _fileLoading = true
             editor.setValue(data.node.data, 0);
+            _newFile = true;
             _fileLoading = false
             _selectedFile = data.node
         }
@@ -338,6 +340,33 @@ $(function() {
             }
         });
     }
+
+    editor.commands.addCommand({
+        name: 'saveFile',
+        bindKey: {
+            win: 'Ctrl-S',
+            mac: 'Command-S',
+            sender: 'editor|cli'
+        },
+        exec: function(env, args, request) {
+        }
+    });
+
+    editor.commands.addCommand({
+        name: 'File',
+        bindKey: {
+            win: 'Ctrl-Z',
+            mac: 'Command-Z',
+            sender: 'editor|cli'
+        },
+        exec: function(env, args, request) {
+            if (_newFile) {
+                _newFile = false;
+                editor.getSession().getUndoManager().reset()
+            }
+            editor.undo()
+        }
+    });
 
     // Now activate all "behaviours" for the editor.
     $(document).trigger("ace-loaded");
