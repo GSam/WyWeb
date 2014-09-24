@@ -19,6 +19,7 @@ from mako.lookup import TemplateLookup
 import db
 import config
 import admin
+from auth import isAdmin
 
 
 lookup = TemplateLookup(directories=['html'])
@@ -200,6 +201,7 @@ class Main(admin.Admin):
         allow(["HEAD", "GET"])
         error = ""
         redirect = "NO"
+        admin = False
         try:
             # Sanitize the ID.
             safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
@@ -231,6 +233,8 @@ class Main(admin.Admin):
             print ("not logged in")
         else:
             loggedin = True
+            if isAdmin(username):
+                admin = True
             print ("logged")
             filelist = get_files(username)
             print filelist
@@ -243,6 +247,7 @@ class Main(admin.Admin):
                             REDIRECT=redirect, 
                             USERNAME=username, 
                             LOGGED=loggedin,
+                            ADMIN=admin,
                             HELLO_WORLD=HELLO_WORLD,
                             FILES=json.dumps(files))
 
@@ -251,12 +256,14 @@ class Main(admin.Admin):
 
     def student_project(self, project):
         allow(["HEAD", "GET"])
-        
+        admin = False
         # TODO This page should REALLY be secured!
         template = lookup.get_template("index.html")
         username = cherrypy.session.get("_cp_username")
         if not username:
             raise cherrypy.HTTPError(403, "Unauthorised!")
+        if isAdmin(username):
+            admin = True
         files = get_project(project)
         print files
         files = build_file_tree(files)
@@ -267,6 +274,7 @@ class Main(admin.Admin):
                         REDIRECT="",
                         USERNAME=username,
                         LOGGED=username is not None,
+                        ADMIN=admin,
                         FILES=json.dumps(files)
                 )
     student_project.exposed = True

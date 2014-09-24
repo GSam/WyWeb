@@ -77,11 +77,15 @@ editor.session.replace(editor.getSelectionRange(),newText);
                         </div>
    		            </form>
                      % if LOGGED is True:
+                        % if ADMIN is True:
+                           <form class="navbar-form navbar-right"  action="/admin">
+                              <button type="submit" class="btn btn-default">Admim</button>
+                           </form>
+                        % endif
                         <form class="navbar-form navbar-right"  method="post" action="/auth/logout" role="login">
                            <button type="submit" class="btn btn-default">Log out</button>
                         </form>
                         <p class="navbar-text navbar-right">Logged in as <a href="#" class="navbar-link">${USERNAME}</a></p>
-
                      % else:
                         <div class="navbar-right">
                         <form class="navbar-form"  method="post" action="/auth/login" role="login">

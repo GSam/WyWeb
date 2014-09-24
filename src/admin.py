@@ -1,6 +1,7 @@
 import cherrypy, config, web
 import templating, db
 from cherrypy.lib.cptools import allow
+from auth import AuthController, requireAdmin
 
 class Admin(object):
     # ============================================================
@@ -19,6 +20,9 @@ class Admin(object):
         >>> results.STATUS
         'DB: Connection ok'
         """
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+        
         allow(["HEAD", "GET"])
         error = ""
         redirect = "NO"
@@ -26,7 +30,6 @@ class Admin(object):
         cnx = db.connect()
 
         return templating.render("admin.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, STATUS=status)
-
     admin.exposed = True
 
     # ============================================================
@@ -38,6 +41,9 @@ class Admin(object):
         """
         Adds an institution to the database.         
         """
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
         allow(["HEAD", "GET", "POST"])
         options = " "
         status = ""
@@ -65,6 +71,9 @@ class Admin(object):
     # ============================================================
 
     def admin_institutions(self, institution="", *args, **kwargs):
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
         allow(["HEAD", "GET", "POST"])
         redirect = "NO"
         options = []
@@ -117,6 +126,9 @@ class Admin(object):
     # ============================================================
 
     def admin_courses(self, institution="", *args, **kwargs):
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
         allow(["HEAD", "GET", "POST"])
         error = ""
         redirect = "NO"
@@ -164,6 +176,9 @@ class Admin(object):
      
     def admin_course_add(self, course_name=None, course_code=None, course_year=None, 
                         course_institution=None, validation_code=None, *args, **kwargs): 
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
         import random, string
         allow(["HEAD", "GET", "POST"]) 
         error = "" 
@@ -202,6 +217,9 @@ class Admin(object):
     # ============================================================
 
     def admin_course_details(self, id, *args, **kwargs):
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
         allow(["HEAD", "GET", "POST"])
         error = ""
         redirect = "NO"
@@ -235,6 +253,9 @@ class Admin(object):
     # ============================================================
 
     def admin_students_search(self, searchValue="", id=None, *args, **kwargs):
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
         allow(["HEAD", "GET", "POST"])
         error = ""
         searchResult = []
@@ -312,6 +333,9 @@ class Admin(object):
     # ============================================================
 
     def admin_students_list(self, id=None, institution="", course=None, *args, **kwargs):
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
         allow(["HEAD", "GET", "POST"])
         error = ""
         redirect = "NO"
