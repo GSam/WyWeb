@@ -33,3 +33,5 @@ from defaults import *
 # The location of the file to write errors to. Set to None for no logging.
 # ERROR_LOG = None
 
+# The location to store internal failure (null) errors
+# FAIL_DIR = "fail"
