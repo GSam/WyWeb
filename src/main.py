@@ -20,7 +20,8 @@ import db
 import config
 import auth
 import admin
-
+from auth import isAdmin
+import tarfile
 
 lookup = TemplateLookup(directories=['html'])
 
@@ -84,12 +85,15 @@ class Main(admin.Admin):
         self.private_save(**files)
 
         # First, create working directory
-        dir = createWorkingDirectory()
-        dir = config.DATA_DIR + "/" + dir
+        suffix = createWorkingDirectory()
+        dir = config.DATA_DIR + "/" + suffix
 
         result = compile_all(_main, files, _verify, dir)
 
         # #        shutil.rmtree(dir)
+
+        if "internal failure (null)" in str(result):
+            make_tarfile('%s.tar.gz' % suffix, dir)
 
         if type(result) == str:
             response = {"result": "error", "error": result}
@@ -165,8 +169,8 @@ class Main(admin.Admin):
         self.private_save(**files)
 
         # First, create working directory
-        dir = createWorkingDirectory()
-        dir = config.DATA_DIR + "/" + dir
+        suffix = createWorkingDirectory()
+        dir = config.DATA_DIR + "/" + suffix
 
         # Find package name
         package = None
@@ -178,6 +182,9 @@ class Main(admin.Admin):
         run_path = os.path.join(dir, os.path.dirname(_main))
 
         result = compile_all(_main, files, _verify, dir)
+
+        if "internal failure (null)" in str(result):
+            make_tarfile('%s.tar.gz' % suffix, dir)
 
         if type(result) == str:
             response = {"result": "error", "error": result}
@@ -205,6 +212,7 @@ class Main(admin.Admin):
         allow(["HEAD", "GET"])
         error = ""
         redirect = "NO"
+        admin = False
         try:
             # Sanitize the ID.
             safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
@@ -237,6 +245,8 @@ class Main(admin.Admin):
             print ("not logged in")
         else:
             loggedin = True
+            if isAdmin(username):
+                admin = True
             print ("logged")
             filelist = get_files(username)
             print filelist
@@ -250,6 +260,7 @@ class Main(admin.Admin):
                             USERNAME=username, 
                             USERID=userid, 
                             LOGGED=loggedin,
+                            ADMIN=admin,
                             HELLO_WORLD=HELLO_WORLD,
                             FILES=json.dumps(files))
 
@@ -258,13 +269,15 @@ class Main(admin.Admin):
 
     def student_project(self, project):
         allow(["HEAD", "GET"])
-        
+        admin = False
         # TODO This page should REALLY be secured!
         template = lookup.get_template("index.html")
         username = cherrypy.session.get(auth.SESSION_KEY)
         userid = cherrypy.session.get(auth.SESSION_USERID)
         if not userid:
             raise cherrypy.HTTPError(403, "Unauthorised!")
+        if isAdmin(username):
+            admin = True
         files = get_project(project)
         print files
         files = build_file_tree(files)
@@ -276,6 +289,7 @@ class Main(admin.Admin):
                         USERNAME=username,
                         USERID=userid,
                         LOGGED=username is not None,
+                        ADMIN=admin,
                         FILES=json.dumps(files)
                 )
     student_project.exposed = True
@@ -598,3 +612,9 @@ def createWorkingDirectory():
     tail, head = os.path.split(dir)
     return head
 
+def make_tarfile(output_filename, source_dir):
+    if not os.path.exists(config.FAIL_DIR):
+        os.makedirs(config.FAIL_DIR)
+
+    with tarfile.open(os.path.join(config.FAIL_DIR, output_filename), "w:gz") as tar:
+        tar.add(source_dir, arcname=os.path.basename(source_dir))

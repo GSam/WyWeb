@@ -78,9 +78,9 @@ def check_username(user):
     Checks if username exists.
     Returns None on success or a string describing the error on failure
 
-    >>> check_credentials("newuser")
+    >>> check_username("usernotcreated")
 
-    >>> check_credentials("greg")
+    >>> check_username("greg")
     'Username not available'
     """
 
@@ -222,7 +222,50 @@ def all_of(*conditions):
         return True
     return check
 
+def requireAdmin(username):
+    """
+    Require admin role to show the page, raise an error if user is not admin
+    """
+    if not isAdmin(username):
+        raise cherrypy.HTTPRedirect("/auth/login")
+        
+def isAdmin(username):
+    """
+    Checks if username is admin.
+    Returns True on success or False on failure
 
+    >>> isAdmin("greg")
+    True
+    >>> isAdmin("iury")
+    False
+    """
+    result = True
+    cnx = db.connect()[0]
+    if cnx:
+        cursor = cnx.cursor()
+        query = ("SELECT userid from whiley_user where username = %s")
+        cursor.execute(query, (username,))
+        row = cursor.fetchone()
+        if cursor.rowcount > 0:
+            userid = row[0]
+        else:
+            result = False
+        cursor.close()
+
+        if result is True:
+            cursor = cnx.cursor()
+            query = ("SELECT adminid from admin_users where userid = %s")
+            cursor.execute(query, (userid,))      
+            row = cursor.fetchone()
+            if cursor.rowcount > 0:
+                result = True
+            else:
+                result = False
+            cursor.close()
+            cnx.close()
+    else:
+        print "Unable to connect ot database"
+    return result
 # Controller to provide login and logout actions
 
 class AuthController(object):
@@ -236,7 +279,6 @@ class AuthController(object):
 
 
         """
-
         if user is None:
             #return self.get_loginform("", from_page=from_page)
             template = lookup.get_template("login.html")

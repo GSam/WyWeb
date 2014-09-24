@@ -1,6 +1,14 @@
 import cherrypy, config, web
 import templating, db
 from cherrypy.lib.cptools import allow
+from auth import AuthController, requireAdmin
+
+def authorizeTests():
+    global requireAdmin
+    cherrypy.session = {}
+    def innerRequireAdmin(_):
+        return True
+    requireAdmin = innerRequireAdmin
 
 class Admin(object):
     """Contains methods associated with the admin. 
@@ -17,6 +25,7 @@ class Admin(object):
         """
         The admin homepage should return a template for the admin page.
 
+        >>> authorizeTests()
         >>> self = Admin()
         >>> results = self.admin()
         >>> results.ERROR
@@ -26,6 +35,9 @@ class Admin(object):
         >>> results.STATUS
         'DB: Connection ok'
         """
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+        
         allow(["HEAD", "GET"])
         error = ""
         redirect = "NO"
@@ -33,7 +45,6 @@ class Admin(object):
         cnx = db.connect()
 
         return templating.render("admin.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, STATUS=status)
-
     admin.exposed = True
 
     # ============================================================
@@ -45,6 +56,9 @@ class Admin(object):
         """
         Adds an institution to the database.
         """
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
         allow(["HEAD", "GET", "POST"])
         options = " "
         status = ""
@@ -75,6 +89,7 @@ class Admin(object):
         """
         Lists available institutions.
 
+        >>> authorizeTests()
         >>> self = Admin()
         >>> ret = self.admin_institutions()
         >>> ('Victoria University of Wellington', 2) in ret.OPTION
@@ -83,6 +98,9 @@ class Admin(object):
         >>> ret.INSTITUTION_ID, ret.INSTITUTION, ret.CONTACT, ret.WEBSITE, ret.DESCRIPTION
         (2, 'Victoria University of Wellington', None, None, None)
         """
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
         allow(["HEAD", "GET", "POST"])
         redirect = "NO"
         options = []
@@ -138,6 +156,7 @@ class Admin(object):
         """
         Lists all available courses. 
 
+        >>> authorizeTests()
         >>> self = Admin()
         >>> ret = self.admin_courses()
         >>> (2, 'Victoria University of Wellington') in ret.OPTION
@@ -150,6 +169,9 @@ class Admin(object):
         >>> (1, 'SWEN302') in ret.COURSE_LIST
         True
         """
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
         allow(["HEAD", "GET", "POST"])
         error = ""
         redirect = "NO"
@@ -199,6 +221,9 @@ class Admin(object):
         """
         Adds a course to the database. 
         """
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
         import random, string
         allow(["HEAD", "GET", "POST"]) 
         error = "" 
@@ -240,6 +265,7 @@ class Admin(object):
         """
         Retrieves course details.
 
+        >>> authorizeTests()
         >>> self = Admin()
         >>> ret = self.admin_course_details('1')
         >>> ret.COURSENAME, ret.COURSECODE, ret.YEAR
@@ -249,6 +275,9 @@ class Admin(object):
         >>> 'dave, dave' in ret.STUDENTS
         True
         """
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
         allow(["HEAD", "GET", "POST"])
         error = ""
         redirect = "NO"
@@ -284,6 +313,7 @@ class Admin(object):
         """
         Searches students by searchValue, displaying information for student number id. 
 
+        >>> authorizeTests()
         >>> self = Admin()
         >>> ret = self.admin_students_search()
         >>> ret.SEARCHRESULT, ret.SEARCHVALUE
@@ -309,6 +339,9 @@ class Admin(object):
         >>> ('Agile Methods', 'SWEN302', 2014, 1) in ret.STUDENTCOURSES
         True
         """
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
         allow(["HEAD", "GET", "POST"])
         error = ""
         searchResult = []
@@ -348,6 +381,7 @@ class Admin(object):
         """
         Lists students under a institution and course. 
 
+        >>> authorizeTests()
         >>> self = Admin().admin_students_list
         >>> ret = self()
         >>> (2, 'Victoria University of Wellington') in ret.OPTION
@@ -395,6 +429,9 @@ class Admin(object):
         >>> ('Agile Methods', 'SWEN302', 2014, 1) in ret.STUDENTCOURSES
         True
         """
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
         allow(["HEAD", "GET", "POST"])
         error = ""
         redirect = "NO"
