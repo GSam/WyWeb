@@ -123,7 +123,11 @@ class Main(admin.Admin):
         # First, create working directory
         dir = createWorkingDirectory()
         # Second, save the file
-        save(config.DATA_DIR + "/" + dir + "/tmp.whiley", code, "utf-8")
+
+        f = codecs.open(config.DATA_DIR + "/" + dir + "/tmp.whiley","w",'utf-8')
+        f.write(code)
+        f.close()
+
         # Fouth, return result as JSON
         return json.dumps({
             "id": dir
@@ -220,8 +224,8 @@ class Main(admin.Admin):
                 "text": "Project 1",
                 "children": [
                     {
-                        "text": "Hello World",
-                        "data": HELLO_WORLD,
+                        "text": "temp" if code != "" else "Hello World",
+                        "data": code if code != "" else HELLO_WORLD,
                         "type": 'file'
                     }
                 ],
