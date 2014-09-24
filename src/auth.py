@@ -47,10 +47,13 @@ def check_credentials(user, passwd):
     Verifies credentials for username and password.
     Returns None on success or a string describing the error on failure
 
-    >>> check_credentials("greg", "gdg")
+    >>> type(check_credentials("greg", "gdg"))
+    <type 'int'>
 
     >>> check_credentials("wrong", "used")
-    'Incorrect username or password'
+    Traceback (most recent call last):
+        ...
+    LookupError: Incorrect username or password
     """
 
     cnx = db.connect()[0]
@@ -65,11 +68,11 @@ def check_credentials(user, passwd):
             #if check_password(hashed_password, row[2]):
             result = row[0]
         else:
-             raise "Incorrect username or password"
+             raise LookupError("Incorrect username or password")
         cursor.close()
         cnx.close()
     else:
-        raise "Unable to connect to database"
+        raise Exception("Unable to connect to database")
 
 
     return result
@@ -103,8 +106,10 @@ def create_username(user, passwd, email, givenname, surname):
     Create username with given information.
     Returns last created ID on success
 
-    >>> create_username("newuser", "newpass", "newmail@gmail.com", "newname", "newsurname")
-    XX # - LASTSID - Change the XX with the last id to be created
+    >>> type(create_username("newuser", "newpass", "newmail@gmail.com", "newname", "newsurname"))
+    <type 'int'>
+
+    # TODO - LASTSID - Change to test with the last id to be created
     """
 
     #hashed_password = hash_password(passwd)
@@ -113,18 +118,39 @@ def create_username(user, passwd, email, givenname, surname):
     query = "INSERT into whiley_user (username, password, email_address) VALUES (%s, %s, %s)"
     try:
         cursor.execute(query, (user, passwd, email))
-    except mysql.connector.Error, err:
+    except connector.Error, err:
         print("Error  = %s" % err)
     userid = cursor.lastrowid
     query = "INSERT into student_info (givenname, surname, userid) VALUES (%s, %s, %s)"
     try:
         cursor.execute(query, (givenname, surname, userid))
-    except mysql.connector.Error, err:
+    except connector.Error, err:
         print("Error  = %s" % err)
     studentid = cursor.lastrowid
     cursor.close()
     cnx.close()
     return userid, studentid
+
+
+def create_admin(userid):
+    """
+    Insert userid to admin table
+    """
+    result = False
+    cnx = db.connect()[0]
+    cursor = cnx.cursor()
+    query = "SELECT * from admin_users where userid = %s"
+    cursor.execute(query, (userid,))
+    cursor.fetchone()
+    if cursor.rowcount > 0:
+        result = False
+    else:
+        query = "INSERT into admin_users (userid) VALUES (%s)"
+        cursor.execute(query, (userid,))
+        result = True
+    cursor.close()
+    cnx.close()
+    return result
 
 def insertuserdetails(student_infoid, institutionid, coursesid, validationcode):
     """
@@ -224,47 +250,34 @@ def all_of(*conditions):
         return True
     return check
 
-def requireAdmin(username):
+def requireAdmin(userid):
     """
     Require admin role to show the page, raise an error if user is not admin
     """
-    if not isAdmin(username):
+    if not isAdmin(userid):
         raise cherrypy.HTTPRedirect("/auth/login")
         
-def isAdmin(username):
+def isAdmin(userid):
     """
     Checks if username is admin.
     Returns True on success or False on failure
 
-    >>> isAdmin("greg")
+    >>> isAdmin(01)
     True
-    >>> isAdmin("iury")
+    >>> isAdmin(02)
     False
     """
-    result = True
+    result = False
     cnx = db.connect()[0]
     if cnx:
         cursor = cnx.cursor()
-        query = ("SELECT userid from whiley_user where username = %s")
-        cursor.execute(query, (username,))
+        query = ("SELECT adminid from admin_users where userid = %s")
+        cursor.execute(query, (userid,))      
         row = cursor.fetchone()
         if cursor.rowcount > 0:
-            userid = row[0]
-        else:
-            result = False
+            result = True
         cursor.close()
-
-        if result is True:
-            cursor = cnx.cursor()
-            query = ("SELECT adminid from admin_users where userid = %s")
-            cursor.execute(query, (userid,))      
-            row = cursor.fetchone()
-            if cursor.rowcount > 0:
-                result = True
-            else:
-                result = False
-            cursor.close()
-            cnx.close()
+        cnx.close()
     else:
         print "Unable to connect ot database"
     return result
