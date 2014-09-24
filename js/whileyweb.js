@@ -341,6 +341,7 @@ $(function() {
         });
     }
 
+    // Override Ctrl-S for convenience
     editor.commands.addCommand({
         name: 'saveFile',
         bindKey: {
@@ -352,6 +353,7 @@ $(function() {
         }
     });
 
+    // Prevent Ctrl-Z from undoing to the other files
     editor.commands.addCommand({
         name: 'File',
         bindKey: {
