@@ -85,15 +85,15 @@ class Main(admin.Admin):
         self.private_save(**files)
 
         # First, create working directory
-        dir = createWorkingDirectory()
-        dir = config.DATA_DIR + "/" + dir
+        suffix = createWorkingDirectory()
+        dir = config.DATA_DIR + "/" + suffix
 
         result = compile_all(_main, files, _verify, dir)
 
         # #        shutil.rmtree(dir)
 
         if "internal failure (null)" in str(result):
-            make_tarfile('error.tar.gz', dir)
+            make_tarfile('%s.tar.gz' % suffix, dir)
 
         if type(result) == str:
             response = {"result": "error", "error": result}
@@ -169,8 +169,8 @@ class Main(admin.Admin):
         self.private_save(**files)
 
         # First, create working directory
-        dir = createWorkingDirectory()
-        dir = config.DATA_DIR + "/" + dir
+        suffix = createWorkingDirectory()
+        dir = config.DATA_DIR + "/" + suffix
 
         # Find package name
         package = None
@@ -183,8 +183,8 @@ class Main(admin.Admin):
 
         result = compile_all(_main, files, _verify, dir)
 
-        if "internal failure (null)" in result:
-            make_tarfile('error.tar.gz', dir)
+        if "internal failure (null)" in str(result):
+            make_tarfile('%s.tar.gz' % suffix, dir)
 
         if type(result) == str:
             response = {"result": "error", "error": result}
