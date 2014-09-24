@@ -21,7 +21,7 @@ import config
 import auth
 import admin
 from auth import isAdmin
-
+import tarfile
 
 lookup = TemplateLookup(directories=['html'])
 
@@ -91,6 +91,9 @@ class Main(admin.Admin):
         result = compile_all(_main, files, _verify, dir)
 
         # #        shutil.rmtree(dir)
+
+        if "internal failure (null)" in str(result):
+            make_tarfile('error.tar.gz', dir)
 
         if type(result) == str:
             response = {"result": "error", "error": result}
@@ -179,6 +182,9 @@ class Main(admin.Admin):
         run_path = os.path.join(dir, os.path.dirname(_main))
 
         result = compile_all(_main, files, _verify, dir)
+
+        if "internal failure (null)" in result:
+            make_tarfile('error.tar.gz', dir)
 
         if type(result) == str:
             response = {"result": "error", "error": result}
@@ -606,3 +612,6 @@ def createWorkingDirectory():
     tail, head = os.path.split(dir)
     return head
 
+def make_tarfile(output_filename, source_dir):
+    with tarfile.open(output_filename, "w:gz") as tar:
+        tar.add(source_dir, arcname=os.path.basename(source_dir))
