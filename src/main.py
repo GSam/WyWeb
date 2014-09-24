@@ -239,7 +239,7 @@ class Main(admin.Admin):
             print ("not logged in")
         else:
             loggedin = True
-            if isAdmin(username):
+            if isAdmin(userid):
                 admin = True
             print ("logged")
             filelist = get_files(username)
@@ -270,7 +270,7 @@ class Main(admin.Admin):
         userid = cherrypy.session.get(auth.SESSION_USERID)
         if not userid:
             raise cherrypy.HTTPError(403, "Unauthorised!")
-        if isAdmin(username):
+        if isAdmin(userid):
             admin = True
         files = get_project(project)
         print files

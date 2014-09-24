@@ -125,6 +125,27 @@ def create_username(user, passwd, email, givenname, surname):
     cnx.close()
     return lastid
 
+
+def create_admin(userid):
+    """
+    Insert userid to admin table
+    """
+    result = False
+    cnx = db.connect()[0]
+    cursor = cnx.cursor()
+    query = "SELECT * from admin_users where userid = %s"
+    cursor.execute(query, (userid,))
+    cursor.fetchone()
+    if cursor.rowcount > 0:
+        result = False
+    else:
+        query = "INSERT into admin_users (userid) VALUES (%s)"
+        cursor.execute(query, (userid,))
+        result = True
+    cursor.close()
+    cnx.close()
+    return result
+
 def insertuserdetails(student_infoid, institutionid, coursesid, validationcode):
     """
     Create username with given information.
@@ -222,47 +243,34 @@ def all_of(*conditions):
         return True
     return check
 
-def requireAdmin(username):
+def requireAdmin(userid):
     """
     Require admin role to show the page, raise an error if user is not admin
     """
-    if not isAdmin(username):
+    if not isAdmin(userid):
         raise cherrypy.HTTPRedirect("/auth/login")
         
-def isAdmin(username):
+def isAdmin(userid):
     """
     Checks if username is admin.
     Returns True on success or False on failure
 
-    >>> isAdmin("greg")
+    >>> isAdmin(01)
     True
-    >>> isAdmin("iury")
+    >>> isAdmin(02)
     False
     """
-    result = True
+    result = False
     cnx = db.connect()[0]
     if cnx:
         cursor = cnx.cursor()
-        query = ("SELECT userid from whiley_user where username = %s")
-        cursor.execute(query, (username,))
+        query = ("SELECT adminid from admin_users where userid = %s")
+        cursor.execute(query, (userid,))      
         row = cursor.fetchone()
         if cursor.rowcount > 0:
-            userid = row[0]
-        else:
-            result = False
+            result = True
         cursor.close()
-
-        if result is True:
-            cursor = cnx.cursor()
-            query = ("SELECT adminid from admin_users where userid = %s")
-            cursor.execute(query, (userid,))      
-            row = cursor.fetchone()
-            if cursor.rowcount > 0:
-                result = True
-            else:
-                result = False
-            cursor.close()
-            cnx.close()
+        cnx.close()
     else:
         print "Unable to connect ot database"
     return result
@@ -398,7 +406,9 @@ class AuthController(object):
         sess = cherrypy.session
         username = sess.get(SESSION_KEY, None)
         sess[SESSION_KEY] = None
+        sess[SESSION_USERID]= None
         if username:
             cherrypy.request.login = None
+            cherrypy.request.userid = None
             #self.on_logout(username)
         raise cherrypy.HTTPRedirect(from_page or "/")

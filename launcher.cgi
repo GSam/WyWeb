@@ -26,7 +26,6 @@ cherrypy_config = {
 }
 #cherrypy.quickstart(main.Main(), config=cherrypy_config)
 cherrypy.tree.mount(main.Main(), config=cherrypy_config)
-cherrypy.tree.mount(admin.Admin(), '/login', config=cherrypy_config)
 cherrypy.tree.mount(auth.AuthController(), '/auth', config=cherrypy_config)
 
 cherrypy.engine.start()

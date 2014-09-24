@@ -1,6 +1,7 @@
 import cherrypy, config, web
 import templating, db
 from cherrypy.lib.cptools import allow
+import auth
 from auth import AuthController, requireAdmin
 
 class Admin(object):
@@ -20,8 +21,8 @@ class Admin(object):
         >>> results.STATUS
         'DB: Connection ok'
         """
-        username = cherrypy.session.get("_cp_username")
-        requireAdmin(username)
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
         
         allow(["HEAD", "GET"])
         error = ""
@@ -33,6 +34,61 @@ class Admin(object):
     admin.exposed = True
 
     # ============================================================
+    # Manage admin page
+    # ============================================================
+    def manage_admins(self, newadminid="", deleteadminid="", searchuser=None, *args, **kwargs):
+        """
+        Manage the admins.
+
+        >>> self = manage_admins()
+        >>> results = manage_admins()
+        >>> results.ERROR
+        ''
+        >>> results.REDIRECT
+        'NO'
+        >>> results.STATUS
+        'DB: Connection ok'
+        """
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
+
+        allow(["HEAD", "GET", "POST"])
+        message = ""
+        redirect = "NO"
+        adminList = []
+        userList = []
+
+        if deleteadminid is not None:
+            print deleteadminid
+
+        if newadminid == "":          
+            cnx, status = db.connect()
+            cursor = cnx.cursor() 
+            query = ("SELECT username, user.userid from whiley_user user, admin_users admin  where user.userid=admin.userid")
+            cursor.execute(query)
+            for (username, userid) in cursor:
+                adminList.append((username,userid))
+            cursor.close()
+            userid = None
+
+        if searchuser is not None:
+            cnx, status = db.connect()
+            cursor = cnx.cursor() 
+            query = ("SELECT userid from whiley_user  where username=%s")
+            cursor.execute(query,(searchuser,))
+            userid = cursor.fetchone()
+            if cursor.rowcount > 0:
+                if not auth.create_admin(userid[0]):
+                    message = "User is an Admin already"
+            else:
+                message = "User does not exist"
+            cursor.close()
+
+        return templating.render("manage_admins.html", ADMINLIST=adminList, MESSAGE=message)
+
+    manage_admins.exposed = True
+
+    # ============================================================
     # Admin Add Institutions Page
     # ============================================================
 
@@ -41,8 +97,8 @@ class Admin(object):
         """
         Adds an institution to the database.         
         """
-        username = cherrypy.session.get("_cp_username")
-        requireAdmin(username)
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
 
         allow(["HEAD", "GET", "POST"])
         options = " "
@@ -71,8 +127,8 @@ class Admin(object):
     # ============================================================
 
     def admin_institutions(self, institution="", *args, **kwargs):
-        username = cherrypy.session.get("_cp_username")
-        requireAdmin(username)
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
 
         allow(["HEAD", "GET", "POST"])
         redirect = "NO"
@@ -126,8 +182,8 @@ class Admin(object):
     # ============================================================
 
     def admin_courses(self, institution="", *args, **kwargs):
-        username = cherrypy.session.get("_cp_username")
-        requireAdmin(username)
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
 
         allow(["HEAD", "GET", "POST"])
         error = ""
@@ -176,8 +232,8 @@ class Admin(object):
      
     def admin_course_add(self, course_name=None, course_code=None, course_year=None, 
                         course_institution=None, validation_code=None, *args, **kwargs): 
-        username = cherrypy.session.get("_cp_username")
-        requireAdmin(username)
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
 
         import random, string
         allow(["HEAD", "GET", "POST"]) 
@@ -217,8 +273,8 @@ class Admin(object):
     # ============================================================
 
     def admin_course_details(self, id, *args, **kwargs):
-        username = cherrypy.session.get("_cp_username")
-        requireAdmin(username)
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
 
         allow(["HEAD", "GET", "POST"])
         error = ""
@@ -253,8 +309,8 @@ class Admin(object):
     # ============================================================
 
     def admin_students_search(self, searchValue="", id=None, *args, **kwargs):
-        username = cherrypy.session.get("_cp_username")
-        requireAdmin(username)
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
 
         allow(["HEAD", "GET", "POST"])
         error = ""
@@ -333,8 +389,8 @@ class Admin(object):
     # ============================================================
 
     def admin_students_list(self, id=None, institution="", course=None, *args, **kwargs):
-        username = cherrypy.session.get("_cp_username")
-        requireAdmin(username)
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
 
         allow(["HEAD", "GET", "POST"])
         error = ""
