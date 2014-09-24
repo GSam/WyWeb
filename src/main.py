@@ -294,6 +294,21 @@ class Main(admin.Admin):
                 )
     student_project.exposed = True
 
+    def exports(self, *args, **files):
+        allow(["HEAD", "POST", "GET"])
+        
+        # First, create working directory
+        suffix = createWorkingDirectory()
+        dir = config.DATA_DIR + "/" + suffix
+
+        save_all(files, dir)
+
+        output = make_tarfile("%s.tar.gz" % suffix, dir)
+        result = cherrypy.lib.static.serve_fileobj(open(output, 'r'), "application/x-tgz", name="this")
+        os.unlink(output)
+        return result
+
+    exports.exposed = True
 
     # Everything else should redirect to the main page.
     def default(self, *args, **kwargs):
@@ -616,5 +631,8 @@ def make_tarfile(output_filename, source_dir):
     if not os.path.exists(config.FAIL_DIR):
         os.makedirs(config.FAIL_DIR)
 
-    with tarfile.open(os.path.join(config.FAIL_DIR, output_filename), "w:gz") as tar:
+    output = os.path.join(config.FAIL_DIR, output_filename)
+    with tarfile.open(output, "w:gz") as tar:
         tar.add(source_dir, arcname=os.path.basename(source_dir))
+
+    return output
