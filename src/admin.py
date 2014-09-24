@@ -138,8 +138,8 @@ class Admin(object):
     admin_institutions_add.exposed = True
 
     def admin_institutions_remove(self, id):
-        username = cherrypy.session.get("_cp_username")
-        requireAdmin(username)
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
 
         allow(["POST"])
 
@@ -152,7 +152,7 @@ class Admin(object):
 
         return templating.render("redirect.html", STATUS="alert-success", 
                                 MESSAGE="Institution deleted...")
-    admin_institution_remove.exposed = True
+    admin_institutions_remove.exposed = True
 
     # ============================================================
     # Admin Institutions Page
@@ -330,8 +330,8 @@ class Admin(object):
     admin_course_add.exposed = True
     
     def admin_course_remove(self, id):
-        username = cherrypy.session.get("_cp_username")
-        requireAdmin(username)
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
 
         allow(["POST"])
 

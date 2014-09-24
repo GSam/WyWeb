@@ -13,6 +13,11 @@
 </thead><tbody>
 <tr>
 	<td>open</td>
+	<td>/auth/logout</td>
+	<td></td>
+</tr>
+<tr>
+	<td>open</td>
 	<td>/</td>
 	<td></td>
 </tr>
