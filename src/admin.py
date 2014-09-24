@@ -81,6 +81,23 @@ class Admin(object):
 
     admin_institutions_add.exposed = True
 
+    def admin_institutions_remove(self, id):
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
+        allow(["POST"])
+
+        cnx, status = db.connect()
+        cursor = cnx.cursor()
+        query = "DELETE FROM institution WHERE institutionid=%s"
+        cursor.execute(query, (id,))
+        cursor.close()
+        cnx.close()
+
+        return templating.render("redirect.html", STATUS="alert-success", 
+                                MESSAGE="Institution deleted...")
+    admin_institution_remove.exposed = True
+
     # ============================================================
     # Admin Institutions Page
     # ============================================================
@@ -256,6 +273,22 @@ class Admin(object):
                                
     admin_course_add.exposed = True
     
+    def admin_course_remove(self, id):
+        username = cherrypy.session.get("_cp_username")
+        requireAdmin(username)
+
+        allow(["POST"])
+
+        cnx, status = db.connect()
+        cursor = cnx.cursor()
+        query = "DELETE FROM course WHERE courseid=%s"
+        cursor.execute(query, (id,))
+        cursor.close()
+        cnx.close()
+
+        return templating.render("redirect.html", STATUS="alert-success", 
+                                MESSAGE="Course deleted...")
+    admin_course_remove.exposed = True
 
     # ============================================================
     # Admin Course details page
