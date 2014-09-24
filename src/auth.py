@@ -25,6 +25,7 @@ import config
 lookup = TemplateLookup(directories=['html'])
 
 SESSION_KEY = '_cp_username'
+SESSION_USERID = '_cp_userid'
 
 #def hash_password(password):
     # uuid is used to generate a random number
@@ -54,20 +55,20 @@ def check_credentials(user, passwd):
     cnx = db.connect()[0]
     if cnx:
         cursor = cnx.cursor()
-        query = ("SELECT * from whiley_user where username = %s and password = %s")
+        query = ("SELECT userid from whiley_user where username = %s and password = %s")
         cursor.execute(query, (user, passwd))
         row = cursor.fetchone()
         if cursor.rowcount > 0:
             #print("{} passwd".format(row[2]))
             #hashed_password = hash_password(passwd)
             #if check_password(hashed_password, row[2]):
-            result = None
+            result = row[0]
         else:
-             result = "Incorrect username or password"
+             raise "Incorrect username or password"
         cursor.close()
         cnx.close()
     else:
-        result = "Unable to connect ot database"
+        raise "Unable to connect to database"
 
 
     return result
@@ -284,16 +285,17 @@ class AuthController(object):
             error = False
             return template.render(ERROR=error)
             #raise cherrypy.HTTPRedirect("/")
-        error_msg = check_credentials(user, passwd)
-        if error_msg:
+        try:
+            userid = check_credentials(user, passwd)
+        except Exception as excep:
             error = True
             template = lookup.get_template("login.html")
-            return template.render(ERRORMSG=error_msg, USERNAME=user, ERROR=error)
-        else:
-            cherrypy.session.regenerate()
-            cherrypy.session[SESSION_KEY] = cherrypy.request.login = user
-            #return cherrypy.session[SESSION_KEY]
-            raise cherrypy.HTTPRedirect(from_page)
+            return template.render(ERRORMSG=excep.message, USERNAME=user, ERROR=excep.message)
+        cherrypy.session.regenerate()
+        cherrypy.session[SESSION_KEY] = cherrypy.request.login = user
+        cherrypy.session[SESSION_USERID] = cherrypy.request.userid = userid
+        #return cherrypy.session[SESSION_KEY]
+        raise cherrypy.HTTPRedirect(from_page)
 
     @cherrypy.expose
     def signup(self, user="", passwd="", email="", cpasswd="", givenname="", surname="", enrolled=False):

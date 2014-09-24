@@ -34,7 +34,7 @@
 <tr>
 	<td>verifyText</td>
 	<td>css=p.navbar-text.navbar-right</td>
-	<td>Logged in as greg</td>
+	<td>Logged in as greg(1)</td>
 </tr>
 <tr>
 	<td>clickAndWait</td>

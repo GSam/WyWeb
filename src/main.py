@@ -18,6 +18,7 @@ from mako.lookup import TemplateLookup
 
 import db
 import config
+import auth
 import admin
 from auth import isAdmin
 
@@ -103,7 +104,7 @@ class Main(admin.Admin):
 
     def private_save(self, **files):
         projects = set()
-        if cherrypy.session.get("_cp_username"):
+        if cherrypy.session.get(auth.SESSION_USERID):
             for filepath, source in files.items():
                 print filepath
                 filepath = filepath.split("/")
@@ -123,7 +124,11 @@ class Main(admin.Admin):
         # First, create working directory
         dir = createWorkingDirectory()
         # Second, save the file
-        save(config.DATA_DIR + "/" + dir + "/tmp.whiley", code, "utf-8")
+
+        f = codecs.open(config.DATA_DIR + "/" + dir + "/tmp.whiley","w",'utf-8')
+        f.write(code)
+        f.close()
+
         # Fouth, return result as JSON
         return json.dumps({
             "id": dir
@@ -214,14 +219,15 @@ class Main(admin.Admin):
             error = "Invalid ID: %s" % id
             redirect = "YES"
         template = lookup.get_template("index.html")
-        username = cherrypy.session.get("_cp_username")
+        username = cherrypy.session.get(auth.SESSION_KEY)
+        userid = cherrypy.session.get(auth.SESSION_USERID)
         files = [
             {
                 "text": "Project 1",
                 "children": [
                     {
                         "text": "Hello World",
-                        "data": HELLO_WORLD,
+                        "data": code if code != "" else HELLO_WORLD,
                         "type": 'file'
                     }
                 ],
@@ -246,6 +252,7 @@ class Main(admin.Admin):
                             ERROR=error,
                             REDIRECT=redirect, 
                             USERNAME=username, 
+                            USERID=userid, 
                             LOGGED=loggedin,
                             ADMIN=admin,
                             HELLO_WORLD=HELLO_WORLD,
@@ -259,8 +266,9 @@ class Main(admin.Admin):
         admin = False
         # TODO This page should REALLY be secured!
         template = lookup.get_template("index.html")
-        username = cherrypy.session.get("_cp_username")
-        if not username:
+        username = cherrypy.session.get(auth.SESSION_KEY)
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        if not userid:
             raise cherrypy.HTTPError(403, "Unauthorised!")
         if isAdmin(username):
             admin = True
@@ -273,6 +281,7 @@ class Main(admin.Admin):
                         ERROR="",
                         REDIRECT="",
                         USERNAME=username,
+                        USERID=userid,
                         LOGGED=username is not None,
                         ADMIN=admin,
                         FILES=json.dumps(files)
@@ -301,39 +310,43 @@ def load(filename, encoding):
 
 # Save a given file to the filesystem
 def save(project_name, filename, data):
-    username = cherrypy.session.get("_cp_username")
+    userid = cherrypy.session.get(auth.SESSION_USERID)
     cnx, status = db.connect()
     cursor = cnx.cursor()
-    sql = """SELECT p.projectid
-    FROM whiley_user w left outer join project p on ( w.userid = p.userid)
-    WHERE w.username = '""" + username + "' AND p.project_name = '" + project_name + "'"
-    cursor.execute(sql)
+    print "saving Project:", project_name, filename
+    sql = "SELECT p.projectid FROM project p where p.userid = %s AND p.project_name = %s"
+    cursor.execute(sql, (userid,project_name))
     project = cursor.fetchone()
     if project:
         projectid = project[0]
         print projectid
         if projectid is None:
-            #create new project
-            sql = "SELECT userid FROM whiley_user WHERE username = %s"
-            cursor.execute(sql, (username,))
-            userid = cursor.fetchone()[0]
             sql = "INSERT INTO project (project_name, userid) VALUES (%s, %s)"
             cursor.execute(sql, (project_name, userid))
             projectid = cursor.lastrowid
 
 
         sql = "INSERT INTO file (projectid, filename, source) VALUES (%s, %s, %s)"
-        print type(projectid), type(filename), type(data)
+        print projectid, filename, data
         print sql
+        cursor = cnx.cursor()
         cursor.execute(sql, (projectid, filename, data))
+        if cursor.fetchwarnings():
+            for item in cursor.fetchwarnings():
+                print item
+        cursor.close()
+        cursor = cnx.cursor()
+        cursor.execute("select * from file where projectid = %s", (projectid, ))
+        print cursor.fetchall()
 
 def clear_files(project_name):
-    username = cherrypy.session.get("_cp_username")
+    print "CLEAR FILES", project_name
+    userid = cherrypy.session.get(auth.SESSION_USERID)
     cnx, status = db.connect()
     cursor = cnx.cursor()
     # Retrieve User ID
-    sql =  "SELECT p.projectid FROM project p, whiley_user w WHERE w.userid = p.userid AND w.username = %s"
-    cursor.execute(sql, (username,))
+    sql =  "SELECT p.projectid FROM project p WHERE p.userid = %s and p.project_name = %s"
+    cursor.execute(sql, (userid,project_name))
     projectids = cursor.fetchall()
 
     for (projectid,) in projectids:
@@ -343,6 +356,7 @@ def clear_files(project_name):
 def save_all(files, dir):
     for filename, contents in files.items():
         filepath = dir + "/" + filename
+        print filepath
         if not os.path.exists(os.path.dirname(filepath)):
             os.makedirs(os.path.dirname(filepath))
         with codecs.open(filepath, 'w', 'utf8') as f:
