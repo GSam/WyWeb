@@ -295,6 +295,8 @@ class Main(admin.Admin):
     student_project.exposed = True
 
     def exports(self, *args, **files):
+        import StringIO
+
         allow(["HEAD", "POST", "GET"])
         
         # First, create working directory
@@ -304,7 +306,12 @@ class Main(admin.Admin):
         save_all(files, dir)
 
         output = make_tarfile("%s.tar.gz" % suffix, dir)
-        result = cherrypy.lib.static.serve_fileobj(open(output, 'r'), "application/x-tgz", name="this")
+
+        tempf = open(output, 'r')
+        stringf = StringIO.StringIO(tempf.read())
+        tempf.close()
+
+        result = cherrypy.lib.static.serve_fileobj(stringf, "application/x-tgz", name="this")
         os.unlink(output)
         return result
 
