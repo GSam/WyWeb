@@ -22,13 +22,34 @@
 
       </script>
       <script type="text/javascript" src="js/whileyweb.js"></script>
-<script>
+       <script>
 function commentCode() {
 editor.toggleCommentLines();
 }
 
-function indentCode() {
-	editor.indent();
+function indentBlock() {
+    editor.blockIndent();
+	editor.focus().bind(editor);
+}
+
+function outdentBlock() {
+	editor.blockOutdent();
+	editor.focus().bind(editor);
+}
+
+function undo() {
+	editor.undo();
+	editor.focus().bind(editor);
+}
+
+function redo() {
+	editor.redo();
+	editor.focus().bind(editor);
+}
+
+function foldall() {
+	editor.foldAll();
+	editor.focus().bind(editor);
 }
 
 </script>
@@ -109,8 +130,50 @@ function indentCode() {
                     <nav>
                         <button class="btn" onclick="addProject()" title="Create a Project...">+</button>
                     </nav>
-                </div><div><table><tr><td><a href=" javascript:commentCode();"><img src="images/blockquote.gif" border="0" alt="Blockquote selected text"></a></td><td> &nbsp; &nbsp; </td><td>
-                <td><a href=" javascript:indentCode();"><img src="images/indent.png" border="0" alt="Indent selected text"></a></td></tr></table>
+                </div>
+                  <div>
+                      <table>
+                          <tr>
+                              <td>
+                                  <a href=" javascript:commentCode();">
+                                      <img src="images/blockquote.gif" border="0" alt="Blockquote selected text">
+                                  </a>
+                              </td>
+                              <td> &nbsp; &nbsp; </td>
+                              <td></td>
+                              <td>
+                                  <a href=" javascript:indentBlock();">
+                                      <img src="images/indent.png" border="0" alt="Indent selected text">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:outdentBlock();">
+                                      <img src="images/indent.png" border="0" alt="Outdent selected text">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:undo();">
+                                      <img src="images/undo.png" border="0" alt="Undo">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:redo();">
+                                      <img src="images/redo.png" border="0" alt="Redo">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:foldall();">
+                                      <img src="images/foldall.png" border="0" alt="Fold All">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:find();">
+                                      <img src="images/find.png" border="0" alt="Fold All">
+                                      <input type="text" >
+                                  </a>
+                              </td>
+                          </tr>
+                      </table>
 </div>
                 <div id="code" class="col-md-10"></div>
                   <script>
@@ -118,6 +181,7 @@ function indentCode() {
 					var editor = ace.edit("code");
 					editor.setTheme("ace/theme/eclipse");
 					editor.getSession().setMode("ace/mode/javascript");
+					editor.focus().bind(editor);
 	  </script>
               </div>
                </div>
