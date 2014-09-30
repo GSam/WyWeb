@@ -22,6 +22,10 @@
          var loggedStorage = undefined;
 
       </script>
+      <style>
+      .ide-menu td {
+      padding-left:10px;
+      }</style>
       <script type="text/javascript" src="js/whileyweb.js"></script>
        <script>
 function commentCode() {
@@ -133,15 +137,13 @@ function foldall() {
                     </nav>
                 </div>
                   <div>
-                      <table>
+                      <table class="ide-menu">
                           <tr>
-                              <td>
+                    <td>
                                   <a href=" javascript:commentCode();">
-                                      <img src="images/blockquote.gif" border="0" alt="Blockquote selected text">
+                                      <img src="images/comments.png" border="0" alt="Blockquote selected text">
                                   </a>
                               </td>
-                              <td> &nbsp; &nbsp; </td>
-                              <td></td>
                               <td>
                                   <a href=" javascript:indentBlock();">
                                       <img src="images/indent.png" border="0" alt="Indent selected text">
@@ -149,7 +151,7 @@ function foldall() {
                               </td>
                               <td>
                                   <a href=" javascript:outdentBlock();">
-                                      <img src="images/indent.png" border="0" alt="Outdent selected text">
+                                      <img src="images/outdent.png" border="0" alt="Outdent selected text">
                                   </a>
                               </td>
                               <td>
