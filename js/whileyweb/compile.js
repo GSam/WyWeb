@@ -36,7 +36,8 @@ function exports() {
     var request = {};
     var main = getPath($files, $files.jstree('get_selected')[0]) + ".whiley";
     addFiles($files, "", "#", request, main.split("/")[0]);
-    $.post(root_url + "/export", request);
+    $.post(root_url + "/exports", request);
+    window.open('/exports?' + $.param(request), "filename.tar.gz")
 
     $("#spinner").show();
 }

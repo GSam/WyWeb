@@ -248,6 +248,7 @@ $(document).on('ace-loaded', function() {
         }
     })
 })
+
 function addProject() {
     $('#file-browser').jstree('create_node', null, {text: 'UntitledProject'}, undefined, function(type) {
         $('#file-browser').jstree('set_type', type, 'project')

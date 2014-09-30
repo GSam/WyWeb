@@ -4,7 +4,7 @@
 function showErrors(errors) {
     clearErrors();
     for(var i=0;i!=errors.length;++i) {
-		var error = errors[i];
+        var error = errors[i];
         markError(error);
     }
 }
