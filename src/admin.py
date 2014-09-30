@@ -1,6 +1,7 @@
 import cherrypy, config, web
 import templating, db
 from cherrypy.lib.cptools import allow
+from cherrypy import request
 from auth import AuthController, requireAdmin
 
 def authorizeTests():
@@ -85,18 +86,31 @@ class Admin(object):
         username = cherrypy.session.get("_cp_username")
         requireAdmin(username)
 
-        allow(["POST"])
+        if request.method == 'POST':
+            cnx, status = db.connect()
+            cursor = cnx.cursor()
+            query = "DELETE FROM institution WHERE institutionid=%s"
+            cursor.execute(query, (id,))
+            query = "DELETE FROM course where institutionid = %s"
+            cursor.execute(query, (id,))
+            cursor.close()
+            cnx.close()
 
-        cnx, status = db.connect()
-        cursor = cnx.cursor()
-        query = "DELETE FROM institution WHERE institutionid=%s"
-        cursor.execute(query, (id,))
-        cursor.close()
-        cnx.close()
+            return templating.render("redirect.html", STATUS="alert-success", 
+                                    MESSAGE="Institution deleted...")
+        else:
+            cnx, status = db.connect()
+            cursor = cnx.cursor()
+            query = "SELECT institution_name FROM institution WHERE institutionid=%s"
+            cursor.execute(query, (id,))
+            name = cursor.fetchone()[0]
+            cursor.close()
+            cnx.close()
 
-        return templating.render("redirect.html", STATUS="alert-success", 
-                                MESSAGE="Institution deleted...")
-    admin_institution_remove.exposed = True
+            return templating.render("confirm.html", TITLE="Are you sure you want to delete "+name+"?",
+                                MESSAGE="The institution and all it's courses will be permanently removed.",
+                                CONFIRM_LABLE="DELETE")
+    admin_institutions_remove.exposed = True
 
     # ============================================================
     # Admin Institutions Page
@@ -277,17 +291,18 @@ class Admin(object):
         username = cherrypy.session.get("_cp_username")
         requireAdmin(username)
 
-        allow(["POST"])
+        if request.method == 'POST':
+            cnx, status = db.connect()
+            cursor = cnx.cursor()
+            query = "DELETE FROM course WHERE courseid=%s"
+            cursor.execute(query, (id,))
+            cursor.close()
+            cnx.close()
 
-        cnx, status = db.connect()
-        cursor = cnx.cursor()
-        query = "DELETE FROM course WHERE courseid=%s"
-        cursor.execute(query, (id,))
-        cursor.close()
-        cnx.close()
-
-        return templating.render("redirect.html", STATUS="alert-success", 
-                                MESSAGE="Course deleted...")
+            return templating.render("redirect.html", STATUS="alert-success", 
+                                    MESSAGE="Course deleted...")
+        else:
+            username
     admin_course_remove.exposed = True
 
     # ============================================================

@@ -56,17 +56,33 @@
 <div class="row">
 	<div class="container-fluid" id="content">
 	<div id="ide">
-	<div class=content><div align="right"><a href="admin_institutions_add">Add Institution</a></div>
+	<div class=content>
+        <div align="right"><a href="admin_institutions_add">+ Add Institution</a></div>
 		<form>
 		<table width="100%" border="0">
-			<tr><td width=55 align=left valign="top"><img src=images/institution_small.png></td><td valign="top"><h2 style="margin-top:0px;padding-top:0px;"> Current Institutions</h2></td><td rowspan="2" width="50%"> <fieldset>  <legend>${INSTITUTION}</legend>
-${DESCRIPTION}<br>${CONTACT}<br>${WEBSITE}</fieldset></td></tr>
-			<tr><td>&nbsp;</td><td valign="top"><select name="institution" onchange="this.form.submit()">
+			<tr>
+                <td width=55 align=left valign="top">
+                    <img src=images/institution_small.png>
+            </td>
+            <td valign="top">
+                <h2 style="margin-top:0px;padding-top:0px;"> Current Institutions</h2>
+            </td>
+            <td rowspan="2" width="50%"> 
+                <fieldset>  <legend><div style="float:right;font-size:75%">
+                        <a href="admin_institutions_remove?id=${INSTITUTION_ID}">- Remove</a></div>
+                    ${INSTITUTION}</legend>
+                ${DESCRIPTION}<br>${CONTACT}<br>${WEBSITE}</fieldset>
+            </td>
+        </tr>
+		<tr>
+            <td>&nbsp;</td>
+            <td valign="top"><select name="institution" onchange="this.form.submit()">
                 % for label, value in OPTION:
                     <option value="${str(value)}" ${"selected" if str(value) == INSTITUTION_ID else ""}>
                         ${label}</option>
                 % endfor
-            </select></td></tr>
+            </select></td>
+        </tr>
 		</table>
 		</form>
 	<br><br>
