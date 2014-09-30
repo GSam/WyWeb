@@ -29,6 +29,19 @@ function compile() {
     });
     $("#spinner").show();
 }
+
+function exports() {
+    // build parameters
+    var $files = $('#file-browser');
+    var request = {};
+    var main = getPath($files, $files.jstree('get_selected')[0]) + ".whiley";
+    addFiles($files, "", "#", request, main.split("/")[0]);
+    $.post(root_url + "/exports", request);
+    window.open('/exports?' + $.param(request), "filename.tar.gz")
+
+    $("#spinner").show();
+}
+
 function addFiles($files, prefix, node, query, project) {
     var data = $files.jstree('get_node', node);
     if (data.type == "file")

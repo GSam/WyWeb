@@ -41,6 +41,19 @@ function compile() {
     });
     $("#spinner").show();
 }
+
+function exports() {
+    // build parameters
+    var $files = $('#file-browser');
+    var request = {};
+    var main = getPath($files, $files.jstree('get_selected')[0]) + ".whiley";
+    addFiles($files, "", "#", request, main.split("/")[0]);
+    $.post(root_url + "/exports", request);
+    window.open('/exports?' + $.param(request), "filename.tar.gz")
+
+    $("#spinner").show();
+}
+
 function addFiles($files, prefix, node, query, project) {
     var data = $files.jstree('get_node', node);
     if (data.type == "file")
@@ -66,7 +79,7 @@ function getPath($files, node) {
 function showErrors(errors) {
     clearErrors();
     for(var i=0;i!=errors.length;++i) {
-		var error = errors[i];
+        var error = errors[i];
         markError(error);
     }
 }
@@ -173,9 +186,17 @@ $(function() {
         }
     })
 });
+loggedStorage = undefined;
+
 function getFileData() {
-    if ("files" in localStorage && !isLoggedIn)
+    if ("files" in localStorage && !isLoggedIn) {
         return JSON.parse(localStorage["files"])
+    }
+
+    if (isLoggedIn && loggedStorage != undefined) {
+        return loggedStorage;
+    }
+    
     return serverFiles
 }
 
@@ -184,6 +205,9 @@ function saveFile() {
         var $files = $('#file-browser');
     
         localStorage["files"] = JSON.stringify($files.jstree(true).get_json('#', {'flat':true}));
+    } else {
+        var $files = $('#file-browser');
+        loggedStorage = JSON.stringify($files.jstree(true).get_json('#', {'flat':true}));
     }
 }
 /**
@@ -211,12 +235,14 @@ function clearMessages() {
 }
 
 var _selectedFile, _fileLoading = false;
+var _newFile = false;
 
 $(function() {
     $('#file-browser').on('changed.jstree', function(evt, data) {
         if (data && data.node && "data" in data.node) {
             _fileLoading = true
             editor.setValue(data.node.data, 0);
+            _newFile = true;
             _fileLoading = false
             _selectedFile = data.node
         }
@@ -233,6 +259,7 @@ $(document).on('ace-loaded', function() {
         }
     })
 })
+
 function addProject() {
     $('#file-browser').jstree('create_node', null, {text: 'UntitledProject'}, undefined, function(type) {
         $('#file-browser').jstree('set_type', type, 'project')
@@ -338,6 +365,35 @@ $(function() {
             }
         });
     }
+
+    // Override Ctrl-S for convenience
+    editor.commands.addCommand({
+        name: 'saveFile',
+        bindKey: {
+            win: 'Ctrl-S',
+            mac: 'Command-S',
+            sender: 'editor|cli'
+        },
+        exec: function(env, args, request) {
+        }
+    });
+
+    // Prevent Ctrl-Z from undoing to the other files
+    editor.commands.addCommand({
+        name: 'File',
+        bindKey: {
+            win: 'Ctrl-Z',
+            mac: 'Command-Z',
+            sender: 'editor|cli'
+        },
+        exec: function(env, args, request) {
+            if (_newFile) {
+                _newFile = false;
+                editor.getSession().getUndoManager().reset()
+            }
+            editor.undo()
+        }
+    });
 
     // Now activate all "behaviours" for the editor.
     $(document).trigger("ace-loaded");
