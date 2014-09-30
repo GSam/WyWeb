@@ -13,7 +13,32 @@
 </thead><tbody>
 <tr>
 	<td>open</td>
+	<td>/auth/logout</td>
+	<td></td>
+</tr>
+<tr>
+	<td>open</td>
 	<td>/admin</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=user</td>
+	<td>greg</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=passwd</td>
+	<td>gdg</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=button.btn.btn-default</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=button.btn.btn-default</td>
 	<td></td>
 </tr>
 <tr>
@@ -105,6 +130,11 @@
 	<td>verifyText</td>
 	<td>css=h3</td>
 	<td>exact:DB: Connection ok</td>
+</tr>
+<tr>
+	<td>open</td>
+	<td>/auth/logout</td>
+	<td></td>
 </tr>
 </tbody></table>
 </body>

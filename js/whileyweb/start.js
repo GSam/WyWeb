@@ -42,6 +42,35 @@ $(function() {
         });
     }
 
+    // Override Ctrl-S for convenience
+    editor.commands.addCommand({
+        name: 'saveFile',
+        bindKey: {
+            win: 'Ctrl-S',
+            mac: 'Command-S',
+            sender: 'editor|cli'
+        },
+        exec: function(env, args, request) {
+        }
+    });
+
+    // Prevent Ctrl-Z from undoing to the other files
+    editor.commands.addCommand({
+        name: 'File',
+        bindKey: {
+            win: 'Ctrl-Z',
+            mac: 'Command-Z',
+            sender: 'editor|cli'
+        },
+        exec: function(env, args, request) {
+            if (_newFile) {
+                _newFile = false;
+                editor.getSession().getUndoManager().reset()
+            }
+            editor.undo()
+        }
+    });
+
     // Now activate all "behaviours" for the editor.
     $(document).trigger("ace-loaded");
 });

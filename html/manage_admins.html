@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <title>Whiley on the Web!</title>
+      <link rel="stylesheet" href="css/style.css">
+      <link href="css/bootstrap.min.css" rel="stylesheet">
+      <link rel="shortcut icon" href="http://whiley.org/wp-content/themes/atahualpa351/images/favicon/whileyfav.ico" />
+      <link rel="stylesheet" href="css/jstree.css">
+      <script type="text/javascript" src="js/jquery.js"></script>
+      <script type="text/javascript" src="js/jquery-ui.js"></script>
+      <script type="text/javascript" src="js/ace.js" charset="utf-8"></script>
+      <script type="text/javascript" src="js/jstree.js"></script>
+      <script type="text/javascript" src="js/mode-whiley.js"></script>
+      <script type="text/javascript" src="js/whileyweb.js"></script>
+   </head>
+   <body>
+      <div class="container-fluid content">
+      <div class="col-md-1">
+      </div>
+      <div class="col-md-10">
+         <div class="container-fluid" id="container">
+            <div class="row topbar">
+               <div class="col-md-1">
+                  <img src="images/wylogo.png" class="image-responsive"/>
+               </div>
+               <div class="col-md-11">
+                  <p>
+                  <h1>Whiley <span id="bold">ADMINISTRATION</span><br/>
+                     <small>From this page, you can administer the Whiley system.</small>
+                  </h1>
+                  </p>
+               </div>
+            </div>
+            <div class="row">
+               <nav class="navbar navbar-default" role="navigation">
+                  <div class="container-fluid">
+                  <form class="navbar-form">
+                  		  <a href="/" class="btn btn-primary navbar-btn" title="Admin">Play</a>
+			              <a href="admin" class="btn btn-primary navbar-btn" title="Admin">Admin</a>
+			              <a href="admin_institutions" class="btn btn-primary navbar-btn" title="Institutions">Institutions</a>
+			              <a href="admin_courses" class="btn btn-primary navbar-btn" title="Courses">Courses</a>
+						  <a href="admin_students_list" class="btn btn-primary navbar-btn" title="Students">Students List</a>
+						  <a href="admin_students_search" class="btn btn-primary navbar-btn" title="Students">Students Search</a>
+			              <a href="http://www.whiley.org" class="btn btn-primary navbar-btn" title="Admin">whiley.org</a>
+		            </form>
+                  </div>
+                  <!-- /.container-fluid -->
+               </nav>
+            </div>
+          <div class="container">
+            <div class="row">
+              <div class="col-md-6">
+           		 	<h2>Manage Admins</h2>
+                <table class="table">
+                    <tr>
+                    <th>Username</th>
+                    <th>Delete</th>
+                    </tr>
+                % for username, userid in ADMINLIST:
+                    <tr>
+                    <td>
+                    ${username}
+                    </td>
+                    <td><a href="/manage_admins?deleteadminid=${userid}">Delete</a></td>
+                    </tr>
+                % endfor
+                </table>
+                </div>
+              <div class="col-md-6">
+                <h2>Add Admin</h2>
+                <form action="/manage_admins" method="get">
+                    <label for="searchuser">Username</label>
+                    <input type="text" name="searchuser"/>
+                    <input type="submit"/>
+                </form>
+                <div class="alert alert-danger" role="alert">${MESSAGE}</div>
+              </div>
+
+            </div>
+
+</div></div>
+   </body>
+</html>
+

@@ -7,6 +7,7 @@
 import cherrypy
 import db
 import templating
+from mysql import connector
 
 import cherrypy
 from cherrypy.lib.static import serve_file
@@ -117,18 +118,39 @@ def create_username(user, passwd, email, givenname, surname):
     query = "INSERT into whiley_user (username, password, email_address) VALUES (%s, %s, %s)"
     try:
         cursor.execute(query, (user, passwd, email))
-    except mysql.connector.Error, err:
+    except connector.Error, err:
         print("Error  = %s" % err)
-    laststudentid = cursor.lastrowid
+    userid = cursor.lastrowid
     query = "INSERT into student_info (givenname, surname, userid) VALUES (%s, %s, %s)"
     try:
-        cursor.execute(query, (givenname, surname, laststudentid))
-    except mysql.connector.Error, err:
+        cursor.execute(query, (givenname, surname, userid))
+    except connector.Error, err:
         print("Error  = %s" % err)
-    lastid = cursor.lastrowid
+    studentid = cursor.lastrowid
     cursor.close()
     cnx.close()
-    return lastid
+    return userid, studentid
+
+
+def create_admin(userid):
+    """
+    Insert userid to admin table
+    """
+    result = False
+    cnx = db.connect()[0]
+    cursor = cnx.cursor()
+    query = "SELECT * from admin_users where userid = %s"
+    cursor.execute(query, (userid,))
+    cursor.fetchone()
+    if cursor.rowcount > 0:
+        result = False
+    else:
+        query = "INSERT into admin_users (userid) VALUES (%s)"
+        cursor.execute(query, (userid,))
+        result = True
+    cursor.close()
+    cnx.close()
+    return result
 
 def insertuserdetails(student_infoid, institutionid, coursesid, validationcode):
     """
@@ -163,7 +185,8 @@ def check_auth(*args, **kwargs):
     conditions = cherrypy.request.config.get('auth.require', None)
     if conditions is not None:
         username = cherrypy.session.get(SESSION_KEY)
-        if username:
+        userid = cherrypy.session.get(SESSION_USERID)
+        if userid:
             cherrypy.request.login = username
             for condition in conditions:
                 # A condition is just a callable that returns true or false
@@ -227,47 +250,34 @@ def all_of(*conditions):
         return True
     return check
 
-def requireAdmin(username):
+def requireAdmin(userid):
     """
     Require admin role to show the page, raise an error if user is not admin
     """
-    if not isAdmin(username):
+    if not isAdmin(userid):
         raise cherrypy.HTTPRedirect("/auth/login")
         
-def isAdmin(username):
+def isAdmin(userid):
     """
     Checks if username is admin.
     Returns True on success or False on failure
 
-    >>> isAdmin("greg")
+    >>> isAdmin(01)
     True
-    >>> isAdmin("iury")
+    >>> isAdmin(02)
     False
     """
-    result = True
+    result = False
     cnx = db.connect()[0]
     if cnx:
         cursor = cnx.cursor()
-        query = ("SELECT userid from whiley_user where username = %s")
-        cursor.execute(query, (username,))
+        query = ("SELECT adminid from admin_users where userid = %s")
+        cursor.execute(query, (userid,))      
         row = cursor.fetchone()
         if cursor.rowcount > 0:
-            userid = row[0]
-        else:
-            result = False
+            result = True
         cursor.close()
-
-        if result is True:
-            cursor = cnx.cursor()
-            query = ("SELECT adminid from admin_users where userid = %s")
-            cursor.execute(query, (userid,))      
-            row = cursor.fetchone()
-            if cursor.rowcount > 0:
-                result = True
-            else:
-                result = False
-            cursor.close()
-            cnx.close()
+        cnx.close()
     else:
         print "Unable to connect ot database"
     return result
@@ -323,12 +333,13 @@ class AuthController(object):
             return template.render(ERROR=error, ERRORMSG=error_msg)
         error_msg = check_username(user)
         if error_msg is None:
-            laststudentinfoid = create_username(user, passwd, email, givenname, surname)
+            userid, studentid = create_username(user, passwd, email, givenname, surname)
             cherrypy.session.regenerate()
             cherrypy.session[SESSION_KEY] = cherrypy.request.login = user
+            cherrypy.session[SESSION_USERID] = cherrypy.request.userid = userid
             if enrolled is not False:
                 #send user to institutions page
-                return self.user_courses(studentinfoid=laststudentinfoid)
+                return self.user_courses(studentinfoid=studentid)
             else:
                 message="User Created, Welcome! Redirecting..."
                 template = lookup.get_template("redirect.html")
@@ -402,8 +413,12 @@ class AuthController(object):
     def logout(self, from_page="/"):
         sess = cherrypy.session
         username = sess.get(SESSION_KEY, None)
+        userid = sess.get(SESSION_USERID, None)
         sess[SESSION_KEY] = None
+        sess[SESSION_USERID] = None
         if username:
             cherrypy.request.login = None
+        if userid:
+            cherrypy.request.userid = None
             #self.on_logout(username)
-        raise cherrypy.HTTPRedirect(from_page or "/")
+        raise cherrypy.HTTPRedirect("/")
