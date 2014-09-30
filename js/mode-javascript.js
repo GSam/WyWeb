@@ -755,30 +755,60 @@ ace.define("ace/mode/folding/cstyle",["require","exports","module","ace/lib/oop"
 "use strict";
 
 var oop = require("../../lib/oop");
+var Range = require("../../range").Range;
 var BaseFoldMode = require("./fold_mode").FoldMode;
 
-var FoldMode = exports.FoldMode = function(markers) {
-    this.foldingStartMarker = new RegExp("([\\[{])(?:\\s*)$|(" + markers + ")(?:\\s*)(?:#.*)?$");
+var FoldMode = exports.FoldMode = function(commentRegex) {
+    if (commentRegex) {
+        this.foldingStartMarker = new RegExp(
+            this.foldingStartMarker.source.replace(/\|[^|]*?$/, "|" + commentRegex.start)
+        );
+        this.foldingStopMarker = new RegExp(
+            this.foldingStopMarker.source.replace(/\|[^|]*?$/, "|" + commentRegex.end)
+        );
+    }
 };
 oop.inherits(FoldMode, BaseFoldMode);
 
 (function() {
 
-    this.getFoldWidgetRange = function(session, foldStyle, row) {
+    this.foldingStartMarker = /(\{|\[)[^\}\]]*$|^\s*(\/\*)/;
+    this.foldingStopMarker = /^[^\[\{]*(\}|\])|^[\s\*]*(\*\/)/;
+
+    this.getFoldWidgetRange = function(session, foldStyle, row, forceMultiline) {
         var line = session.getLine(row);
         var match = line.match(this.foldingStartMarker);
         if (match) {
+            var i = match.index;
+
             if (match[1])
-                return this.openingBracketBlock(session, match[1], row, match.index);
-            if (match[2])
-                return this.indentationBlock(session, row, match.index + match[2].length);
-            return this.indentationBlock(session, row);
+                return this.openingBracketBlock(session, match[1], row, i);
+
+            var range = session.getCommentFoldRange(row, i + match[0].length, 1);
+
+            if (range && !range.isMultiLine()) {
+                if (forceMultiline) {
+                    range = this.getSectionRange(session, row);
+                } else if (foldStyle != "all")
+                    range = null;
+            }
+
+            return range;
         }
-    }
 
-}).call(FoldMode.prototype);
+        if (foldStyle === "markbegin")
+            return;
 
-});
+        var match = line.match(this.foldingStopMarker);
+        if (match) {
+            var i = match.index + match[0].length;
+
+            if (match[1])
+                return this.closingBracketBlock(session, match[1], row, i);
+
+            return session.getCommentFoldRange(row, i, -1);
+        }
+    };
 
     this.getSectionRange = function(session, row) {
         var line = session.getLine(row);
