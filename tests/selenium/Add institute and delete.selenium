@@ -102,7 +102,12 @@
 	<td></td>
 </tr>
 <tr>
-	<td>assertElementNotPresent</td>
+	<td>verifyNotText</td>
+	<td>name=institution</td>
+	<td>*XYZ*</td>
+</tr>
+<tr>
+	<td>assertNotSomethingSelected</td>
 	<td>name=institution</td>
 	<td>label=XYZ</td>
 </tr>
