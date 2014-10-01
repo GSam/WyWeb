@@ -36,13 +36,14 @@
                <nav class="navbar navbar-default" role="navigation">
                   <div class="container-fluid">
                   <form class="navbar-form">
-                  		  <a href="/" class="btn btn-primary navbar-btn" title="Admin">Play</a>
+                  		  <a href="/" class="btn btn-default navbar-btn" title="IDE">Play</a>
 			              <a href="admin" class="btn btn-primary navbar-btn" title="Admin">Admin</a>
+                          <a href="manage_admins" class="btn btn-primary navbar-btn" title="Rights">Admin Rights</a>
 			              <a href="admin_institutions" class="btn btn-primary navbar-btn" title="Institutions">Institutions</a>
 			              <a href="admin_courses" class="btn btn-primary navbar-btn" title="Courses">Courses</a>
 						  <a href="admin_students_list" class="btn btn-primary navbar-btn" title="Students">Students List</a>
 						  <a href="admin_students_search" class="btn btn-primary navbar-btn" title="Students">Students Search</a>
-			              <a href="http://www.whiley.org" class="btn btn-primary navbar-btn" title="Admin">whiley.org</a>
+			              <a href="http://www.whiley.org" class="btn btn-default navbar-btn" title="Admin">whiley.org</a>
 		            </form>
                   </div>
                   <!-- /.container-fluid -->
@@ -55,14 +56,14 @@
                 <table class="table">
                     <tr>
                     <th>Username</th>
-                    <th>Delete</th>
+                    <th>-</th>
                     </tr>
                 % for username, userid in ADMINLIST:
                     <tr>
                     <td>
                     ${username}
                     </td>
-                    <td><a href="/manage_admins?deleteadminid=${userid}">Delete</a></td>
+                    <td><a href="/admin_manage_revoke?id=${userid}">Revoke</a></td>
                     </tr>
                 % endfor
                 </table>

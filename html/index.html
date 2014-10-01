@@ -24,8 +24,12 @@
       </script>
       <style>
       .ide-menu td {
-      padding-left:10px;
-      }</style>
+      padding-left:8px;
+      padding-right:8px;
+      border-left:1px solid #dddddd;
+      border-top:1px solid #dddddd;
+      }
+      </style>
       <script type="text/javascript" src="js/whileyweb.js"></script>
        <script>
 function newFile() {
@@ -72,12 +76,18 @@ function foldAll() {
 }
 
 function find() {
-    var config = require("ace/config")
-	config.loadModule("ace/ext/searchBox",function(e){e.Search(editor)});
+    var config = ace.require("ace/config");
+    config.loadModule("ace/ext/searchbox",function(e){e.Search(editor)});
 	editor.focus();
 }
 
-function gotoLine() {
+function macroRecord() {
+    editor.commands.toggleRecording(editor);
+    editor.focus();
+}
+
+function macroPlay() {
+    editor.commands.replay(editor);
 }
 
 </script>
@@ -169,22 +179,22 @@ function gotoLine() {
                               </td>
                               <td>
                                   <a href=" javascript:newProject();">
-                                      <img src="images/newProject.png" border="0" alt="Create New Project">
+                                      <img src="images/new_project.png" border="0" alt="Create New Project">
                                   </a>
                               </td>
                               <td>
                                   <a href=" javascript:saveAll();">
-                                      <img src="images/saveAll.png" border="0" alt="Save All Files">
+                                      <img src="images/save.png" border="0" alt="Save All Files">
                                   </a>
                               </td>
                               <td>
                                   <a href=" javascript:compileProject();">
-                                      <img src="images/compileProject.png" border="0" alt="Compile This Project">
+                                      <img src="images/compile.png" border="0" alt="Compile This Project">
                                   </a>
                               </td>
                               <td>
                                   <a href=" javascript:runProject();">
-                                      <img src="images/runProject.png" border="0" alt="Run This Project">
+                                      <img src="images/run.png" border="0" alt="Run This Project">
                                   </a>
                               </td>
                               <td>
@@ -225,17 +235,19 @@ function gotoLine() {
                               </td>
                               <td>
                                   <a href=" javascript:gotoLine();">
-                                      <img src="images/gotoLine.png" border="0" alt="Goto Line">
+                                      <img src="images/goto.png" border="0" alt="Goto Line">
                                   </a>
                               </td>
                               <td>
                                   <a href=" javascript:find();">
+
                                       <img src="images/find.png" border="0" alt="Find">
+
                                   </a>
                               </td>
                               <td>
                                   <a href=" javascript:findNext();">
-                                      <img src="images/findNext.png" border="0" alt="Find Next">
+                                      <img src="images/right_arrow.png" border="0" alt="Find Next">
                                   </a>
                               </td>
                               <td>
@@ -256,7 +268,7 @@ function gotoLine() {
                                       <img src="images/macroRecord.png" border="0" alt="Record Macro">
                                   </a>
                               </td>
-                              <td>
+                              <td style="border-right:1px solid #dddddd">
                                   <a href=" javascript:macroPlay();">
                                       <img src="images/macroPlay.png" border="0" alt="Play Macro">
                                   </a>
