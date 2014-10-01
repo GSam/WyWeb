@@ -210,6 +210,9 @@ function macroPlay() {
                                   </a>
                               </td>
                               <td>
+                        % if LOGGED is False:
+                                  <img src="images/save.png" border="0" alt="Save All Files" title="Saving Is Only Available To Logged In Users" style="opacity:0.4">
+                        % endif
                         % if LOGGED is True:
                                   <a href=" javascript:saveToServer();editor.focus();">
                                       <img src="images/save.png" border="0" alt="Save All Files" title="Save All Files">
@@ -252,9 +255,6 @@ function macroPlay() {
                                   <a href=" javascript:redo();">
                                       <img src="images/redo.png" border="0" alt="Redo" title="Redo">
                                   </a>
-                              </td>
-                              <td style="border-right:1px solid #FFF">
-                                  <input id="gotoLineNumber" type="text" class="form-control input-sm">
                               </td>
                               <td>
                                   <a href=" javascript:gotoLine();">
