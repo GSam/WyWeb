@@ -20,6 +20,10 @@ $(document).on('ace-loaded', function() {
         if (!_fileLoading) {
             _selectedFile.data = editor.getValue()
             saveFile()
+            if (_newFile) {
+                _newFile = false;
+                editor.getSession().getUndoManager().reset()
+            }
         }
     })
 })
