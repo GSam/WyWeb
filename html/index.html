@@ -34,8 +34,18 @@
       </style>
       <script type="text/javascript" src="js/whileyweb.js"></script>
        <script>
+function newFile() {
+}
+
+function newProject() {
+}
+
+function saveAll() {
+}
+
 function commentCode() {
-editor.toggleCommentLines();
+        editor.toggleCommentLines();
+	editor.focus();
 }
 
 function indentBlock() {
@@ -49,10 +59,10 @@ function outdentBlock() {
 }
 
 function undo() {
-            if (_newFile) {
-                _newFile = false;
-                editor.getSession().getUndoManager().reset()
-            }
+    if (_newFile) {
+        _newFile = false;
+        editor.getSession().getUndoManager().reset()
+    }
 	editor.undo();
 	editor.focus();
 }
@@ -62,15 +72,26 @@ function redo() {
 	editor.focus();
 }
 
-function foldall() {
-	editor.foldAll();
+function foldAll() {
+	Folding.foldAll();
 	editor.focus();
 }
 
 function find() {
-var config = require("./config")
-	config.loadModule("ace/ext/searchBox",function(e){e.Search(editor)});
+    var config = ace.require("ace/config");
+    config.loadModule("ace/ext/searchbox",function(e){e.Search(editor)});
 	editor.focus();
+}
+
+function macroRecord() {
+    editor.commands.toggleRecording(editor);
+    $("#macro_recorder").
+    editor.focus();
+}
+
+function macroPlay() {
+    editor.commands.replay(editor);
+    editor.focus();
 }
 
 </script>
@@ -155,34 +176,34 @@ var config = require("./config")
                   <div>
                       <table class="ide-menu">
                           <tr>
-                          <td>
-								<a href=" javascript:commentCode();">
-								<img src="images/new_file.png" border="0" alt="New File" title="New File">
-								</a>
-							</td>
-						 <td>
-						<a href=" javascript:commentCode();">
-						<img src="images/new_project.png" border="0" alt="New Project" title="New Project">
-						</a>
-							</td>
-							 <td>
-									<a href=" javascript:commentCode();">
-									<img src="images/save.png" border="0" alt="Save" title="Save">
-									</a>
-							</td>
-							 <td>
-									<a href=" javascript:commentCode();" >
-									<img src="images/compile.png" border="0" alt="Compile" title="Compile">
-									</a>
-							</td>
-							 <td>
-							<a href=" javascript:commentCode();">
-							<img src="images/run.png" border="0"  alt="Run" title="Run">
-							</a>
-							</td>
 
+                              <td>
+                                  <a href=" javascript:newFile();">
+                                      <img src="images/new_file.png" border="0" alt="Add New File" title="New File">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:newProject();">
+                                      <img src="images/new_project.png" border="0" alt="Create New Project" title="New Project">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:saveAll();">
+                                      <img src="images/save.png" border="0" alt="Save All Files" title="Save All Files">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:compileProject();">
+                                      <img src="images/compile.png" border="0" alt="Compile This Project" title="Compile">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:runProject();">
+                                      <img src="images/run.png" border="0" alt="Run This Project" title="Run">
+                                  </a>
+                              </td>
+                              <td>
 
-                    <td>
                                   <a href=" javascript:commentCode();">
                                       <img src="images/comments.png" border="0" alt="comment selected text" title="Comment selected text">
                                   </a>
@@ -197,6 +218,7 @@ var config = require("./config")
                                       <img src="images/outdent.png" border="0" alt="Outdent selected text" title="Outdent selected text">
                                   </a>
                               </td>
+
                               <td>
                                   <a href=" javascript:undo();">
                                       <img src="images/undo.png" border="0" alt="Undo" title="Undo">
@@ -207,44 +229,37 @@ var config = require("./config")
                                       <img src="images/redo.png" border="0" alt="Redo" title="Redo">
                                   </a>
                               </td>
-
-                             <td>
-                                  <a href=" javascript:find();">
-
-                                      <img src="images/find.png" border="0" alt="Find" title="Find">
-
+                              <td>
+                                  <a href=" javascript:gotoLine();">
+                                      <img src="images/goto.png" border="0" alt="Goto Line" title="Goto Line">
                                   </a>
                               </td>
                               <td>
-									<a href=" javascript:redo();">
-										<img src="images/left_arrow.png" border="0" alt="Previous" title="Previous">
-									</a>
-                              </td>
-                               <td>
-								<a href=" javascript:redo();">
-									<img src="images/right_arrow.png" border="0" alt="Next" title="Next">
-								</a>
-                              </td>
+                                  <a href=" javascript:find();">
 
-                                <td>
-							  							  								<a href=" javascript:redo();">
-							  							  									<img src="images/goto.png" border="0" alt="Goto Line" Title="Goto Line">
-							  							  								</a>
+                                      <img src="images/find.png" border="0" alt="Find" Title="Find">
+                                  </a>
                               </td>
-                                <td>
-									<a href=" javascript:redo();">
-										<img src="images/replace.png" border="0" alt="Replace" title="Replace">
-									</a>
+                              <td>
+                                  <a href=" javascript:findNext();">
+                                      <img src="images/right_arrow.png" border="0" alt="Find Next" Title="Find Next">
+                                  </a>
                               </td>
-  						<td>
-									<a href=" javascript:redo();">
-										<img src="images/record.png" border="0" alt="Record" title="Record">
-									</a>
+                              <td>
+                                  <a href=" javascript:replace();">
+                                      <img src="images/replace.png" border="0" alt="Replace" Title="Replace">
+                                  </a>
                               </td>
-                              <td  style="border-right:1px solid #dddddd">
-							  									<a href=" javascript:redo();">
-							  										<img src="images/play.png" border="0" alt="play" title="Play">
-							  									</a>
+                              <td>
+                                  <a href=" javascript:macroRecord();">
+                                      <img id="macro_recorder" src="images/record.png" border="0" alt="Record Macro" title="Record Macro">
+                                  </a>
+                              </td>
+                              <td style="border-right:1px solid #dddddd">
+                                  <a href=" javascript:macroPlay();">
+                                      <img src="images/play.png" border="0" alt="Play Macro" Title ="Play Macro">
+                                  </a>
+
                               </td>
                           </tr>
                       </table>
