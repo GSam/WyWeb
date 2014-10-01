@@ -3,7 +3,7 @@ import templating, db
 from cherrypy.lib.cptools import allow
 from cherrypy import request
 import auth
-from auth import AuthController, requireAdmin
+from auth import AuthController, requireAdmin, requireAdminOrTeacher, isAdmin
 
 def authorizeTests():
     global requireAdmin
@@ -38,7 +38,7 @@ class Admin(object):
         'DB: Connection ok'
         """
         userid = cherrypy.session.get(auth.SESSION_USERID)
-        requireAdmin(userid)
+        requireAdminOrTeacher(userid)
         
         allow(["HEAD", "GET"])
         error = ""
@@ -46,7 +46,8 @@ class Admin(object):
         status = "DB: Connection ok"
         cnx = db.connect()
 
-        return templating.render("admin.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, STATUS=status)
+        return templating.render("admin.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect,
+                                STATUS=status, IS_ADMIN=isAdmin(userid))
     admin.exposed = True
 
     # ============================================================
@@ -65,8 +66,8 @@ class Admin(object):
         >>> results.STATUS
         'DB: Connection ok'
         """
-        userid = cherrypy.session.get(auth.SESSION_USERID)
-        requireAdmin(userid)
+        adminUserid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(adminUserid)
 
         allow(["HEAD", "GET", "POST"])
         message = ""
@@ -111,7 +112,7 @@ class Admin(object):
             userid = None
 
         return templating.render("manage_admins.html", ADMINLIST=adminList, TEACHERLIST=teacherList, 
-                                    MESSAGE=message, TEACHER_MESSAGE=teacherMessage)
+                                    MESSAGE=message, TEACHER_MESSAGE=teacherMessage, IS_ADMIN=isAdmin(adminUserid))
 
     manage_admins.exposed = True
 
@@ -148,22 +149,25 @@ class Admin(object):
         requireAdmin(userid)
 
         if request.method == 'POST' and login and staffid and full_name and preferred_name:
+            cnx, status = db.connect()
+            cursor = cnx.cursor()
+            query = "SELECT userid FROM whiley_user WHERE username = %s"
+            cursor.execute(query, (id,))
+            id = cursor.fetchone()[0]
+            cursor.close()
+            cnx.close()
+
             auth.create_teacher(id, login, staffid, full_name, preferred_name)
 
             return templating.render("redirect.html", STATUS="alert-success", MESSAGE="Teacher rights added...")
         else:
             # prefill login
             if not login:
-                cnx, status = db.connect()
-                cursor = cnx.cursor()
-                query = "SELECT username FROM whiley_user WHERE userid = %s"
-                cursor.execute(query, (id,))
-                newlogin = cursor.fetchone()
-                cursor.close()
-                cnx.close()
-                if newlogin: login = newlogin
+                login = id
+
             return templating.render("admin_add_teacher.html", USERID=id, LOGIN=login, STAFFID=staffid,
-                                        FULLNAME=full_name, PREFERRED_NAME=preferred_name)
+                                        FULLNAME=full_name, PREFERRED_NAME=preferred_name, 
+                                        IS_ADMIN=isAdmin(userid))
     admin_teacher_add.exposed = True
 
     def admin_teacher_revoke(self, id):
@@ -224,7 +228,8 @@ class Admin(object):
             cursor.close()
             cnx.close()
 
-        return templating.render("admin_institutions_add.html", ROOT_URL=config.VIRTUAL_URL, ERROR="", REDIRECT="", OPTION=options, STATUS=status)
+        return templating.render("admin_institutions_add.html", ROOT_URL=config.VIRTUAL_URL, ERROR="",
+                                REDIRECT="", OPTION=options, STATUS=status, IS_ADMIN=isAdmin(userid))
 
     admin_institutions_add.exposed = True
 
@@ -321,7 +326,7 @@ class Admin(object):
         return templating.render("admin_institutions.html", ROOT_URL=config.VIRTUAL_URL, ERROR="", 
                                REDIRECT=redirect, OPTION=options, INSTITUTION_ID=institution,
                                INSTITUTION=displayInstitution, CONTACT=displayContact, WEBSITE=displayWebsite,
-                               DESCRIPTION=displayDescription)
+                               DESCRIPTION=displayDescription, IS_ADMIN=isAdmin(userid))
 
     admin_institutions.exposed = True
 
@@ -383,7 +388,7 @@ class Admin(object):
 
         return templating.render("admin_courses.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error,
                                 REDIRECT=redirect, OPTION=options, INSTITUTION=institution, 
-                                COURSE_LIST=course_list)
+                                COURSE_LIST=course_list, IS_ADMIN=isAdmin(userid))
 
     admin_courses.exposed = True
     
@@ -429,7 +434,9 @@ class Admin(object):
         cursor.close() 
         cnx.close() 
 
-        return templating.render("admin_courses_add.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, REDIRECT=redirect, OPTION=options, NEWSTATUS=newstatus, VALIDATIONCODE=validationCode)  
+        return templating.render("admin_courses_add.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error,
+                                    REDIRECT=redirect, OPTION=options, NEWSTATUS=newstatus, 
+                                    VALIDATIONCODE=validationCode, IS_ADMIN=isAdmin(userid))  
                                
     admin_course_add.exposed = True
     
@@ -506,7 +513,7 @@ class Admin(object):
         return templating.render("admin_course_details.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, 
             REDIRECT=redirect,
             COURSENAME=courseName, COURSECODE=courseCode, YEAR=year, VALIDATIONCODE=validationcode,
-            INSTITUTION=institution, STUDENTS=students, COURSEID=id)
+            INSTITUTION=institution, STUDENTS=students, COURSEID=id, IS_ADMIN=isAdmin(userid))
     admin_course_details.exposed = True
     
 
@@ -546,7 +553,7 @@ class Admin(object):
         True
         """
         userid = cherrypy.session.get(auth.SESSION_USERID)
-        requireAdmin(userid)
+        requireAdminOrTeacher(userid)
 
         allow(["HEAD", "GET", "POST"])
         error = ""
@@ -574,7 +581,8 @@ class Admin(object):
                                 REDIRECT=redirect, STATUS=status,
                                 SEARCHRESULT=searchResult, SEARCHVALUE=searchValue,
                                 STUDENTNAME=studentName, INSTITUTIONNAME=institutionName,
-                                STUDENTCOURSES=studentCourses, STUDENTPROJECTS=studentProjects)
+                                STUDENTCOURSES=studentCourses, STUDENTPROJECTS=studentProjects, 
+                                IS_ADMIN=isAdmin(userid))
 
     admin_students_search.exposed = True
 
@@ -636,7 +644,7 @@ class Admin(object):
         True
         """
         userid = cherrypy.session.get(auth.SESSION_USERID)
-        requireAdmin(userid)
+        requireAdminOrTeacher(userid)
 
         allow(["HEAD", "GET", "POST"])
         error = ""
@@ -702,7 +710,8 @@ class Admin(object):
                                 OPTION=options, INSTITUTION=institution, 
                                 STUDENTNAME=studentName, STUDENTINSTITUTION=studentInstitution,
                                 STUDENTCOURSES=studentCourses, STUDENTPROJECTS=studentProjects,
-                                OPTIONCOURSE=optionsCourse, COURSE=course, OPTIONSTUDENT=optionsStudent)
+                                OPTIONCOURSE=optionsCourse, COURSE=course, OPTIONSTUDENT=optionsStudent, 
+                                IS_ADMIN=isAdmin(userid))
 
     admin_students_list.exposed = True
 

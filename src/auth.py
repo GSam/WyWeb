@@ -15,7 +15,6 @@ from cherrypy.lib.cptools import allow
 from cherrypy import HTTPRedirect
 from cherrypy import request
 
-
 import uuid
 import hashlib
 
@@ -249,34 +248,40 @@ def member_of(groupname):
 def name_is(reqd_username):
     return lambda: reqd_username == cherrypy.request.login
 
-# These might be handy
-
-def any_of(*conditions):
-    """Returns True if any of the conditions match"""
-    def check():
-        for c in conditions:
-            if c():
-                return True
-        return False
-    return check
-
-# By default all conditions are required, but this might still be
-# needed if you want to use it inside of an any_of(...) condition
-def all_of(*conditions):
-    """Returns True if all of the conditions match"""
-    def check():
-        for c in conditions:
-            if not c():
-                return False
-        return True
-    return check
-
 def requireAdmin(userid):
     """
     Require admin role to show the page, raise an error if user is not admin
     """
     if not isAdmin(userid):
         raise cherrypy.HTTPRedirect("/auth/login")
+
+def requireAdminOrTeacher(userid):
+    """
+    Require either an admin or teacher role to show the page, rasie an error if user is not
+    """
+    if not isAdmin(userid) and not isTeacher(userid):
+        raise cherrypy.HTTPRedirect("/auth/login")
+
+def isTeacher(userid):
+    """
+    Checks if username is a teacher. 
+    Returns True on success or False on failure
+    """
+    result = False
+    cnx = db.connect()[0]
+    if cnx:
+        cursor = cnx.cursor()
+        query = ("SELECT teacherid FROM teacher_info WHERE userid = %s")
+        cursor.execute(query, (userid,))
+        row = cursor.fetchone()
+        if cursor.rowcount > 0:
+            result = True
+        cursor.close()
+        cnx.close()
+    else:
+        print "Unable to connect to database"
+    print userid, "is teacher:", result
+    return result
         
 def isAdmin(userid):
     """

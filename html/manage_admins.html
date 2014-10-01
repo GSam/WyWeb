@@ -38,9 +38,11 @@
                   <form class="navbar-form">
                   		  <a href="/" class="btn btn-default navbar-btn" title="IDE">Play</a>
 			              <a href="admin" class="btn btn-primary navbar-btn" title="Admin">Admin</a>
-                          <a href="manage_admins" class="btn btn-primary navbar-btn" title="Rights">Admin Rights</a>
-			              <a href="admin_institutions" class="btn btn-primary navbar-btn" title="Institutions">Institutions</a>
-			              <a href="admin_courses" class="btn btn-primary navbar-btn" title="Courses">Courses</a>
+                          % if IS_ADMIN:
+                              <a href="manage_admins" class="btn btn-primary navbar-btn" title="Rights">Rights</a>
+			                  <a href="admin_institutions" class="btn btn-primary navbar-btn" title="Institutions">Institutions</a>
+			                  <a href="admin_courses" class="btn btn-primary navbar-btn" title="Courses">Courses</a>
+                          % endif
 						  <a href="admin_students_list" class="btn btn-primary navbar-btn" title="Students">Students List</a>
 						  <a href="admin_students_search" class="btn btn-primary navbar-btn" title="Students">Students Search</a>
 			              <a href="http://www.whiley.org" class="btn btn-default navbar-btn" title="Admin">whiley.org</a>
