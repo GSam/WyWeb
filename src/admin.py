@@ -74,9 +74,6 @@ class Admin(object):
         adminList = []
         userList = []
 
-        if deleteadminid is not None:
-            print deleteadminid
-
         if newadminid == "":          
             cnx, status = db.connect()
             cursor = cnx.cursor() 
@@ -103,6 +100,35 @@ class Admin(object):
         return templating.render("manage_admins.html", ADMINLIST=adminList, MESSAGE=message)
 
     manage_admins.exposed = True
+
+    def admin_manage_revoke(self, id):
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
+
+        if request.method == 'POST':
+            cnx, status = db.connect()
+            cursor = cnx.cursor()
+            query = "DELETE FROM admin_users WHERE userid=%s"
+            cursor.execute(query, (id,))
+            cursor.close()
+            cnx.close()
+
+            return templating.render("redirect.html", STATUS="alert-success", 
+                                    MESSAGE="Admin rights revoked...")
+        else:
+            cnx, status = db.connect()
+            cursor = cnx.cursor()
+            query = "SELECT username FROM whiley_user WHERE userid=%s"
+            cursor.execute(query, (id,))
+            name = cursor.fetchone()[0]
+            cursor.close()
+            cnx.close()
+
+            return templating.render("confirm.html", 
+                                TITLE="Are you sure you want to revoke %s's admin rights?" % name,
+                                MESSAGE="The institution and all it's courses will be permanently removed.",
+                                CONFIRM_LABLE="REVOKE")
+    admin_manage_revoke.exposed = True
 
     # ============================================================
     # Admin Add Institutions Page
