@@ -38,27 +38,37 @@ editor.toggleCommentLines();
 
 function indentBlock() {
     editor.blockIndent();
-	editor.focus().bind(editor);
+	editor.focus();
 }
 
 function outdentBlock() {
 	editor.blockOutdent();
-	editor.focus().bind(editor);
+	editor.focus();
 }
 
 function undo() {
+            if (_newFile) {
+                _newFile = false;
+                editor.getSession().getUndoManager().reset()
+            }
 	editor.undo();
-	editor.focus().bind(editor);
+	editor.focus();
 }
 
 function redo() {
 	editor.redo();
-	editor.focus().bind(editor);
+	editor.focus();
 }
 
 function foldall() {
 	editor.foldAll();
-	editor.focus().bind(editor);
+	editor.focus();
+}
+
+function find() {
+var config = require("./config")
+	config.loadModule("ace/ext/searchBox",function(e){e.Search(editor)});
+	editor.focus();
 }
 
 </script>
@@ -198,7 +208,8 @@ function foldall() {
 
                              <td style="border-right:1px solid #ffffff"><input type="text" ></td><td>
                                   <a href=" javascript:find();">
-                                      <img src="images/find.png" border="0" alt="Fold All">
+
+                                      <img src="images/find.png" border="0" alt="Find">
 
                                   </a>
                               </td>
@@ -215,15 +226,14 @@ function foldall() {
 
                           </tr>
                       </table>
-</div>
-                <div id="code" class="col-md-10"></div>
+                  </div>
+                  <div id="code" class="col-md-10"></div>
                   <script>
-
 					var editor = ace.edit("code");
 					editor.setTheme("ace/theme/eclipse");
 					editor.getSession().setMode("ace/mode/javascript");
-					editor.focus().bind(editor);
-	  </script>
+					editor.focus();
+						  </script>
               </div>
                </div>
             <div id="messages"></div>
@@ -245,5 +255,6 @@ function foldall() {
              pageTracker._trackPageview();
          } catch(err) {}
       </script>
+      </div>
    </body>
 </html>
