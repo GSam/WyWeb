@@ -187,7 +187,7 @@ function macroPlay() {
             <div class="row">
               <div class="container-fluid" id="content">
            		 <div id="ide" class="col-md-2">
-                  	<div class="file-browser">
+                  	<div class="file-browser" style="overflow:auto;">
 	                     <div id="file-browser">
 								</div>
                      </div>
@@ -199,13 +199,13 @@ function macroPlay() {
                       <table class="ide-menu">
                           <tr>
 
-                              <td>
+                              <td style="z-index: 100">
                                   <a href=" javascript:newFile();">
                                       <img src="images/new_file.png" border="0" alt="Add New File" title="New File">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:newProject();">
+                                  <a href=" javascript:addProject();">
                                       <img src="images/new_project.png" border="0" alt="Create New Project" title="New Project">
                                   </a>
                               </td>
