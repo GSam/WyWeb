@@ -20,7 +20,7 @@ import db
 import config
 import auth
 import admin
-from auth import isAdmin
+from auth import isAdmin, isTeacher
 import tarfile
 
 lookup = TemplateLookup(directories=['html'])
@@ -245,7 +245,7 @@ class Main(admin.Admin):
             print ("not logged in")
         else:
             loggedin = True
-            if isAdmin(userid):
+            if isAdmin(userid) or isTeacher(userid):
                 admin = True
             print ("logged")
             filelist = get_files(username)
