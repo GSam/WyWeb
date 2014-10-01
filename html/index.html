@@ -26,6 +26,8 @@
       .ide-menu td {
       padding-left:8px;
       padding-right:8px;
+      padding-top:3px;
+       padding-bottom:3px;
       border-left:1px solid #dddddd;
       border-top:1px solid #dddddd;
       }
@@ -83,11 +85,13 @@ function find() {
 
 function macroRecord() {
     editor.commands.toggleRecording(editor);
+    $("#macro_recorder").
     editor.focus();
 }
 
 function macroPlay() {
     editor.commands.replay(editor);
+    editor.focus();
 }
 
 </script>
@@ -216,11 +220,6 @@ function macroPlay() {
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:foldall();">
-                                      <img src="images/foldall.png" border="0" alt="Fold All">
-                                  </a>
-                              </td>
-                              <td>
                                   <img src="images/separator.png" border="0" alt="">
                               </td>
                               <td>
@@ -240,9 +239,7 @@ function macroPlay() {
                               </td>
                               <td>
                                   <a href=" javascript:find();">
-
                                       <img src="images/find.png" border="0" alt="Find">
-
                                   </a>
                               </td>
                               <td>
@@ -256,21 +253,16 @@ function macroPlay() {
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:replaceAll();">
-                                      <img src="images/replaceAll.png" border="0" alt="Replace All">
-                                  </a>
-                              </td>
-                              <td>
                                   <img src="images/separator.png" border="0" alt="">
                               </td>
                               <td>
                                   <a href=" javascript:macroRecord();">
-                                      <img src="images/macroRecord.png" border="0" alt="Record Macro">
+                                      <img id="macro_recorder" src="images/record.png" border="0" alt="Record Macro">
                                   </a>
                               </td>
                               <td style="border-right:1px solid #dddddd">
                                   <a href=" javascript:macroPlay();">
-                                      <img src="images/macroPlay.png" border="0" alt="Play Macro">
+                                      <img src="images/play.png" border="0" alt="Play Macro">
                                   </a>
                               </td>
                           </tr>
