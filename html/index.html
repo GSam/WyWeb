@@ -28,8 +28,18 @@
       }</style>
       <script type="text/javascript" src="js/whileyweb.js"></script>
        <script>
+function newFile() {
+}
+
+function newProject() {
+}
+
+function saveAll() {
+}
+
 function commentCode() {
-editor.toggleCommentLines();
+        editor.toggleCommentLines();
+	editor.focus();
 }
 
 function indentBlock() {
@@ -43,10 +53,10 @@ function outdentBlock() {
 }
 
 function undo() {
-            if (_newFile) {
-                _newFile = false;
-                editor.getSession().getUndoManager().reset()
-            }
+    if (_newFile) {
+        _newFile = false;
+        editor.getSession().getUndoManager().reset()
+    }
 	editor.undo();
 	editor.focus();
 }
@@ -56,15 +66,18 @@ function redo() {
 	editor.focus();
 }
 
-function foldall() {
-	editor.foldAll();
+function foldAll() {
+	Folding.foldAll();
 	editor.focus();
 }
 
 function find() {
-var config = require("./config")
+    var config = require("ace/config")
 	config.loadModule("ace/ext/searchBox",function(e){e.Search(editor)});
 	editor.focus();
+}
+
+function gotoLine() {
 }
 
 </script>
@@ -149,7 +162,35 @@ var config = require("./config")
                   <div>
                       <table class="ide-menu">
                           <tr>
-                    <td>
+                              <td>
+                                  <a href=" javascript:newFile();">
+                                      <img src="images/new_file.png" border="0" alt="Add New File">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:newProject();">
+                                      <img src="images/newProject.png" border="0" alt="Create New Project">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:saveAll();">
+                                      <img src="images/saveAll.png" border="0" alt="Save All Files">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:compileProject();">
+                                      <img src="images/compileProject.png" border="0" alt="Compile This Project">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:runProject();">
+                                      <img src="images/runProject.png" border="0" alt="Run This Project">
+                                  </a>
+                              </td>
+                              <td>
+                                  <img src="images/separator.png" border="0" alt="">
+                              </td>
+                              <td>
                                   <a href=" javascript:commentCode();">
                                       <img src="images/comments.png" border="0" alt="Blockquote selected text">
                                   </a>
@@ -165,6 +206,14 @@ var config = require("./config")
                                   </a>
                               </td>
                               <td>
+                                  <a href=" javascript:foldall();">
+                                      <img src="images/foldall.png" border="0" alt="Fold All">
+                                  </a>
+                              </td>
+                              <td>
+                                  <img src="images/separator.png" border="0" alt="">
+                              </td>
+                              <td>
                                   <a href=" javascript:undo();">
                                       <img src="images/undo.png" border="0" alt="Undo">
                                   </a>
@@ -175,13 +224,41 @@ var config = require("./config")
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:foldall();">
-                                      <img src="images/foldall.png" border="0" alt="Fold All">
+                                  <a href=" javascript:gotoLine();">
+                                      <img src="images/gotoLine.png" border="0" alt="Goto Line">
                                   </a>
                               </td>
                               <td>
                                   <a href=" javascript:find();">
                                       <img src="images/find.png" border="0" alt="Find">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:findNext();">
+                                      <img src="images/findNext.png" border="0" alt="Find Next">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:replace();">
+                                      <img src="images/replace.png" border="0" alt="Replace">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:replaceAll();">
+                                      <img src="images/replaceAll.png" border="0" alt="Replace All">
+                                  </a>
+                              </td>
+                              <td>
+                                  <img src="images/separator.png" border="0" alt="">
+                              </td>
+                              <td>
+                                  <a href=" javascript:macroRecord();">
+                                      <img src="images/macroRecord.png" border="0" alt="Record Macro">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:macroPlay();">
+                                      <img src="images/macroPlay.png" border="0" alt="Play Macro">
                                   </a>
                               </td>
                           </tr>
