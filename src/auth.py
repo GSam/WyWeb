@@ -152,6 +152,27 @@ def create_admin(userid):
     cnx.close()
     return result
 
+def create_teacher(userid, login, staffid, full_name, preferred_name):
+    """
+    Inserts userid to the teacher_info table.
+    """
+    result = False
+    cnx = db.connect()[0]
+    cursor = cnx.cursor()
+    query = "SELECT * from teacher_info where userid = %s"
+    cursor.execute(query, (userid,))
+    cursor.fetchone()
+    if cursor.rowcount > 0:
+        result = False
+    else:
+        query = """INSERT into teacher_info (staffid, login, full_name, preferred_name, userid) 
+                    VALUES (%s, %s, %s, %s, %s)"""
+        cursor.execute(query, (staffid, login, full_name, preferred_name, userid))
+        result = True
+    cursor.close()
+    cnx.close()
+    return result
+
 def insertuserdetails(student_infoid, institutionid, coursesid, validationcode):
     """
     Create username with given information.

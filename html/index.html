@@ -33,6 +33,7 @@
       }
       </style>
       <script type="text/javascript" src="js/whileyweb.js"></script>
+      <script type="text/javascript" src="js/ext-searchbox.js"></script>
        <script>
 function newFile() {
 }
@@ -78,26 +79,18 @@ function foldAll() {
 }
 
 function gotoLine() {
-	editor.gotoLine($("#gotoLineNumber").val(), 1, true);
+
+    editor.execCommand("gotoline");
 	editor.focus();
 }
 
-function find(searchFor) {
-    editor.find(searchFor);
+function find() {
+    editor.execCommand("find");
 	editor.focus();
 }
 
-function findNext(searchFor) {
-    editor.findNext(searchFor);
-	editor.focus();
-}
-
-function replaceNext() {
-    findIt = $("#findInFile").val();
-    replaceWith = $("#replaceInFile").val()
-    alert(findIt+" => "+replaceWith);
-    editor.find(findIt);
-    editor.replaceSelection(replaceWith);
+function replace() {
+    editor.execCommand("replace");
 	editor.focus();
 }
 
@@ -205,60 +198,59 @@ function macroPlay() {
                   <div>
                       <table class="ide-menu">
                           <tr>
+
                               <td>
                                   <a href=" javascript:newFile();">
-                                      <img src="images/new_file.png" border="0" alt="Add New File">
+                                      <img src="images/new_file.png" border="0" alt="Add New File" title="New File">
                                   </a>
                               </td>
                               <td>
                                   <a href=" javascript:newProject();">
-                                      <img src="images/new_project.png" border="0" alt="Create New Project">
+                                      <img src="images/new_project.png" border="0" alt="Create New Project" title="New Project">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:saveAll();">
-                                      <img src="images/save.png" border="0" alt="Save All Files">
+                        % if LOGGED is True:
+                                  <a href=" javascript:saveToServer();editor.focus();">
+                                      <img src="images/save.png" border="0" alt="Save All Files" title="Save All Files">
+                                  </a>
+                        % endif
+                              </td>
+                              <td>
+                                  <a href=" javascript:compile();">
+                                      <img src="images/compile.png" border="0" alt="Compile This Project" title="Compile">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:compileProject();">
-                                      <img src="images/compile.png" border="0" alt="Compile This Project">
+                                  <a href=" javascript:run();">
+                                      <img src="images/run.png" border="0" alt="Run This Project" title="Run">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:runProject();">
-                                      <img src="images/run.png" border="0" alt="Run This Project">
-                                  </a>
-                              </td>
-                              <td>
-                                  <img src="images/separator.png" border="0" alt="">
-                              </td>
-                              <td>
+
                                   <a href=" javascript:commentCode();">
-                                      <img src="images/comments.png" border="0" alt="Blockquote selected text">
+                                      <img src="images/comments.png" border="0" alt="comment selected text" title="Comment selected text">
                                   </a>
                               </td>
                               <td>
                                   <a href=" javascript:indentBlock();">
-                                      <img src="images/indent.png" border="0" alt="Indent selected text">
+                                      <img src="images/indent.png" border="0" alt="Indent selected text" title="Indent selected text">
                                   </a>
                               </td>
                               <td>
                                   <a href=" javascript:outdentBlock();">
-                                      <img src="images/outdent.png" border="0" alt="Outdent selected text">
+                                      <img src="images/outdent.png" border="0" alt="Outdent selected text" title="Outdent selected text">
                                   </a>
                               </td>
-                              <td>
-                                  <img src="images/separator.png" border="0" alt="">
-                              </td>
+
                               <td>
                                   <a href=" javascript:undo();">
-                                      <img src="images/undo.png" border="0" alt="Undo">
+                                      <img src="images/undo.png" border="0" alt="Undo" title="Undo">
                                   </a>
                               </td>
                               <td>
                                   <a href=" javascript:redo();">
-                                      <img src="images/redo.png" border="0" alt="Redo">
+                                      <img src="images/redo.png" border="0" alt="Redo" title="Redo">
                                   </a>
                               </td>
                               <td style="border-right:1px solid #FFF">
@@ -266,43 +258,29 @@ function macroPlay() {
                               </td>
                               <td>
                                   <a href=" javascript:gotoLine();">
-                                      <img src="images/goto.png" border="0" alt="Goto Line">
-                                  </a>
-                              </td>
-                              <td style="border-right:1px solid #FFF">
-                                  <input id=findInFile type="text" class="form-control input-xs">
-                              </td>
-                              <td>
-                                  <a href=" javascript:find($('#findInFile').val());">
-                                      <img src="images/find.png" border="0" alt="Find">
+                                      <img src="images/goto.png" border="0" alt="Goto Line" title="Goto Line">
                                   </a>
                               </td>
                               <td>
-                                  <a href="javascript:findNext();">
-                                      <img src="images/right_arrow.png" border="0" alt="Find Next">
-                                  </a>
-                              </td>
-                              <td style="border-right:1px solid #FFF">
-                                  <input id=replaceInFile type="text" class="form-control input-sm">
-                              </td>
-
-                              <td>
-                                  <a href="javascript:alert('replacing...');replaceNext();">
-                                      <img src="images/replace.png" border="0" alt="Replace">
+                                  <a href=" javascript:find();">
+                                      <img src="images/find.png" border="0" alt="Find" Title="Find">
                                   </a>
                               </td>
                               <td>
-                                  <img src="images/separator.png" border="0" alt="">
+                                  <a href=" javascript:replace();">
+                                      <img src="images/replace.png" border="0" alt="Replace" Title="Replace">
+                                  </a>
                               </td>
                               <td>
-                                  <a href="javascript:macroRecord();">
-                                      <img id="macro_recorder" src="images/record.png" border="0" alt="Record Macro">
+                                  <a href=" javascript:macroRecord();">
+                                      <img id="macro_recorder" src="images/record.png" border="0" alt="Record Macro" title="Record Macro">
                                   </a>
                               </td>
                               <td style="border-right:1px solid #dddddd">
                                   <a href=" javascript:macroPlay();">
-                                      <img src="images/play.png" border="0" alt="Play Macro">
+                                      <img src="images/play.png" border="0" alt="Play Macro" Title ="Play Macro">
                                   </a>
+
                               </td>
                           </tr>
                       </table>
