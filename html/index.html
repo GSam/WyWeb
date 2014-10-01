@@ -24,8 +24,12 @@
       </script>
       <style>
       .ide-menu td {
-      padding-left:10px;
-      }</style>
+      padding-left:8px;
+      padding-right:8px;
+      border-left:1px solid #dddddd;
+      border-top:1px solid #dddddd;
+      }
+      </style>
       <script type="text/javascript" src="js/whileyweb.js"></script>
        <script>
 function commentCode() {
@@ -139,6 +143,33 @@ function foldall() {
                   <div>
                       <table class="ide-menu">
                           <tr>
+                          <td>
+								<a href=" javascript:commentCode();">
+								<img src="images/new_file.png" border="0" alt="New File">
+								</a>
+							</td>
+						 <td>
+						<a href=" javascript:commentCode();">
+						<img src="images/new_project.png" border="0" alt="New Project">
+						</a>
+							</td>
+							 <td>
+									<a href=" javascript:commentCode();">
+									<img src="images/save.png" border="0" alt="Save">
+									</a>
+							</td>
+							 <td>
+									<a href=" javascript:commentCode();" alt="Compile">
+									<img src="images/compile.png" border="0" >
+									</a>
+							</td>
+							 <td>
+							<a href=" javascript:commentCode();" alt="Run">
+							<img src="images/run.png" border="0" >
+							</a>
+							</td>
+
+
                     <td>
                                   <a href=" javascript:commentCode();">
                                       <img src="images/comments.png" border="0" alt="Blockquote selected text">
@@ -164,17 +195,24 @@ function foldall() {
                                       <img src="images/redo.png" border="0" alt="Redo">
                                   </a>
                               </td>
-                              <td>
-                                  <a href=" javascript:foldall();">
-                                      <img src="images/foldall.png" border="0" alt="Fold All">
-                                  </a>
-                              </td>
-                              <td>
+
+                             <td style="border-right:1px solid #ffffff"><input type="text" ></td><td>
                                   <a href=" javascript:find();">
                                       <img src="images/find.png" border="0" alt="Fold All">
-                                      <input type="text" >
+
                                   </a>
                               </td>
+                              <td>
+									<a href=" javascript:redo();">
+										<img src="images/left_arrow.png" border="0" alt="Previous">
+									</a>
+                              </td>
+                               <td style="border-right:1px solid #dddddd">
+								<a href=" javascript:redo();">
+									<img src="images/right_arrow.png" border="0" alt="Next">
+								</a>
+                              </td>
+
                           </tr>
                       </table>
 </div>
