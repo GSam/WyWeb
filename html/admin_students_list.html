@@ -98,7 +98,7 @@
 % if STUDENTPROJECTS:
     <h4>Projects</h4>
     % for projectid, projectname, files in STUDENTPROJECTS:
-        <a href="#">${projectname}</a><br />
+        <a href="student_project?project=${str(projectid)}">${projectname}</a><br />
         % for filename in files:
             &nbsp; --> &nbsp; ${filename}
         % endfor
