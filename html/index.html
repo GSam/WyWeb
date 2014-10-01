@@ -198,9 +198,8 @@ function macroPlay() {
                   <div>
                       <table class="ide-menu">
                           <tr>
-
                               <td style="z-index: 100">
-                                  <a href=" javascript:newFile();">
+                                  <a href=" javascript:newFile();" style="opacity:0.3">
                                       <img src="images/new_file.png" border="0" alt="Add New File" title="New File">
                                   </a>
                               </td>
@@ -211,7 +210,7 @@ function macroPlay() {
                               </td>
                               <td>
                         % if LOGGED is False:
-                                  <img src="images/save.png" border="0" alt="Save All Files" title="Saving Is Only Available To Logged In Users" style="opacity:0.4">
+                                  <img  style="opacity:0.3" src="images/save.png" border="0" alt="Save All Files" title="Saving Is Only Available To Logged In Users">
                         % endif
                         % if LOGGED is True:
                                   <a href=" javascript:saveToServer();editor.focus();">
@@ -298,6 +297,7 @@ function macroPlay() {
             <div>
             	<textarea id="console" readonly="readonly"></textarea>
             </div>
+             <div class="row topbar">Whiley by Dr David Pearce; IDE by Scott, <a href="http://www.gregs.co.nz">Greg</a>, Adrian, Garming, and Iuri; Icons by <a href="http://glyphicons.com">Glyphicon</a></div>
 
          </div>
       </div>
