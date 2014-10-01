@@ -66,7 +66,7 @@ var JavaScriptHighlightRules = function() {
         	"all|any|assert|assume|bool|break|byte|catch|case|catch|char|continue|" +
 			"constant|debug|default|do|else|ensures|export|false|finite|for|" +
 			"function|from|if|import|in|int|is|method|native|new|no|null|package|" +
-			"private|protected|public|real|requires|return|skip|some|string|",
+			"private|protected|public|real|requires|return|skip|some|string|type|while|switch|",
         "storage.type":
             "const|let|var|function",
         "constant.language":

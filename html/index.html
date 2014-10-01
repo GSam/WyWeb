@@ -22,21 +22,49 @@
          var loggedStorage = undefined;
 
       </script>
+      <style>
+      .ide-menu td {
+      padding-left:10px;
+      }</style>
       <script type="text/javascript" src="js/whileyweb.js"></script>
-<script>
+       <script>
 function commentCode() {
 editor.toggleCommentLines();
 }
 
-function indentCode() {
-var oldText = editor.session.getTextRange(editor.getSelectionRange());
-var newText = "";
-var lines = oldText.split('\n');
-for(var i = 0;i < lines.length;i++){
-   newText = newText + "\t " + lines[i] + "\n";
+function indentBlock() {
+    editor.blockIndent();
+	editor.focus();
 }
-newText = newText.substring(0, newText.length-1);
-editor.session.replace(editor.getSelectionRange(),newText);
+
+function outdentBlock() {
+	editor.blockOutdent();
+	editor.focus();
+}
+
+function undo() {
+            if (_newFile) {
+                _newFile = false;
+                editor.getSession().getUndoManager().reset()
+            }
+	editor.undo();
+	editor.focus();
+}
+
+function redo() {
+	editor.redo();
+	editor.focus();
+}
+
+function foldall() {
+	editor.foldAll();
+	editor.focus();
+}
+
+function find() {
+var config = require("./config")
+	config.loadModule("ace/ext/searchBox",function(e){e.Search(editor)});
+	editor.focus();
 }
 
 </script>
@@ -117,16 +145,55 @@ editor.session.replace(editor.getSelectionRange(),newText);
                     <nav>
                         <button class="btn" onclick="addProject()" title="Create a Project...">+</button>
                     </nav>
-                </div><div><table><tr><td><a href=" javascript:commentCode();"><img src="images/blockquote.gif" border="0" alt="Blockquote selected text"></a></td><td> &nbsp; &nbsp; </td><td>
-                <td><a href=" javascript:indentCode();"><img src="images/indent.png" border="0" alt="Indent selected text"></a></td></tr></table>
-</div>
-                <div id="code" class="col-md-10"></div>
+                </div>
+                  <div>
+                      <table class="ide-menu">
+                          <tr>
+                    <td>
+                                  <a href=" javascript:commentCode();">
+                                      <img src="images/comments.png" border="0" alt="Blockquote selected text">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:indentBlock();">
+                                      <img src="images/indent.png" border="0" alt="Indent selected text">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:outdentBlock();">
+                                      <img src="images/outdent.png" border="0" alt="Outdent selected text">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:undo();">
+                                      <img src="images/undo.png" border="0" alt="Undo">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:redo();">
+                                      <img src="images/redo.png" border="0" alt="Redo">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:foldall();">
+                                      <img src="images/foldall.png" border="0" alt="Fold All">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href=" javascript:find();">
+                                      <img src="images/find.png" border="0" alt="Find">
+                                  </a>
+                              </td>
+                          </tr>
+                      </table>
+                  </div>
+                  <div id="code" class="col-md-10"></div>
                   <script>
-
 					var editor = ace.edit("code");
 					editor.setTheme("ace/theme/eclipse");
 					editor.getSession().setMode("ace/mode/javascript");
-	  </script>
+					editor.focus();
+						  </script>
               </div>
                </div>
             <div id="messages"></div>
@@ -148,5 +215,6 @@ editor.session.replace(editor.getSelectionRange(),newText);
              pageTracker._trackPageview();
          } catch(err) {}
       </script>
+      </div>
    </body>
 </html>
