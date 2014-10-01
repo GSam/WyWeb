@@ -52,7 +52,7 @@ class Admin(object):
     # ============================================================
     # Manage admin page
     # ============================================================
-    def manage_admins(self, newadminid="", deleteadminid="", searchuser=None, *args, **kwargs):
+    def manage_admins(self, newadminid="", deleteadminid="", searchuser=None, newteacherid="", *args, **kwargs):
         """
         Manage the admins.
 
@@ -97,7 +97,21 @@ class Admin(object):
                 message = "User does not exist"
             cursor.close()
 
-        return templating.render("manage_admins.html", ADMINLIST=adminList, MESSAGE=message)
+        teacherList = []
+        teacherMessage = ""
+
+        if newteacherid == "":          
+            cnx, status = db.connect()
+            cursor = cnx.cursor() 
+            query = ("SELECT full_name, userid from teacher_info")
+            cursor.execute(query)
+            for (username, userid) in cursor:
+                teacherList.append((username,userid))
+            cursor.close()
+            userid = None
+
+        return templating.render("manage_admins.html", ADMINLIST=adminList, TEACHERLIST=teacherList, 
+                                    MESSAGE=message, TEACHER_MESSAGE=teacherMessage)
 
     manage_admins.exposed = True
 
@@ -126,9 +140,59 @@ class Admin(object):
 
             return templating.render("confirm.html", 
                                 TITLE="Are you sure you want to revoke %s's admin rights?" % name,
-                                MESSAGE="The institution and all it's courses will be permanently removed.",
-                                CONFIRM_LABLE="REVOKE")
+                                MESSAGE="", CONFIRM_LABLE="REVOKE")
     admin_manage_revoke.exposed = True
+
+    def admin_teacher_add(self, id, login="", staffid="", full_name="", preferred_name="", *args, **kwargs):
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
+
+        if request.method == 'POST' and login and staffid and full_name and preferred_name:
+            auth.create_teacher(id, login, staffid, full_name, preferred_name)
+
+            return templating.render("redirect.html", STATUS="alert-success", MESSAGE="Teacher rights added...")
+        else:
+            # prefill login
+            if not login:
+                cnx, status = db.connect()
+                cursor = cnx.cursor()
+                query = "SELECT username FROM whiley_user WHERE userid = %s"
+                cursor.execute(query, (id,))
+                newlogin = cursor.fetchone()
+                cursor.close()
+                cnx.close()
+                if newlogin: login = newlogin
+            return templating.render("admin_add_teacher.html", USERID=id, LOGIN=login, STAFFID=staffid,
+                                        FULLNAME=full_name, PREFERRED_NAME=preferred_name)
+    admin_teacher_add.exposed = True
+
+    def admin_teacher_revoke(self, id):
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
+
+        if request.method == 'POST':
+            cnx, status = db.connect()
+            cursor = cnx.cursor()
+            query = "DELETE FROM teacher_info WHERE userid=%s"
+            cursor.execute(query, (id,))
+            cursor.close()
+            cnx.close()
+
+            return templating.render("redirect.html", STATUS="alert-success", 
+                                    MESSAGE="Admin rights revoked...")
+        else:
+            cnx, status = db.connect()
+            cursor = cnx.cursor()
+            query = "SELECT username FROM whiley_user WHERE userid=%s"
+            cursor.execute(query, (id,))
+            name = cursor.fetchone()[0]
+            cursor.close()
+            cnx.close()
+
+            return templating.render("confirm.html", 
+                                TITLE="Are you sure you want to revoke %s's teaching rights?" % name,
+                                MESSAGE="", CONFIRM_LABLE="REVOKE")
+    admin_teacher_revoke.exposed = True
 
     # ============================================================
     # Admin Add Institutions Page
@@ -331,11 +395,11 @@ class Admin(object):
      
     def admin_course_add(self, course_name=None, course_code=None, course_year=None, 
                         course_institution=None, validation_code=None, *args, **kwargs): 
-        userid = cherrypy.session.get(auth.SESSION_USERID)
-        requireAdmin(userid)
         """
         Adds a course to the database. 
         """
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
 
         import random, string
         allow(["HEAD", "GET", "POST"]) 
@@ -451,8 +515,7 @@ class Admin(object):
     # ============================================================
 
     def admin_students_search(self, searchValue="", id=None, *args, **kwargs):
-        userid = cherrypy.session.get(auth.SESSION_USERID)
-        requireAdmin(userid)
+
         """
         Searches students by searchValue, displaying information for student number id. 
 
@@ -482,6 +545,8 @@ class Admin(object):
         >>> ('Agile Methods', 'SWEN302', 2014, 1) in ret.STUDENTCOURSES
         True
         """
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
 
         allow(["HEAD", "GET", "POST"])
         error = ""
@@ -519,8 +584,6 @@ class Admin(object):
     # ============================================================
 
     def admin_students_list(self, id=None, institution="", course=None, *args, **kwargs):
-        userid = cherrypy.session.get(auth.SESSION_USERID)
-        requireAdmin(userid)
         """
         Lists students under a institution and course. 
 
@@ -572,6 +635,8 @@ class Admin(object):
         >>> ('Agile Methods', 'SWEN302', 2014, 1) in ret.STUDENTCOURSES
         True
         """
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdmin(userid)
 
         allow(["HEAD", "GET", "POST"])
         error = ""

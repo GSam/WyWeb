@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <title>Whiley on the Web!</title>
+      <link href="/css/bootstrap.min.css" rel="stylesheet">
+      <link rel="stylesheet" href="/css/style.css">
+      <link rel="shortcut icon" href="http://whiley.org/wp-content/themes/atahualpa351/images/favicon/whileyfav.ico" />
+      <link rel="stylesheet" href="/css/jstree.css">
+      <script type="text/javascript" src="/js/jquery.js"></script>
+      <script type="text/javascript" src="/js/jquery-ui.js"></script>
+      <script type="text/javascript" src="/js/ace.js" charset="utf-8"></script>
+      <script type="text/javascript" src="/js/jstree.js"></script>
+      <script type="text/javascript">
+      </script>
+      <script type="text/javascript" src="/js/whileyweb.js"></script>
+   </head>
+   <body>
+      <div class="container-fluid content">
+      <div class="col-md-1">
+      </div>
+      <div class="col-md-10">
+         <div class="container-fluid" id="container">
+            <div class="row topbar">
+               <div class="col-md-1">
+                  <img src="images/wylogo.png" class="image-responsive"/>
+               </div>
+               <div class="col-md-11">
+                  <p>
+                  <h1>Whiley <span id="bold">ADMINISTRATION</span><br/>
+                     <small>From this page, you can administer the Whiley system.</small>
+                  </h1>
+                  </p>
+               </div>
+            </div>
+            <div class="row">
+               <nav class="navbar navbar-default" role="navigation">
+                  <div class="container-fluid">
+                  <form class="navbar-form">
+                  		  <a href="/" class="btn btn-default navbar-btn" title="IDE">Play</a>
+			              <a href="admin" class="btn btn-primary navbar-btn" title="Admin">Admin</a>
+                          <a href="manage_admins" class="btn btn-primary navbar-btn" title="Rights">Admin Rights</a>
+			              <a href="admin_institutions" class="btn btn-primary navbar-btn" title="Institutions">Institutions</a>
+			              <a href="admin_courses" class="btn btn-primary navbar-btn" title="Courses">Courses</a>
+						  <a href="admin_students_list" class="btn btn-primary navbar-btn" title="Students">Students List</a>
+						  <a href="admin_students_search" class="btn btn-primary navbar-btn" title="Students">Students Search</a>
+			              <a href="http://www.whiley.org" class="btn btn-default navbar-btn" title="Admin">whiley.org</a>
+		            </form>
+                  </div>
+                  <!-- /.container-fluid -->
+               </nav>
+            </div>
+            <div class="row">
+              <div class="container-fluid" style="padding-top:30px; padding-bottom:30px;">
+               <div class="col-md-3"></div>
+                <div class="col-md-6">
+                  <div class="row">
+                        <form class="form-horizontal" role="login" method="post" action="?">
+                            <input type="hidden" name="id" value="${USERID}">
+                          <div class="form-group">
+                            <label for="user" class="col-sm-2 control-label">Username</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" name="login" value="${LOGIN}">
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label for="password" class="col-sm-2 control-label">Staff ID</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" name="staffid" value="${STAFFID}">
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label for="password" class="col-sm-2 control-label">Full name</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" name="full_name" value="${FULLNAME}">
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label for="password" class="col-sm-2 control-label">Preferred name</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" name="preferred_name" value="${PREFERRED_NAME}">
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                              <button type="submit" class="btn btn-default">Create</button>
+                            </div>
+                          </div>
+                        </form>
+                  </div>
+
+                </div>
+                <div class="col-md-3"></div>
+               </div>
+            </div>
+
+         </div>
+      </div>
+      <div class="col-md-1">
+      </div>
+
+
+      <script type="text/javascript">
+         var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+         document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+      </script>
+      <script type="text/javascript">
+         try {
+             var pageTracker = _gat._getTracker("UA-5582165-5");
+             pageTracker._trackPageview();
+         } catch(err) {}
+      </script>
+   </body>
+</html>
