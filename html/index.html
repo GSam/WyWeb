@@ -33,6 +33,7 @@
       }
       </style>
       <script type="text/javascript" src="js/whileyweb.js"></script>
+      <script type="text/javascript" src="js/ext-searchbox.js"></script>
        <script>
 function newFile() {
 }
@@ -77,19 +78,40 @@ function foldAll() {
 	editor.focus();
 }
 
+function gotoLine() {
+
+    editor.execCommand("gotoline");
+	editor.focus();
+}
+
 function find() {
-    var config = ace.require("ace/config");
-    config.loadModule("ace/ext/searchbox",function(e){e.Search(editor)});
+    editor.execCommand("find");
+	editor.focus();
+}
+
+function replace() {
+    editor.execCommand("replace");
 	editor.focus();
 }
 
 function macroRecord() {
+    var image = $("#macro_recorder").attr("src");
+    if (image === "images/record_on.png") {
+        $("#macro_recorder").attr("src","images/record.png");
+    }else{
+        $("#macro_recorder").attr("src","images/record_on.png");
+    }
     editor.commands.toggleRecording(editor);
-    $("#macro_recorder").
     editor.focus();
 }
 
 function macroPlay() {
+    var image = $("#macro_recorder").attr("src");
+    if (image === "images/record_on.png") {
+        $("#macro_player").attr("src","images/play.png");
+    }else{
+        $("#macro_player").attr("src","images/play_on.png");
+    }
     editor.commands.replay(editor);
     editor.focus();
 }
@@ -188,17 +210,22 @@ function macroPlay() {
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:saveAll();">
+                        % if LOGGED is False:
+                                  <img src="images/save.png" border="0" alt="Save All Files" title="Saving Is Only Available To Logged In Users" style="opacity:0.4">
+                        % endif
+                        % if LOGGED is True:
+                                  <a href=" javascript:saveToServer();editor.focus();">
                                       <img src="images/save.png" border="0" alt="Save All Files" title="Save All Files">
                                   </a>
+                        % endif
                               </td>
                               <td>
-                                  <a href=" javascript:compileProject();">
+                                  <a href=" javascript:compile();">
                                       <img src="images/compile.png" border="0" alt="Compile This Project" title="Compile">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:runProject();">
+                                  <a href=" javascript:run();">
                                       <img src="images/run.png" border="0" alt="Run This Project" title="Run">
                                   </a>
                               </td>
@@ -236,13 +263,7 @@ function macroPlay() {
                               </td>
                               <td>
                                   <a href=" javascript:find();">
-
                                       <img src="images/find.png" border="0" alt="Find" Title="Find">
-                                  </a>
-                              </td>
-                              <td>
-                                  <a href=" javascript:findNext();">
-                                      <img src="images/right_arrow.png" border="0" alt="Find Next" Title="Find Next">
                                   </a>
                               </td>
                               <td>
