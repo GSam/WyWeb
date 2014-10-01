@@ -77,19 +77,48 @@ function foldAll() {
 	editor.focus();
 }
 
-function find() {
-    var config = ace.require("ace/config");
-    config.loadModule("ace/ext/searchbox",function(e){e.Search(editor)});
+function gotoLine() {
+	editor.gotoLine($("#gotoLineNumber").val(), 1, true);
+	editor.focus();
+}
+
+function find(searchFor) {
+    editor.find(searchFor);
+	editor.focus();
+}
+
+function findNext(searchFor) {
+    editor.findNext(searchFor);
+	editor.focus();
+}
+
+function replaceNext() {
+    findIt = $("#findInFile").val();
+    replaceWith = $("#replaceInFile").val()
+    alert(findIt+" => "+replaceWith);
+    editor.find(findIt);
+    editor.replaceSelection(replaceWith);
 	editor.focus();
 }
 
 function macroRecord() {
+    var image = $("#macro_recorder").attr("src");
+    if (image === "images/record_on.png") {
+        $("#macro_recorder").attr("src","images/record.png");
+    }else{
+        $("#macro_recorder").attr("src","images/record_on.png");
+    }
     editor.commands.toggleRecording(editor);
-    $("#macro_recorder").
     editor.focus();
 }
 
 function macroPlay() {
+    var image = $("#macro_recorder").attr("src");
+    if (image === "images/record_on.png") {
+        $("#macro_player").attr("src","images/play.png");
+    }else{
+        $("#macro_player").attr("src","images/play_on.png");
+    }
     editor.commands.replay(editor);
     editor.focus();
 }
@@ -232,23 +261,33 @@ function macroPlay() {
                                       <img src="images/redo.png" border="0" alt="Redo">
                                   </a>
                               </td>
+                              <td style="border-right:1px solid #FFF">
+                                  <input id="gotoLineNumber" type="text" class="form-control input-sm">
+                              </td>
                               <td>
                                   <a href=" javascript:gotoLine();">
                                       <img src="images/goto.png" border="0" alt="Goto Line">
                                   </a>
                               </td>
+                              <td style="border-right:1px solid #FFF">
+                                  <input id=findInFile type="text" class="form-control input-xs">
+                              </td>
                               <td>
-                                  <a href=" javascript:find();">
+                                  <a href=" javascript:find($('#findInFile').val());">
                                       <img src="images/find.png" border="0" alt="Find">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:findNext();">
+                                  <a href="javascript:findNext();">
                                       <img src="images/right_arrow.png" border="0" alt="Find Next">
                                   </a>
                               </td>
+                              <td style="border-right:1px solid #FFF">
+                                  <input id=replaceInFile type="text" class="form-control input-sm">
+                              </td>
+
                               <td>
-                                  <a href=" javascript:replace();">
+                                  <a href="javascript:alert('replacing...');replaceNext();">
                                       <img src="images/replace.png" border="0" alt="Replace">
                                   </a>
                               </td>
@@ -256,7 +295,7 @@ function macroPlay() {
                                   <img src="images/separator.png" border="0" alt="">
                               </td>
                               <td>
-                                  <a href=" javascript:macroRecord();">
+                                  <a href="javascript:macroRecord();">
                                       <img id="macro_recorder" src="images/record.png" border="0" alt="Record Macro">
                                   </a>
                               </td>
