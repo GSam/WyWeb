@@ -28,7 +28,136 @@ lookup = TemplateLookup(directories=['html'])
 # ============================================================
 # Application Entry
 # ============================================================
+DEFAULT_PROJECT = [
+            {
+                "text": "Samples",
+                "children": [
+                    {
+                        "text": "HelloWorld",
+                        "data": """import whiley.lang.System
 
+method main(System.Console console):
+    console.out.println("Hello World")
+""",
+                        "type": 'file'
+                    },
+                    {
+                        "text": "abs",
+                        "data": """import whiley.lang.*
+
+/**
+* Return the absolute of an integer parameter
+*/
+function abs(int x) => (int y)
+// Return value cannot be negative
+ensures y >= 0:
+    //
+    if x >= 0:
+        return x
+    else:
+        return -x
+
+public method main(System.Console console):
+    console.out.println("abs(1) = " ++ abs(1))
+    console.out.println("abs(0) = " ++ abs(0))
+    console.out.println("abs(-1) = " ++ abs(-1))""",
+                        "type": 'file'
+                    },
+                    {
+                        "text": "max",
+                        "data": """import whiley.lang.*
+
+/**
+* The max() function, which returns the greater
+* of two integer arguments
+*/
+function max(int x, int y) => (int r)
+// result must be one of the arguments
+ensures r == x || r == y
+// result must be greater-or-equal than arguments
+ensures r >= x && r >= y:
+//
+    if x > y:
+        return x
+    else:
+        return y
+
+method main(System.Console console):
+    console.out.println("max(10,0) = " ++ max(10,0))
+    console.out.println("max(5,6) = " ++ max(5,6))
+    console.out.println("max(0,0) = " ++ max(0,0))""",
+                        "type": 'file'
+                    },
+                    {
+                        "text": "microwave",
+                        "data": """// This is based on the classical "microwave" oven state
+// machine problem. The purpose is to ensure that the
+// door is never open when the microwave is heating.
+
+type nat is (int x) where x >= 0
+
+// First, define the state of the microwave.
+type Microwave is {
+    bool heatOn, // if true, the oven is cooking
+    bool doorOpen, // if true, the door is open
+    nat timer // timer setting (in seconds)
+} where !doorOpen || !heatOn
+
+// The clock tick event is signaled by the internal clock
+// circuits of the microwave. It is triggered every second
+// in order to implement timed cooking.
+function clockTick(Microwave m) => Microwave:
+    //
+    if m.heatOn && m.timer == 0:
+        // Timer has expired
+        m.heatOn = false
+    else if m.heatOn:
+        // Still time left
+        m.timer = m.timer - 1
+    // If heating is not on, then ignore this event
+    return m
+
+// Set the timer on the microwave. This can't be done if
+// the microwave is cooking.
+function setTimer(Microwave m, nat value) => Microwave
+requires !m.heatOn:
+    //
+    m.timer = value
+    return m
+
+// Signals that the "start cooking" button has been
+// pressed. Observe that, if the door is open, then
+// this event should have no effect.
+function startCooking(Microwave m) => Microwave:
+    //
+    // Here, we check the all important safety propery
+    // for the microwave.
+    if !m.doorOpen:
+        m.heatOn = true
+    return m
+
+// A door closed event is triggered when the sensor
+// detects that the door is closed.
+function doorClosed(Microwave m) => Microwave
+requires m.doorOpen:
+//
+    m.doorOpen = false
+    return m
+
+// A door opened event is triggered when the sensor
+// detects that the door is opened.
+function doorOpened(Microwave m) => Microwave
+requires !m.doorOpen:
+    //
+    m.doorOpen = true
+    m.heatOn = false
+    return m""",
+                        "type": 'file'
+                    }
+                ],
+                "type": 'project'
+            }
+        ]
 HELLO_WORLD = """import whiley.lang.System
 
 method main(System.Console console):
@@ -213,33 +342,12 @@ class Main(admin.Admin):
         error = ""
         redirect = "NO"
         admin = False
-        try:
-            # Sanitize the ID.
-            safe_id = re.sub("[^a-zA-Z0-9-_]+", "", id)
-            # Load the file
-            code = load(config.DATA_DIR + "/" + safe_id + "/tmp.whiley", "utf-8")
-            # Escape the code
-            code = cgi.escape(code)
-        except Exception:
-            code = ""
-            error = "Invalid ID: %s" % id
-            redirect = "YES"
+
         template = lookup.get_template("index.html")
         username = cherrypy.session.get(auth.SESSION_KEY)
         userid = cherrypy.session.get(auth.SESSION_USERID)
-        files = [
-            {
-                "text": "Project 1",
-                "children": [
-                    {
-                        "text": "Hello World",
-                        "data": code if code != "" else HELLO_WORLD,
-                        "type": 'file'
-                    }
-                ],
-                "type": 'project'
-            }
-        ]
+        files = DEFAULT_PROJECT
+
         if userid is None:
             loggedin = False
             print ("not logged in")
@@ -254,7 +362,6 @@ class Main(admin.Admin):
             # print files
         return template.render(
                             ROOT_URL=config.VIRTUAL_URL,
-                            CODE=code,
                             ERROR=error,
                             REDIRECT=redirect, 
                             USERNAME=username, 
