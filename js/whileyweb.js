@@ -242,11 +242,31 @@ $(function() {
         if (data && data.node && "data" in data.node) {
             _fileLoading = true
             editor.setValue(data.node.data, 0);
+            //console.log(data.node.type);
+            if (data.node.type == "project" || data.node.type == "default")
+            {
+                editor.container.style.pointerEvents="none"
+                editor.container.style.opacity=0.5
+                editor.renderer.setStyle("disabled", true)
+                editor.blur()
+            }
+            else if (data.node.type == "file")
+            {
+                editor.container.style.pointerEvents="auto"
+                editor.container.style.opacity=1.0
+                editor.renderer.setStyle("disabled", false)
+                editor.focus()
+            }
+
             _newFile = true;
             _fileLoading = false
             _selectedFile = data.node
         }
     }).on('loaded.jstree', function() {
+            editor.container.style.pointerEvents="none"
+            editor.container.style.opacity=0.5
+            editor.renderer.setStyle("disabled", true)
+            editor.blur()
         _selectedFile = $(this).jstree('get_node', $(this).jstree('get_selected')[0])
     })
 })
