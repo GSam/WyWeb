@@ -143,7 +143,7 @@ $(function() {
             check_callback: true,
             data: getFileData()
         },
-     plugins: ["contextmenu", "dnd", "types", "unique", "wholerow"],
+     plugins: ["contextmenu", "dnd", "types", "unique", "wholerow", "search"],
      contextmenu: {
      items: function(node) {
                 var tmp = $.jstree.defaults.contextmenu.items()
@@ -265,6 +265,7 @@ $(document).on('ace-loaded', function() {
 })
 
 function addProject() {
+    $('#file-browser').jstree("search",'UntitledProject');
     $('#file-browser').jstree('create_node', null, {text: 'UntitledProject'}, undefined, function(type) {
         $('#file-browser').jstree('set_type', type, 'project')
     })

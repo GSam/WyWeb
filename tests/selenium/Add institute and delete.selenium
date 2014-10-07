@@ -107,11 +107,6 @@
 	<td>*XYZ*</td>
 </tr>
 <tr>
-	<td>assertNotSomethingSelected</td>
-	<td>name=institution</td>
-	<td>label=XYZ</td>
-</tr>
-<tr>
 	<td>open</td>
 	<td>/auth/logout</td>
 	<td></td>
