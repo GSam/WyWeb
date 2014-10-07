@@ -414,7 +414,7 @@ class Main(admin.Admin):
 
         output = make_tarfile("%s.tar.gz" % suffix, dir)
 
-        tempf = open(output, 'r')
+        tempf = open(output, 'rb')
         stringf = StringIO.StringIO(tempf.read())
         tempf.close()
 

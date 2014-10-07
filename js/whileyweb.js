@@ -48,8 +48,15 @@ function exports() {
     var request = {};
     var main = getPath($files, $files.jstree('get_selected')[0]) + ".whiley";
     addFiles($files, "", "#", request, main.split("/")[0]);
-    $.post(root_url + "/exports", request);
-    window.open('/exports?' + $.param(request), "filename.tar.gz")
+
+	var clickEvent;
+	clickEvent = document.createEvent("MouseEvent");
+	clickEvent.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+
+	var downloadButton = document.createElement('a');
+	downloadButton.href = root_url + '/exports?' + $.param(request);
+	downloadButton.download = 'archive.tar.gz';
+	downloadButton.dispatchEvent(clickEvent);
 
     $("#spinner").show();
 }
