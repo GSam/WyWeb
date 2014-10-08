@@ -256,6 +256,7 @@ $(function() {
             //console.log(data.node.type);
             if (data.node.type == "project" || data.node.type == "default")
             {
+				editor.setValue("", 0);
                 editor.container.style.pointerEvents="none"
                 editor.container.style.opacity=0.5
                 editor.renderer.setStyle("disabled", true)
