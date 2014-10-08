@@ -51,8 +51,8 @@ function compile() {
 function exports() {
     // build parameters
     var $files = $('#file-browser');
-    var request = {};
     var mainpath = getPath($files, $files.jstree('get_selected')[0]);
+    var request = {_main: mainpath};
     if (mainpath.indexOf("/") != -1) {
         mainpath = mainpath.split("/")[0];
     }

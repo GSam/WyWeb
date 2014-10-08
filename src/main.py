@@ -401,7 +401,7 @@ class Main(admin.Admin):
                 )
     student_project.exposed = True
 
-    def exports(self, *args, **files):
+    def exports(self, _main, *args, **files):
         import StringIO
 
         allow(["HEAD", "POST", "GET"])
@@ -412,7 +412,7 @@ class Main(admin.Admin):
 
         save_all(files, dir)
 
-        output = make_tarfile("%s.tar.gz" % suffix, dir)
+        output = make_tarfile("%s.tar.gz" % _main.split("/")[0], os.path.join(dir, _main.split("/")[0]))
 
         tempf = open(output, 'rb')
         stringf = StringIO.StringIO(tempf.read())

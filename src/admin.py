@@ -515,10 +515,14 @@ class Admin(object):
         cursor.execute(sql, (str(courseID),))
         teachers = list(cursor)
 
+        sql = """SELECT stream_name from course_stream where courseid = %s"""
+        cursor.execute(sql, (str(courseId),))
+        streams = [ret[0] for ret in cursor]
+
         cursor.close()
         
         return templating.render("admin_course_details.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, 
-            REDIRECT=redirect, TEACHERS=teachers,
+            REDIRECT=redirect, TEACHERS=teachers, STREAMS=streams, 
             COURSENAME=courseName, COURSECODE=courseCode, YEAR=year, VALIDATIONCODE=validationcode,
             INSTITUTION=institution, STUDENTS=students, COURSEID=courseId, IS_ADMIN=isAdmin(userid))
     admin_course_details.exposed = True
@@ -531,8 +535,6 @@ class Admin(object):
 
         allow(['POST'])
 
-        print courseid, username
-
         cnx, status = db.connect()
         cursor = cnx.cursor()
 
@@ -541,15 +543,33 @@ class Admin(object):
         cursor.execute(query, (username,))
         teacherid = cursor.fetchone()
         if not teacherid:
-            return templating.render("redirect.html", STATUS="alert-error", MESSAGE="No such teacher!")
+            return templating.render("redirect.html", STATUS="alert-warning", MESSAGE="No such teacher!")
         teacherid = teacherid[0]
 
         query = """INSERT INTO teacher_course_link (teacherinfoid, courseid) VALUES (%s, %s)"""
         cursor.execute(query, (teacherid, courseid))
         if not cursor.rowcount:
-            return templating.render("redirect.html", STATUS="alert-error", MESSAGE="Failed to add teacher!")
+            return templating.render("redirect.html", STATUS="alert-warning", MESSAGE="Failed to add teacher!")
         return templating.render("redirect.html", STATUS="alert-success", MESSAGE="Teacher added.")
     admin_course_add_teacher.exposed=True
+
+    def admin_course_add_stream(self, courseid, name, *args, **kwargs):
+        """Adds a stream to a course."""
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdminOrTeacher(userid)
+
+        allow(['POST'])
+        print courseid, name
+
+        cnx, status = db.connect()
+        cursor = cnx.cursor()
+
+        query = """INSERT INTO course_stream (stream_name, courseid) VALUES (%s, %s)"""
+        cursor.execute(query, (name, courseid))
+        if not cursor.rowcount:
+            return templating.render("redirect.html", STATUS="alert-warning", MESSAGE="Failed to add course stream!")
+        return templating.render("redirect.html", STATUS="alert-success", MESSAGE="Course stream added.")
+    admin_course_add_stream.exposed=True
 
     # ============================================================
     # Admin Students search page
@@ -677,8 +697,7 @@ class Admin(object):
         >>> ('Agile Methods', 'SWEN302', 2014, 1) in ret.STUDENTCOURSES
         True
         """
-        userid = cherrypy.session.get(auth.SESSION_USERID)
-        requireAdminOrTeacher(userid)
+        isAdmin, permittedCourses, permittedStudents = getAccessPermissions()
 
         allow(["HEAD", "GET", "POST"])
         error = ""
@@ -714,7 +733,8 @@ class Admin(object):
             cursor = cnx.cursor() 
             sql = "SELECT courseid,code from course where institutionid = %s"
             cursor.execute(sql, institution)
-            optionsCourse = list(cursor)
+            optionsCourse = [(courseid, code) for courseid, code in cursor 
+                                if permittedCourses is None or courseid in permittedCourses]
             cursor.close()   
         else:
             cnx, status = db.connect()
@@ -722,12 +742,13 @@ class Admin(object):
             sql = "SELECT courseid,code from course where institutionid = %s"
             cursor.execute(sql, institution)
             for (courseid,code) in cursor:
-                optionsCourse.append((courseid, code))
-                if course == "":
-                    course = str(courseid)
+                if permittedCourses is None or courseid in permittedCourses:
+                    optionsCourse.append((courseid, code))
+                    if course == "":
+                        course = str(courseid)
             cursor.close()
         
-        if course:
+        if course and (permittedCourses is None or course in permittedCourses):
              cnx, status = db.connect()
              cursor = cnx.cursor() 
              sql = "SELECT distinct a.student_info_id,a.givenname,a.surname from student_info a,student_course_link b, course c, course_stream d where c.courseid = %s and  c.courseid = d.courseid and d.coursestreamid =b.coursestreamid and b.studentinfoid = a.student_info_id"
@@ -827,13 +848,14 @@ def getAccessPermissions():
     elif auth.isTeacher(userid):
         cnx, status = db.connect()
         cursor = cnx.cursor()
-        sql = """select courseid from teacher_course_link where teacherinfoid = %s"""
+        sql = """select tc.courseid from teacher_course_link tc, teacher_info t 
+                where tc.teacherinfoid = t.teacherid and t.userid = %s"""
         cursor.execute(sql, (userid,))
         courses = [ret[0] for ret in cursor.fetchall()]
 
         sql = """select sc.studentinfoid 
-                from teacher_course_link tc, course_stream cs, student_course_link sc
-                where tc.teacherinfoid = %s and tc.courseid = cs.courseid 
+                from teacher_info t, teacher_course_link tc, course_stream cs, student_course_link sc
+                where t.userid = %s and tc.teacherinfoid = t.teacherid and tc.courseid = cs.courseid 
                     and cs.coursestreamid = sc.coursestreamid"""
         cursor.execute(sql, (userid,))
         students = [ret[0] for ret in cursor.fetchall()]

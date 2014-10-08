@@ -75,6 +75,21 @@
 <tr>
     <th>Validation Code</th> <td>${VALIDATIONCODE}</td>
 </tr>
+<tr>
+    <th>Streams</th>
+    <td>
+        <ul>
+        <li><form action="admin_course_add_stream" method="post">
+            <input type="hidden" name="courseid" value="${COURSEID}" />
+            <input type="text" name="name" placeholder="New Stream" />
+            <input type="submit" value="+" />
+        </form></li>
+        % for stream in STREAMS:
+            <li>${stream}</li>
+        %endfor
+        </ul>
+    </td>
+</tr>
 </table>
 </div>
 
