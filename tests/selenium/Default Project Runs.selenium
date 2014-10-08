@@ -12,6 +12,11 @@
 <tr><td rowspan="1" colspan="3">Default Project Runs</td></tr>
 </thead><tbody>
 <tr>
+	<td>runScript</td>
+	<td>localStorage.clear()</td>
+	<td></td>
+</tr>
+<tr>
 	<td>open</td>
 	<td>/auth/logout</td>
 	<td></td>
