@@ -38,7 +38,7 @@
 </tr>
 <tr>
 	<td>click</td>
-	<td>css=button.btn.btn-primary</td>
+	<td>css=a.enabled &gt; img[alt=&quot;Compile This Project&quot;]</td>
 	<td></td>
 </tr>
 <tr>
