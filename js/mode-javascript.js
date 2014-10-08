@@ -803,17 +803,21 @@ var Mode = function() {
 oop.inherits(Mode, TextMode);
 
 (function() {
-    this.lineCommentStart = "#";
+
+    this.lineCommentStart = "//";
+    this.blockComment = {start: "/*", end: "*/"};
 
     this.getNextLineIndent = function(state, line, tab) {
         var indent = this.$getIndent(line);
 
         var tokenizedLine = this.getTokenizer().getLineTokens(line, state);
         var tokens = tokenizedLine.tokens;
+        var endState = tokenizedLine.state;
 
         if (tokens.length && tokens[tokens.length-1].type == "comment") {
             return indent;
         }
+
 
         if (state == "start") {
             var match = line.match(/^.*[\{\(\[\:]\s*$/);
