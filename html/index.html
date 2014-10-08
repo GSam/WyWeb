@@ -120,6 +120,9 @@ function insertBoilerplate(){
     function(){
             var boilerSelected = $( this ).val();
             var editorSelected = editor.session.getTextRange(editor.getSelectionRange());
+            if (editorSelected==""){
+                editorSelected="placeholder";
+            }
             if (boilerSelected === "main"){
                 editor.insert("\n");
                 editor.navigateLineStart();
@@ -129,21 +132,20 @@ function insertBoilerplate(){
                 editor.insert("\n");
                 editor.navigateLineStart();
                 editor.insert('function '+editorSelected+'(string input) => (bool retValue, string output)');
-                editor.insert('\nrequires |input| < 1000 && |input| >= 0');
-                editor.insert('\nensures retValue == true && output == input :');
-                editor.insert('\nreturn true, input');
+                editor.insert('\nrequires test1 && test2');
+                editor.insert('\nensures test3 && test4 :');
+                editor.insert('\n    return true, input');
             } else if (boilerSelected === "method"){
-                editor.insert("\n");
                 editor.navigateLineStart();
-                editor.insert('method '+editorSelected+'(System.Console console, string input) => (bool retValue, string output)\n');
+                editor.insert('\nmethod '+editorSelected+'(System.Console console, string input) => (bool retValue, string output)\n');
                 editor.insert('requires test1 && test2\n');
                 editor.insert('ensures test3 && test4 :\n');
                 editor.insert('    console.out.println("Hello "++input)\n');
                 editor.insert('    return true, input');
             } else if (boilerSelected === "if"){
-                editor.insert('if "+editorSelected+":\n');
-                editor.insert('    console.out.println(\"Hello World\")\n"');
-                editor.insert('else:\n"');
+                editor.insert('if '+editorSelected+':\n');
+                editor.insert('    console.out.println(\"Hello World\")\n');
+                editor.insert('else:\n');
                 editor.insert('    console.out.println("Go Wylie")\n');
             } else if (boilerSelected === "forarray"){
                 editor.insert("\n");
@@ -329,7 +331,7 @@ function insertBoilerplate(){
                                   </a>
 
                               </td>
-                              <td style="border-right:1px solid #dddddd">
+                              <td style="border-right:1px solid #dddddd; ">
                                   <select id="boilerplateselect">
                                       <option value="main">Main Method</option>
                                       <option value="function">Function</option>
@@ -340,7 +342,7 @@ function insertBoilerplate(){
                                       <option value="forblock">For (block)</option>
                                   </select>
                                   <a href=" javascript:insertBoilerplate();">
-                                      <img src="images/insertboilerPlate.png" border="0" alt="Insert Code" Title ="Insert Code">
+                                      <img src="images/expand.png" style="float:right" border="0" alt="Insert Code" Title ="Insert Code">
                                   </a>
 
                               </td>
