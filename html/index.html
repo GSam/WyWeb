@@ -115,6 +115,54 @@ function macroPlay() {
     editor.focus();
 }
 
+function insertBoilerplate(){
+    var template = jQuery("#boilerplateselect option:selected").each(
+    function(){
+            var boilerSelected = $( this ).val();
+            var editorSelected = editor.session.getTextRange(editor.getSelectionRange());
+            if (boilerSelected === "main"){
+                editor.insert("\n");
+                editor.navigateLineStart();
+                editor.insert('method main(System.Console console):\n');
+                editor.insert('    console.out.println("Hello World")\n');
+            } else if (boilerSelected === "function"){
+                editor.insert("\n");
+                editor.navigateLineStart();
+                editor.insert('function '+editorSelected+'(string input) => (bool retValue, string output)');
+                editor.insert('\nrequires |input| < 1000 && |input| >= 0');
+                editor.insert('\nensures retValue == true && output == input :');
+                editor.insert('\nreturn true, input');
+            } else if (boilerSelected === "method"){
+                editor.insert("\n");
+                editor.navigateLineStart();
+                editor.insert('method '+editorSelected+'(System.Console console, string input) => (bool retValue, string output)\n');
+                editor.insert('requires test1 && test2\n');
+                editor.insert('ensures test3 && test4 :\n');
+                editor.insert('    console.out.println("Hello "++input)\n');
+                editor.insert('    return true, input');
+            } else if (boilerSelected === "if"){
+                editor.insert('if "+editorSelected+":\n');
+                editor.insert('    console.out.println(\"Hello World\")\n"');
+                editor.insert('else:\n"');
+                editor.insert('    console.out.println("Go Wylie")\n');
+            } else if (boilerSelected === "forarray"){
+                editor.insert("\n");
+                editor.insert('for i in 0 .. '+editorSelected+':\n');
+                editor.insert('    console.out.println("Hello World")\n');
+            } else if (boilerSelected === "forlist"){
+                editor.insert("\n");
+                editor.insert('for i in '+editorSelected+':\n');
+                editor.insert('    console.out.println("Hello World")\n');
+            } else if (boilerSelected === "forblock"){
+                editor.insert("\n");
+                editor.insert('for i in 0 .. 10:\n');
+                editor.insert(''+editorSelected+'\n');
+            }
+    });
+    editor.focus();
+
+}
+
 </script>
    </head>
    <body>
@@ -277,6 +325,21 @@ function macroPlay() {
                               <td style="border-right:1px solid #dddddd">
                                   <a href=" javascript:macroPlay();">
                                       <img src="images/play.png" border="0" alt="Play Macro" Title ="Play Macro">
+                                  </a>
+
+                              </td>
+                              <td style="border-right:1px solid #dddddd">
+                                  <select id="boilerplateselect">
+                                      <option value="main">Main Method</option>
+                                      <option value="function">Function</option>
+                                      <option value="method">Method</option>
+                                      <option value="if">If</option>
+                                      <option value="forarray">For (array)</option>
+                                      <option value="forlist">For (collection)</option>
+                                      <option value="forblock">For (block)</option>
+                                  </select>
+                                  <a href=" javascript:insertBoilerplate();">
+                                      <img src="images/insertboilerPlate.png" border="0" alt="Insert Code" Title ="Insert Code">
                                   </a>
 
                               </td>
