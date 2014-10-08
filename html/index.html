@@ -30,6 +30,7 @@
       border-left:1px solid #dddddd;
       border-top:1px solid #dddddd;
       }
+          .disabled{opacity:0.3;}
       </style>
       <script type="text/javascript" src="js/whileyweb.js"></script>
       <script type="text/javascript" src="js/ext-searchbox.js"></script>
@@ -44,7 +45,7 @@ function saveAll() {
 }
 
 function commentCode() {
-        editor.toggleCommentLines();
+    editor.toggleCommentLines();
 	editor.focus();
 }
 
@@ -100,6 +101,7 @@ function macroRecord() {
     }else{
         $("#macro_recorder").attr("src","images/record_on.png");
     }
+
     editor.commands.toggleRecording(editor);
     editor.focus();
 }
@@ -113,6 +115,56 @@ function macroPlay() {
     }
     editor.commands.replay(editor);
     editor.focus();
+}
+
+function insertBoilerplate(){
+    var template = jQuery("#boilerplateselect option:selected").each(
+    function(){
+            var boilerSelected = $( this ).val();
+            var editorSelected = editor.session.getTextRange(editor.getSelectionRange());
+            if (editorSelected==""){
+                editorSelected="placeholder";
+            }
+            if (boilerSelected === "main"){
+                editor.insert("\n");
+                editor.navigateLineStart();
+                editor.insert('method main(System.Console console):\n');
+                editor.insert('    console.out.println("Hello World")\n');
+            } else if (boilerSelected === "function"){
+                editor.insert("\n");
+                editor.navigateLineStart();
+                editor.insert('function '+editorSelected+'(string input) => (bool retValue, string output)');
+                editor.insert('\nrequires test1 && test2');
+                editor.insert('\nensures test3 && test4 :');
+                editor.insert('\n    return true, input');
+            } else if (boilerSelected === "method"){
+                editor.navigateLineStart();
+                editor.insert('\nmethod '+editorSelected+'(System.Console console, string input) => (bool retValue, string output)\n');
+                editor.insert('requires test1 && test2\n');
+                editor.insert('ensures test3 && test4 :\n');
+                editor.insert('    console.out.println("Hello "++input)\n');
+                editor.insert('    return true, input');
+            } else if (boilerSelected === "if"){
+                editor.insert('if '+editorSelected+':\n');
+                editor.insert('    console.out.println(\"Hello World\")\n');
+                editor.insert('else:\n');
+                editor.insert('    console.out.println("Go Wylie")\n');
+            } else if (boilerSelected === "forarray"){
+                editor.insert("\n");
+                editor.insert('for i in 0 .. '+editorSelected+':\n');
+                editor.insert('    console.out.println("Hello World")\n');
+            } else if (boilerSelected === "forlist"){
+                editor.insert("\n");
+                editor.insert('for i in '+editorSelected+':\n');
+                editor.insert('    console.out.println("Hello World")\n');
+            } else if (boilerSelected === "forblock"){
+                editor.insert("\n");
+                editor.insert('for i in 0 .. 10:\n');
+                editor.insert(''+editorSelected+'\n');
+            }
+    });
+    editor.focus();
+
 }
 
 </script>
@@ -148,6 +200,7 @@ function macroPlay() {
    			               <button type="button"  class="btn btn-primary" onClick="compile();" title="Compile your program to check it is correct.">Compile</button>
    			              <button type="button"  class="btn btn-primary" onClick="run();" title="Run your program to produce some output!">Run</button>
    			              <!--<a href="admin" class="btn btn-primary" title="Admin">Admin</a>-->
+   			              <button type="button"  class="btn btn-primary" onClick="exports();" title="Export your source to an archive file.">Export</button>
    			              <label class="checkbox inline">
    			        				<input id="verification" type="checkbox" checked="checked" title="Enable or disable compile-time verification" /> Enable Verification
    			    			  </label>
@@ -195,7 +248,7 @@ function macroPlay() {
                     </nav>
                 </div>
                   <div>
-                      <table class="ide-menu">
+                      <table id="toolbar" class="ide-menu">
                           <tr>
                               <td style="z-index: 100">
                                   <a href=" javascript:newFile();" style="opacity:0.3">
@@ -203,13 +256,18 @@ function macroPlay() {
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:addProject();">
+                                  <a href=" javascript:addProject();" class="enabled">
+                                      <img src="images/new_project.png" border="0" alt="Create New Project" title="New Project">
+                                  </a>
+                                  <a class="disabled">
                                       <img src="images/new_project.png" border="0" alt="Create New Project" title="New Project">
                                   </a>
                               </td>
                               <td>
                         % if LOGGED is False:
-                                  <img  style="opacity:0.3" src="images/save.png" border="0" alt="Save All Files" title="Saving Is Only Available To Logged In Users">
+                                  <a href=" javascript:editor.focus();">
+                                      <img src="images/save.png" style="opacity:0.3" border="0" alt="Save All Files" title="Saving Is Only Available To Logged In Users">
+                                  </a>
                         % endif
                         % if LOGGED is True:
                                   <a href=" javascript:saveToServer();editor.focus();">
@@ -218,65 +276,118 @@ function macroPlay() {
                         % endif
                               </td>
                               <td>
-                                  <a href=" javascript:compile();">
+                                  <a class="disabled">
+                                      <img src="images/compile.png" border="0" alt="Compile This Project" title="Compile">
+                                  </a>
+                                  <a href=" javascript:compile();" class="enabled">
                                       <img src="images/compile.png" border="0" alt="Compile This Project" title="Compile">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:run();">
+                                  <a class="disabled">
+                                      <img src="images/run.png" border="0" alt="Run This Project" title="Run">
+                                  </a>
+                                  <a href=" javascript:run();" class="enabled">
                                       <img src="images/run.png" border="0" alt="Run This Project" title="Run">
                                   </a>
                               </td>
                               <td>
-
-                                  <a href=" javascript:commentCode();">
+                                  <a class="disabled">
+                                      <img src="images/comments.png" border="0" alt="comment selected text" title="Comment selected text">
+                                  </a>
+                                  <a href=" javascript:commentCode();" class="enabled">
                                       <img src="images/comments.png" border="0" alt="comment selected text" title="Comment selected text">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:indentBlock();">
+                                  <a class="disabled">
+                                      <img src="images/indent.png" border="0" alt="Indent selected text" title="Indent selected text">
+                                  </a>
+                                  <a href=" javascript:indentBlock();" class="enabled">
                                       <img src="images/indent.png" border="0" alt="Indent selected text" title="Indent selected text">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:outdentBlock();">
+                                  <a class="disabled">
+                                      <img src="images/outdent.png" border="0" alt="Outdent selected text" title="Outdent selected text">
+                                  </a>
+                                  <a href=" javascript:outdentBlock();" class="enabled">
                                       <img src="images/outdent.png" border="0" alt="Outdent selected text" title="Outdent selected text">
                                   </a>
                               </td>
 
                               <td>
-                                  <a href=" javascript:undo();">
+                                  <a class="disabled">
+                                      <img src="images/undo.png" border="0" alt="Undo" title="Undo">
+                                  </a>
+                                  <a href=" javascript:undo();" class="enabled">
                                       <img src="images/undo.png" border="0" alt="Undo" title="Undo">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:redo();">
+                                  <a class="disabled">
+                                      <img src="images/redo.png" border="0" alt="Redo" title="Redo">
+                                  </a>
+                                  <a href=" javascript:redo();" class="enabled">
                                       <img src="images/redo.png" border="0" alt="Redo" title="Redo">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:gotoLine();">
+                                  <a class="disabled">
+                                      <img src="images/goto.png" border="0" alt="Redo" title="Redo">
+                                  </a>
+                                  <a href=" javascript:gotoLine();" class="enabled">
                                       <img src="images/goto.png" border="0" alt="Goto Line" title="Goto Line">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:find();">
+                                  <a class="disabled">
+                                      <img src="images/find.png" border="0" alt="Find" Title="Find">
+                                  </a>
+                                  <a href=" javascript:find();" class="enabled">
                                       <img src="images/find.png" border="0" alt="Find" Title="Find">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:replace();">
+                                  <a class="disabled">
+                                      <img src="images/replace.png" border="0" alt="Replace" Title="Replace">
+                                  </a>
+                                  <a href=" javascript:replace();" class="enabled">
                                       <img src="images/replace.png" border="0" alt="Replace" Title="Replace">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:macroRecord();">
+                                  <a class="disabled">
+                                      <img id="macro_recorder" src="images/record.png" border="0" alt="Record Macro" title="Record Macro">
+                                  </a>
+                                  <a href=" javascript:macroRecord();" class="enabled">
                                       <img id="macro_recorder" src="images/record.png" border="0" alt="Record Macro" title="Record Macro">
                                   </a>
                               </td>
                               <td style="border-right:1px solid #dddddd">
-                                  <a href=" javascript:macroPlay();">
+                                  <a class="disabled">
                                       <img src="images/play.png" border="0" alt="Play Macro" Title ="Play Macro">
+                                  </a>
+                                  <a href=" javascript:macroPlay();" class="enabled">
+                                      <img src="images/play.png" border="0" alt="Play Macro" Title ="Play Macro">
+                                  </a>
+
+                              </td>
+                              <td style="border-right:1px solid #dddddd; ">
+                                  <select id="boilerplateselect">
+                                      <option value="main">Main Method</option>
+                                      <option value="function">Function</option>
+                                      <option value="method">Method</option>
+                                      <option value="if">If</option>
+                                      <option value="forarray">For (array)</option>
+                                      <option value="forlist">For (collection)</option>
+                                      <option value="forblock">For (block)</option>
+                                  </select>
+                                  <a class="disabled">
+                                      <img src="images/expand.png" style="float:right" border="0" alt="Insert Code" Title ="Insert Code">
+                                  </a>
+                                  <a  id="boilerplateanchor" href=" javascript:insertBoilerplate();" class="enabled">
+                                      <img src="images/expand.png" style="float:right" border="0" alt="Insert Code" Title ="Insert Code">
                                   </a>
 
                               </td>
