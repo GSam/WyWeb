@@ -22,7 +22,12 @@ function compile() {
     var $files = $('#file-browser');
     var main = getPath($files, $files.jstree('get_selected')[0]) + ".whiley";
     var request = { _main: main, _verify: verify.checked };
-    addFiles($files, "", "#", request, main.split("/")[0]);
+    if (main.indexOf('/') != -1) {
+        main = main.split("/")[0];
+    } else {
+        main = getPath($files, $files.jstree('get_selected')[0]);
+    }
+    addFiles($files, "", "#", request, main);
     $.post(root_url + "/compile_all", request, function(response) {
         clearMessages();
         console.value = "";
