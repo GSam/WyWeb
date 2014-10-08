@@ -586,8 +586,7 @@ class Admin(object):
         >>> ('Agile Methods', 'SWEN302', 2014, 1) in ret.STUDENTCOURSES
         True
         """
-        userid = cherrypy.session.get(auth.SESSION_USERID)
-        requireAdminOrTeacher(userid)
+        isAdmin, _, permittedStudents = getAccessPermissions()
 
         allow(["HEAD", "GET", "POST"])
         error = ""
@@ -597,8 +596,6 @@ class Admin(object):
         studentCourses = []
         studentProjects = []
 
-        permittedCourses, permittedStudents = getAccessPermissions()
-
         if searchValue:
             cnx, status = db.connect()
             cursor = cnx.cursor()
@@ -606,7 +603,8 @@ class Admin(object):
             sql = "select student_info_id,surname,givenname from student_info where UPPER(givenname) like %s or UPPER(surname) like %s order by surname"
             cursor.execute(sql, (join,join))
             searchResult = [(id_, name(givenname, surname)) 
-                            for id_, surname, givenname in cursor]
+                            for id_, surname, givenname in cursor 
+                            if permittedStudents is None or id_ in permittedStudents]
             cursor.close()
             cnx.close()
 
@@ -618,7 +616,7 @@ class Admin(object):
                                 SEARCHRESULT=searchResult, SEARCHVALUE=searchValue,
                                 STUDENTNAME=studentName, INSTITUTIONNAME=institutionName,
                                 STUDENTCOURSES=studentCourses, STUDENTPROJECTS=studentProjects, 
-                                IS_ADMIN=isAdmin(userid))
+                                IS_ADMIN=isAdmin)
 
     admin_students_search.exposed = True
 
@@ -822,4 +820,23 @@ def studentInfo(id, defaultName=""):
 
     return status, studentName, institution_name, studentCourses, studentProjects
 
+def getAccessPermissions():
+    userid = cherrypy.session.get(auth.SESSION_USERID)
+    if auth.isAdmin(userid):
+        return True, None, None
+    elif auth.isTeacher(userid):
+        cnx, status = db.connect()
+        cursor = cnx.cursor()
+        sql = """select courseid from teacher_course_link where teacherinfoid = %s"""
+        cursor.execute(sql, (userid,))
+        courses = [ret[0] for ret in cursor.fetchall()]
 
+        sql = """select sc.studentinfoid 
+                from teacher_course_link tc, course_stream cs, student_course_link sc
+                where tc.teacherinfoid = %s and tc.courseid = cs.courseid 
+                    and cs.coursestreamid = sc.coursestreamid"""
+        cursor.execute(sql, (userid,))
+        students = [ret[0] for ret in cursor.fetchall()]
+        return False, courses, students
+    else:
+        raise cherrypy.HTTPRedirect("/auth/login")
