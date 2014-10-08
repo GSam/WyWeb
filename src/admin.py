@@ -766,7 +766,7 @@ class Admin(object):
                                 STUDENTNAME=studentName, STUDENTINSTITUTION=studentInstitution,
                                 STUDENTCOURSES=studentCourses, STUDENTPROJECTS=studentProjects,
                                 OPTIONCOURSE=optionsCourse, COURSE=course, OPTIONSTUDENT=optionsStudent, 
-                                IS_ADMIN=isAdmin(userid))
+                                IS_ADMIN=isAdmin)
 
     admin_students_list.exposed = True
 

@@ -38,7 +38,7 @@
 </tr>
 <tr>
 	<td>click</td>
-	<td>xpath=(//button[@type='button'])[3]</td>
+	<td>css=a.enabled &gt; img[alt=&quot;Run This Project&quot;]</td>
 	<td></td>
 </tr>
 <tr>
