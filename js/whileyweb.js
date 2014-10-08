@@ -137,6 +137,7 @@ function clearErrors() {
     }
     editor.markers = [];
 }
+
 $(function() {
     $("#file-browser").jstree({
      core: {
@@ -161,14 +162,7 @@ $(function() {
                     },
                     create_file: {
                         label: "File",
-                        action: function(data) {
-                            var inst = $.jstree.reference(data.reference),
-                                obj = inst.get_node(data.reference);
-                            inst.create_node(obj, {type: "file", text: "New File", data: ""}, "last",
-                                function(new_node) {
-                                    setTimeout(function() {inst.edit(new_node); }, 0);
-                            })
-                        }
+                        action: function(data) {createNewFile(data);}
                     }
                 }
                 if (this.get_type(node) == "file")
@@ -186,6 +180,17 @@ $(function() {
         }
     })
 });
+
+function createNewFile(data)
+{
+    var inst = $.jstree.reference(data.reference);
+    var obj = inst.get_node(data.reference);
+    inst.create_node(obj, {type: "file", text: "New File", data: ""}, "last",
+        function(new_node) {
+            setTimeout(function() {inst.edit(new_node); }, 0);
+        }
+    );
+}
 loggedStorage = undefined;
 
 function getFileData() {
@@ -283,6 +288,11 @@ $(document).on('ace-loaded', function() {
         }
     })
 })
+
+function addFile()
+{
+
+}
 
 function addProject() {
     $('#file-browser').jstree("search",'UntitledProject');
