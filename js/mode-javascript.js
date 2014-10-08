@@ -758,89 +758,24 @@ var oop = require("../../lib/oop");
 var Range = require("../../range").Range;
 var BaseFoldMode = require("./fold_mode").FoldMode;
 
-var FoldMode = exports.FoldMode = function(commentRegex) {
-    if (commentRegex) {
-        this.foldingStartMarker = new RegExp(
-            this.foldingStartMarker.source.replace(/\|[^|]*?$/, "|" + commentRegex.start)
-        );
-        this.foldingStopMarker = new RegExp(
-            this.foldingStopMarker.source.replace(/\|[^|]*?$/, "|" + commentRegex.end)
-        );
-    }
+var FoldMode = exports.FoldMode = function(markers) {
+	this.foldingStartMarker = new RegExp("([\\[{])(?:\\s*)$|(" + markers + ")(?:\\s*)(?:#.*)?$");
 };
 oop.inherits(FoldMode, BaseFoldMode);
 
 (function() {
 
-    this.foldingStartMarker = /(\{|\[)[^\}\]]*$|^\s*(\/\*)/;
-    this.foldingStopMarker = /^[^\[\{]*(\}|\])|^[\s\*]*(\*\/)/;
-
-    this.getFoldWidgetRange = function(session, foldStyle, row, forceMultiline) {
+    this.getFoldWidgetRange = function(session, foldStyle, row) {
         var line = session.getLine(row);
         var match = line.match(this.foldingStartMarker);
         if (match) {
-            var i = match.index;
-
             if (match[1])
-                return this.openingBracketBlock(session, match[1], row, i);
-
-            var range = session.getCommentFoldRange(row, i + match[0].length, 1);
-
-            if (range && !range.isMultiLine()) {
-                if (forceMultiline) {
-                    range = this.getSectionRange(session, row);
-                } else if (foldStyle != "all")
-                    range = null;
-            }
-
-            return range;
+                return this.openingBracketBlock(session, match[1], row, match.index);
+            if (match[2])
+                return this.indentationBlock(session, row, match.index + match[2].length);
+            return this.indentationBlock(session, row);
         }
-
-        if (foldStyle === "markbegin")
-            return;
-
-        var match = line.match(this.foldingStopMarker);
-        if (match) {
-            var i = match.index + match[0].length;
-
-            if (match[1])
-                return this.closingBracketBlock(session, match[1], row, i);
-
-            return session.getCommentFoldRange(row, i, -1);
-        }
-    };
-
-    this.getSectionRange = function(session, row) {
-        var line = session.getLine(row);
-        var startIndent = line.search(/\S/);
-        var startRow = row;
-        var startColumn = line.length;
-        row = row + 1;
-        var endRow = row;
-        var maxRow = session.getLength();
-        while (++row < maxRow) {
-            line = session.getLine(row);
-            var indent = line.search(/\S/);
-            if (indent === -1)
-                continue;
-            if  (startIndent > indent)
-                break;
-            var subRange = this.getFoldWidgetRange(session, "all", row);
-
-            if (subRange) {
-                if (subRange.start.row <= startRow) {
-                    break;
-                } else if (subRange.isMultiLine()) {
-                    row = subRange.end.row;
-                } else if (startIndent == indent) {
-                    break;
-                }
-            }
-            endRow = row;
-        }
-
-        return new Range(startRow, startColumn, endRow, session.getLine(endRow).length);
-    };
+    }
 
 }).call(FoldMode.prototype);
 
@@ -863,56 +798,67 @@ var Mode = function() {
 
     this.$outdent = new MatchingBraceOutdent();
     this.$behaviour = new CstyleBehaviour();
-    this.foldingRules = new CStyleFoldMode();
+    this.foldingRules = new CStyleFoldMode("\\:");
 };
 oop.inherits(Mode, TextMode);
 
 (function() {
-
-    this.lineCommentStart = "//";
-    this.blockComment = {start: "/*", end: "*/"};
+    this.lineCommentStart = "#";
 
     this.getNextLineIndent = function(state, line, tab) {
         var indent = this.$getIndent(line);
 
         var tokenizedLine = this.getTokenizer().getLineTokens(line, state);
         var tokens = tokenizedLine.tokens;
-        var endState = tokenizedLine.state;
 
         if (tokens.length && tokens[tokens.length-1].type == "comment") {
             return indent;
         }
 
-        if (state == "start" || state == "no_regex") {
-            var match = line.match(/^.*(?:\bcase\b.*\:|[\{\(\[])\s*$/);
+        if (state == "start") {
+            var match = line.match(/^.*[\{\(\[\:]\s*$/);
             if (match) {
                 indent += tab;
-            }
-        } else if (state == "doc-start") {
-            if (endState == "start" || endState == "no_regex") {
-                return "";
-            }
-            var match = line.match(/^\s*(\/?)\*/);
-            if (match) {
-                if (match[1]) {
-                    indent += " ";
-                }
-                indent += "* ";
             }
         }
 
         return indent;
     };
 
+    var outdents = {
+        "pass": 1,
+        "return": 1,
+        "raise": 1,
+        "break": 1,
+        "continue": 1
+    };
+    
     this.checkOutdent = function(state, line, input) {
-        return this.$outdent.checkOutdent(line, input);
+        if (input !== "\r\n" && input !== "\r" && input !== "\n")
+            return false;
+
+        var tokens = this.getTokenizer().getLineTokens(line.trim(), state).tokens;
+        
+        if (!tokens)
+            return false;
+        do {
+            var last = tokens.pop();
+        } while (last && (last.type == "comment" || (last.type == "text" && last.value.match(/^\s+$/))));
+        
+        if (!last)
+            return false;
+        
+        return (last.type == "keyword" && outdents[last.value]);
     };
 
     this.autoOutdent = function(state, doc, row) {
-        this.$outdent.autoOutdent(doc, row);
+        
+        row += 1;
+        var indent = this.$getIndent(doc.getLine(row));
+        var tab = doc.getTabString();
+        if (indent.slice(-tab.length) == tab)
+            doc.remove(new Range(row, indent.length-tab.length, row, indent.length));
     };
-
-
 
     this.$id = "ace/mode/javascript";
 }).call(Mode.prototype);

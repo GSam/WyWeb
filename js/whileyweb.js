@@ -1,4 +1,5 @@
-$(document).on("ace-loaded", function autoindent() {
+/* This function is no longer needed */
+/*$(document).on("ace-loaded", function autoindent() {
     editor.on("change", function(evt) {
         if (evt.data.action == "insertText" && evt.data.text == "\n") {
             var line = evt.data.range.end.row,
@@ -9,7 +10,7 @@ $(document).on("ace-loaded", function autoindent() {
                 window.setTimeout(function() {editor.indent()}, 0);
         }
     })
-});
+});*/
 /**
  * Compile a given snippet of Whiley code.
  */
