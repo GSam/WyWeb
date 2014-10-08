@@ -47,10 +47,10 @@ function exports() {
     var $files = $('#file-browser');
     var request = {};
     var mainpath = getPath($files, $files.jstree('get_selected')[0]);
-    if (mainpath.indexOf("/") != -1) { 
+    if (mainpath.indexOf("/") != -1) {
         mainpath = mainpath.split("/")[0];
     }
-        
+
     addFiles($files, "", "#", request, mainpath);
 
     var clickEvent;
@@ -250,6 +250,7 @@ var _newFile = false;
 
 $(function() {
     $('#file-browser').on('changed.jstree', function(evt, data) {
+		saveFile();
         if (data && data.node && "data" in data.node) {
             _fileLoading = true
             editor.setValue(data.node.data, 0);
