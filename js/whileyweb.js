@@ -46,17 +46,21 @@ function exports() {
     // build parameters
     var $files = $('#file-browser');
     var request = {};
-    var main = getPath($files, $files.jstree('get_selected')[0]) + ".whiley";
-    addFiles($files, "", "#", request, main.split("/")[0]);
+    var mainpath = getPath($files, $files.jstree('get_selected')[0]);
+    if (mainpath.indexOf("/") != -1) { 
+        mainpath = mainpath.split("/")[0];
+    }
+        
+    addFiles($files, "", "#", request, mainpath);
 
-	var clickEvent;
-	clickEvent = document.createEvent("MouseEvent");
-	clickEvent.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+    var clickEvent;
+    clickEvent = document.createEvent("MouseEvent");
+    clickEvent.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
 
-	var downloadButton = document.createElement('a');
-	downloadButton.href = root_url + '/exports?' + $.param(request);
-	downloadButton.download = 'archive.tar.gz';
-	downloadButton.dispatchEvent(clickEvent);
+    var downloadButton = document.createElement('a');
+    downloadButton.href = root_url + '/exports?' + $.param(request);
+    downloadButton.download = 'archive.tar.gz';
+    downloadButton.dispatchEvent(clickEvent);
 
     $("#spinner").show();
 }
