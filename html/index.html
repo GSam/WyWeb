@@ -30,6 +30,7 @@
       border-left:1px solid #dddddd;
       border-top:1px solid #dddddd;
       }
+          .disabled{opacity:0.3;}
       </style>
       <script type="text/javascript" src="js/whileyweb.js"></script>
       <script type="text/javascript" src="js/ext-searchbox.js"></script>
@@ -44,7 +45,7 @@ function saveAll() {
 }
 
 function commentCode() {
-        editor.toggleCommentLines();
+    editor.toggleCommentLines();
 	editor.focus();
 }
 
@@ -246,7 +247,7 @@ function insertBoilerplate(){
                     </nav>
                 </div>
                   <div>
-                      <table class="ide-menu">
+                      <table id="toolbar" class="ide-menu">
                           <tr>
                               <td style="z-index: 100">
                                   <a href=" javascript:newFile();" style="opacity:0.3">
@@ -254,13 +255,18 @@ function insertBoilerplate(){
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:addProject();">
+                                  <a href=" javascript:addProject();" class="enabled">
+                                      <img src="images/new_project.png" border="0" alt="Create New Project" title="New Project">
+                                  </a>
+                                  <a class="disabled">
                                       <img src="images/new_project.png" border="0" alt="Create New Project" title="New Project">
                                   </a>
                               </td>
                               <td>
                         % if LOGGED is False:
-                                  <img  style="opacity:0.3" src="images/save.png" border="0" alt="Save All Files" title="Saving Is Only Available To Logged In Users">
+                                  <a href=" javascript:editor.focus();">
+                                      <img src="images/save.png" style="opacity:0.3" border="0" alt="Save All Files" title="Saving Is Only Available To Logged In Users">
+                                  </a>
                         % endif
                         % if LOGGED is True:
                                   <a href=" javascript:saveToServer();editor.focus();">
@@ -269,64 +275,99 @@ function insertBoilerplate(){
                         % endif
                               </td>
                               <td>
-                                  <a href=" javascript:compile();">
+                                  <a class="disabled">
+                                      <img src="images/compile.png" border="0" alt="Compile This Project" title="Compile">
+                                  </a>
+                                  <a href=" javascript:compile();" class="enabled">
                                       <img src="images/compile.png" border="0" alt="Compile This Project" title="Compile">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:run();">
+                                  <a class="disabled">
+                                      <img src="images/run.png" border="0" alt="Run This Project" title="Run">
+                                  </a>
+                                  <a href=" javascript:run();" class="enabled">
                                       <img src="images/run.png" border="0" alt="Run This Project" title="Run">
                                   </a>
                               </td>
                               <td>
-
-                                  <a href=" javascript:commentCode();">
+                                  <a class="disabled">
+                                      <img src="images/comments.png" border="0" alt="comment selected text" title="Comment selected text">
+                                  </a>
+                                  <a href=" javascript:commentCode();" class="enabled">
                                       <img src="images/comments.png" border="0" alt="comment selected text" title="Comment selected text">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:indentBlock();">
+                                  <a class="disabled">
+                                      <img src="images/indent.png" border="0" alt="Indent selected text" title="Indent selected text">
+                                  </a>
+                                  <a href=" javascript:indentBlock();" class="enabled">
                                       <img src="images/indent.png" border="0" alt="Indent selected text" title="Indent selected text">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:outdentBlock();">
+                                  <a class="disabled">
+                                      <img src="images/outdent.png" border="0" alt="Outdent selected text" title="Outdent selected text">
+                                  </a>
+                                  <a href=" javascript:outdentBlock();" class="enabled">
                                       <img src="images/outdent.png" border="0" alt="Outdent selected text" title="Outdent selected text">
                                   </a>
                               </td>
 
                               <td>
-                                  <a href=" javascript:undo();">
+                                  <a class="disabled">
+                                      <img src="images/undo.png" border="0" alt="Undo" title="Undo">
+                                  </a>
+                                  <a href=" javascript:undo();" class="enabled">
                                       <img src="images/undo.png" border="0" alt="Undo" title="Undo">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:redo();">
+                                  <a class="disabled">
+                                      <img src="images/redo.png" border="0" alt="Redo" title="Redo">
+                                  </a>
+                                  <a href=" javascript:redo();" class="enabled">
                                       <img src="images/redo.png" border="0" alt="Redo" title="Redo">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:gotoLine();">
+                                  <a class="disabled">
+                                      <img src="images/goto.png" border="0" alt="Redo" title="Redo">
+                                  </a>
+                                  <a href=" javascript:gotoLine();" class="enabled">
                                       <img src="images/goto.png" border="0" alt="Goto Line" title="Goto Line">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:find();">
+                                  <a class="disabled">
+                                      <img src="images/find.png" border="0" alt="Find" Title="Find">
+                                  </a>
+                                  <a href=" javascript:find();" class="enabled">
                                       <img src="images/find.png" border="0" alt="Find" Title="Find">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:replace();">
+                                  <a class="disabled">
+                                      <img src="images/replace.png" border="0" alt="Replace" Title="Replace">
+                                  </a>
+                                  <a href=" javascript:replace();" class="enabled">
                                       <img src="images/replace.png" border="0" alt="Replace" Title="Replace">
                                   </a>
                               </td>
                               <td>
-                                  <a href=" javascript:macroRecord();">
+                                  <a class="disabled">
+                                      <img id="macro_recorder" src="images/record.png" border="0" alt="Record Macro" title="Record Macro">
+                                  </a>
+                                  <a href=" javascript:macroRecord();" class="enabled">
                                       <img id="macro_recorder" src="images/record.png" border="0" alt="Record Macro" title="Record Macro">
                                   </a>
                               </td>
                               <td style="border-right:1px solid #dddddd">
-                                  <a href=" javascript:macroPlay();">
+                                  <a class="disabled">
+                                      <img src="images/play.png" border="0" alt="Play Macro" Title ="Play Macro">
+                                  </a>
+                                  <a href=" javascript:macroPlay();" class="enabled">
                                       <img src="images/play.png" border="0" alt="Play Macro" Title ="Play Macro">
                                   </a>
 
@@ -341,7 +382,10 @@ function insertBoilerplate(){
                                       <option value="forlist">For (collection)</option>
                                       <option value="forblock">For (block)</option>
                                   </select>
-                                  <a href=" javascript:insertBoilerplate();">
+                                  <a class="disabled">
+                                      <img src="images/expand.png" style="float:right" border="0" alt="Insert Code" Title ="Insert Code">
+                                  </a>
+                                  <a  id="boilerplateanchor" href=" javascript:insertBoilerplate();" class="enabled">
                                       <img src="images/expand.png" style="float:right" border="0" alt="Insert Code" Title ="Insert Code">
                                   </a>
 

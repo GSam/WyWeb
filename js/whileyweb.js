@@ -257,6 +257,8 @@ $(function() {
             //console.log(data.node.type);
             if (data.node.type == "project" || data.node.type == "default")
             {
+                jQuery("#toolbar a.enabled").hide();
+                jQuery("#toolbar a.disabled").show();
 				editor.setValue("", 0);
                 editor.container.style.pointerEvents="none"
                 editor.container.style.opacity=0.5
@@ -265,6 +267,8 @@ $(function() {
             }
             else if (data.node.type == "file")
             {
+                jQuery("#toolbar a.disabled").hide();
+                jQuery("#toolbar a.enabled").show();
                 editor.container.style.pointerEvents="auto"
                 editor.container.style.opacity=1.0
                 editor.renderer.setStyle("disabled", false)
@@ -276,6 +280,8 @@ $(function() {
             _selectedFile = data.node
         }
     }).on('loaded.jstree', function() {
+                jQuery("#toolbar a.disabled").hide();
+                jQuery("#toolbar a.enabled").show();
             editor.container.style.pointerEvents="none"
             editor.container.style.opacity=0.5
             editor.renderer.setStyle("disabled", true)
