@@ -46,10 +46,21 @@ function exports() {
     // build parameters
     var $files = $('#file-browser');
     var request = {};
-    var main = getPath($files, $files.jstree('get_selected')[0]) + ".whiley";
-    addFiles($files, "", "#", request, main.split("/")[0]);
-    $.post(root_url + "/exports", request);
-    window.open('/exports?' + $.param(request), "filename.tar.gz")
+    var mainpath = getPath($files, $files.jstree('get_selected')[0]);
+    if (mainpath.indexOf("/") != -1) { 
+        mainpath = mainpath.split("/")[0];
+    }
+        
+    addFiles($files, "", "#", request, mainpath);
+
+    var clickEvent;
+    clickEvent = document.createEvent("MouseEvent");
+    clickEvent.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+
+    var downloadButton = document.createElement('a');
+    downloadButton.href = root_url + '/exports?' + $.param(request);
+    downloadButton.download = 'archive.tar.gz';
+    downloadButton.dispatchEvent(clickEvent);
 
     $("#spinner").show();
 }
@@ -196,14 +207,14 @@ function getFileData() {
     if (isLoggedIn && loggedStorage != undefined) {
         return loggedStorage;
     }
-    
+
     return serverFiles
 }
 
 function saveFile() {
     if (!isLoggedIn) {
         var $files = $('#file-browser');
-    
+
         localStorage["files"] = JSON.stringify($files.jstree(true).get_json('#', {'flat':true}));
     } else {
         var $files = $('#file-browser');
@@ -242,11 +253,32 @@ $(function() {
         if (data && data.node && "data" in data.node) {
             _fileLoading = true
             editor.setValue(data.node.data, 0);
+            //console.log(data.node.type);
+            if (data.node.type == "project" || data.node.type == "default")
+            {
+				editor.setValue("", 0);
+                editor.container.style.pointerEvents="none"
+                editor.container.style.opacity=0.5
+                editor.renderer.setStyle("disabled", true)
+                editor.blur()
+            }
+            else if (data.node.type == "file")
+            {
+                editor.container.style.pointerEvents="auto"
+                editor.container.style.opacity=1.0
+                editor.renderer.setStyle("disabled", false)
+                editor.focus()
+            }
+
             _newFile = true;
             _fileLoading = false
             _selectedFile = data.node
         }
     }).on('loaded.jstree', function() {
+            editor.container.style.pointerEvents="none"
+            editor.container.style.opacity=0.5
+            editor.renderer.setStyle("disabled", true)
+            editor.blur()
         _selectedFile = $(this).jstree('get_node', $(this).jstree('get_selected')[0])
     })
 })
