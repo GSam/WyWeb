@@ -18,6 +18,11 @@
          var redirect = "${REDIRECT}";
       </script>
       <script type="text/javascript" src="js/whileyweb.js"></script>
+      <style type="text/css">
+         table {border-spacing: 6px; border-collapse: initial /* Fight Bootstrap */}
+         .column {float: left; width: 33.3%}
+         h3 {margin: 0}
+      </style>
    </head>
    <body>
       <div class="container-fluid content">
@@ -61,16 +66,54 @@
            		 <div id="ide">
                     <div style="float:right"><a href="admin_course_remove?id=${COURSEID}">- Remove</a></div>
            		 	<div class=content>
-<h4>${INSTITUTION}</h4>
-<h4>${COURSENAME}</h4>
-<h5>${COURSECODE}</h5>
-<h5>Year: ${YEAR}</h5>
-<h5>Validation Code: ${VALIDATIONCODE}</h5>
+<h2>${INSTITUTION} &mdash; ${COURSENAME} (${COURSECODE})</h2>
+<div class="column">
+<table>
+<tr>
+    <th>Year</th> <td>${YEAR}</td>
+</tr>
+<tr>
+    <th>Validation Code</th> <td>${VALIDATIONCODE}</td>
+</tr>
+</table>
+</div>
 
-% for name in STUDENTS:
-    ${name}<br />
-% endfor
-<br><br><br>
+<div class="column">
+<h3>Teachers</h3>
+<form action="admin_course_add_teacher" method="post">
+<p>
+    <input type="hidden" name="courseid" value="${COURSEID}" />
+    <label for="addteacher">Add Teacher</label>
+    <input type="text" placeholder="Username" name="username" id="addteacher" />
+    <input type="submit" value="+" />
+</p>
+</form>
+% if TEACHERS:
+    <ul>
+    %for id, name in TEACHERS:
+        <li>${name}</li>
+    % endfor
+    </ul>
+% endif
+% if not TEACHERS:
+    <p>None</p>
+% endif
+</div>
+
+<div class="column">
+<h3>Students</h3>
+% if STUDENTS:
+    <ul>
+    % for id, name in STUDENTS:
+        <li><a href="admin_students_list?id=${id}">${name}</a></li>
+    % endfor
+    </ul>
+% endif
+% if not STUDENTS:
+    <p>None</p>
+% endif
+</div>
+
  </div>
       <div class="col-md-1">
       </div>

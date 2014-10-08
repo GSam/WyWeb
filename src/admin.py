@@ -495,6 +495,7 @@ class Admin(object):
         redirect = "NO"
         newstatus = "" 
         students = []
+        courseId = id
 
         cnx, status = db.connect()
         cursor = cnx.cursor() 
@@ -503,19 +504,52 @@ class Admin(object):
         cursor.execute(query, (id,))
         courseID, courseName, courseCode, year, validationcode, institution = cursor.fetchone()
 
-        sql = "SELECT distinct a.student_info_id,a.givenname,a.surname from student_info a,student_course_link b, course c, course_stream d where c.courseid = %s and  c.courseid = d.courseid and d.coursestreamid =b.coursestreamid and b.studentinfoid = a.student_info_id"
+        sql = "SELECT distinct a.student_info_id,a.givenname,a.surname from student_info a,student_course_link b, course c, course_stream d where c.courseid = %s and  c.courseid = d.courseid and d.coursestreamid =b.coursestreamid and b.studentinfoid = a.student_info_id order by a.surname"
 
         cursor.execute(sql, (str(courseID),))
-        students = [name(givenname, surname) for _, givenname, surname in cursor]
+        students = [(id, name(givenname, surname)) for id, givenname, surname in cursor]
+
+        sql = """SELECT distinct a.teacherid,a.full_name 
+                from teacher_info a, teacher_course_link b
+                where b.courseid = %s and b.teacherinfoid = a.teacherid"""
+        cursor.execute(sql, (str(courseID),))
+        teachers = list(cursor)
 
         cursor.close()
         
         return templating.render("admin_course_details.html", ROOT_URL=config.VIRTUAL_URL, ERROR=error, 
-            REDIRECT=redirect,
+            REDIRECT=redirect, TEACHERS=teachers,
             COURSENAME=courseName, COURSECODE=courseCode, YEAR=year, VALIDATIONCODE=validationcode,
-            INSTITUTION=institution, STUDENTS=students, COURSEID=id, IS_ADMIN=isAdmin(userid))
+            INSTITUTION=institution, STUDENTS=students, COURSEID=courseId, IS_ADMIN=isAdmin(userid))
     admin_course_details.exposed = True
     
+
+    def admin_course_add_teacher(self, courseid, username, *args, **kwargs):
+        """Adds a teacher to a course."""
+        userid = cherrypy.session.get(auth.SESSION_USERID)
+        requireAdminOrTeacher(userid)
+
+        allow(['POST'])
+
+        print courseid, username
+
+        cnx, status = db.connect()
+        cursor = cnx.cursor()
+
+        query = """SELECT t.teacherid FROM teacher_info t, whiley_user u 
+                    WHERE u.username = %s AND u.userid = t.userid"""
+        cursor.execute(query, (username,))
+        teacherid = cursor.fetchone()
+        if not teacherid:
+            return templating.render("redirect.html", STATUS="alert-error", MESSAGE="No such teacher!")
+        teacherid = teacherid[0]
+
+        query = """INSERT INTO teacher_course_link (teacherinfoid, courseid) VALUES (%s, %s)"""
+        cursor.execute(query, (teacherid, courseid))
+        if not cursor.rowcount:
+            return templating.render("redirect.html", STATUS="alert-error", MESSAGE="Failed to add teacher!")
+        return templating.render("redirect.html", STATUS="alert-success", MESSAGE="Teacher added.")
+    admin_course_add_teacher.exposed=True
 
     # ============================================================
     # Admin Students search page
@@ -562,6 +596,8 @@ class Admin(object):
         status = "DB: Connection ok"
         studentCourses = []
         studentProjects = []
+
+        permittedCourses, permittedStudents = getAccessPermissions()
 
         if searchValue:
             cnx, status = db.connect()
@@ -785,3 +821,5 @@ def studentInfo(id, defaultName=""):
         cnx.close()
 
     return status, studentName, institution_name, studentCourses, studentProjects
+
+
