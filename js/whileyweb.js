@@ -48,7 +48,7 @@ function compile() {
     $("#spinner").show();
 }
 
-function exports() {
+function exports(filename) {
     // build parameters
     var $files = $('#file-browser');
     var mainpath = getPath($files, $files.jstree('get_selected')[0]);
@@ -56,7 +56,9 @@ function exports() {
     if (mainpath.indexOf("/") != -1) {
         mainpath = mainpath.split("/")[0];
     }
-
+    if(!filename){
+    filename = mainpath;
+    };
     addFiles($files, "", "#", request, mainpath);
 
     var clickEvent;
@@ -65,10 +67,12 @@ function exports() {
 
     var downloadButton = document.createElement('a');
     downloadButton.href = root_url + '/exports?' + $.param(request);
-    downloadButton.download = 'archive.tar.gz';
+    downloadButton.download = filename + '.tar.gz';
     downloadButton.dispatchEvent(clickEvent);
 
     $("#spinner").show();
+    $("#exportModal").modal("hide");
+    $("#exportFilename").val("");
 }
 
 function addFiles($files, prefix, node, query, project) {

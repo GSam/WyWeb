@@ -11,6 +11,7 @@
       <script type="text/javascript" src="js/jquery-ui.js"></script>
       <script type="text/javascript" src="js/jstree.js"></script>
       <script type="text/javascript" src="js/require.js"></script>
+      <script type="text/javascript" src="js/bootstrap.js"></script>
 	  <script src="js/ace.js" type="text/javascript" charset="utf-8"></script>
       <script type="text/javascript">
          var root_url = "${ROOT_URL}";
@@ -89,11 +90,11 @@
                         <div class="form-group">
                       <table id="toolbar" class="ide-menu">
                           <tr>
-                              <td style="z-index: 100">
-                                  <a href="javascript:addFile();" style="opacity:0.3">
-                                      <img src="images/new_file.png" border="0" alt="Add New File" title="New File">
-                                  </a>
-                              </td>
+                              <!--<td style="z-index: 100">-->
+                                  <!--<a href="javascript:addFile();" style="opacity:0.3">-->
+                                      <!--<img src="images/new_file.png" border="0" alt="Add New File" title="New File">-->
+                                  <!--</a>-->
+                              <!--</td>-->
                               <td>
                                   <a href="javascript:addProject();">
                                       <img src="images/new_project.png" border="0" alt="Create New Project" title="New Project">
@@ -104,10 +105,20 @@
                                   <a href="javascript:editor.focus();">
                                       <img src="images/save.png" style="opacity:0.3" border="0" alt="Save All Files" title="Saving Is Only Available To Logged In Users">
                                   </a>
+                              </td>
+                              <td>
+                                  <a href="javascript:editor.focus();">
+                                      <img src="images/export.png" style="opacity:0.3" border="0" alt="Export project" title="Export Is Only Available To Logged In Users.">
+                                  </a>  
                         % endif
                         % if LOGGED is True:
                                   <a href="javascript:saveToServer();editor.focus();">
-                                      <img src="images/save.png" border="0" alt="Save All Files" title="Save All Files">
+                                    <img src="images/save.png" border="0" alt="Save All Files" title="Save All Files">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href="javascript:exportProject();">
+                                      <img src="images/export.png" border="0" alt="Export project" title="Export your source to an archive file.">
                                   </a>
                         % endif
                               </td>
@@ -192,6 +203,23 @@
                                       <img src="images/replace.png" border="0" alt="Replace" Title="Replace">
                                   </a>
                               </td>
+                              <td style="border-right:1px solid #dddddd; ">
+                                  <select id="boilerplateselect" title="Insert a code template at the cursor">
+                                      <option value="">Code Templates</option>
+                                      <option value="main">Main Method</option>
+                                      <option value="function">Function</option>
+                                      <option value="method">Method</option>
+                                      <option value="if">If</option>
+                                      <option value="forarray">For (array)</option>
+                                      <option value="forlist">For (collection)</option>
+                                      <option value="forblock">For (block)</option>
+                                  </select>
+                                  <a class="disabled">
+                                      <img src="images/expand.png" style="float:right" border="0" alt="Insert Code" Title ="Insert Code">
+                                  </a>
+                                  <a  id="boilerplateanchor" href=" javascript:insertBoilerplate();" class="enabled">
+                                      <img src="images/expand.png" style="float:right" border="0" alt="Insert Code" title="Insert a code template at the cursor">
+                                  </a>
                               <td>
                                   <a class="disabled">
                                       <img src="images/record.png" border="0" alt="Record Macro" title="Record Macro">
@@ -209,22 +237,15 @@
                                   </a>
 
                               </td>
-                              <td style="border-right:1px solid #dddddd; ">
-                                  <select id="boilerplateselect">
-                                      <option value="main">Main Method</option>
-                                      <option value="function">Function</option>
-                                      <option value="method">Method</option>
-                                      <option value="if">If</option>
-                                      <option value="forarray">For (array)</option>
-                                      <option value="forlist">For (collection)</option>
-                                      <option value="forblock">For (block)</option>
-                                  </select>
+                              <td style="border-right:1px solid #dddddd">
                                   <a class="disabled">
-                                      <img src="images/expand.png" style="float:right" border="0" alt="Insert Code" Title ="Insert Code">
+                                      <img src="images/share.png" border="0" alt="Share" Title ="Share with a Permalink">
                                   </a>
-                                  <a  id="boilerplateanchor" href=" javascript:insertBoilerplate();" class="enabled">
-                                      <img src="images/expand.png" style="float:right" border="0" alt="Insert Code" Title ="Insert Code">
+                                  <a href=" javascript:shareProject();" class="enabled">
+                                      <img src="images/share.png" border="0" alt="Share" Title ="Share with a Permalink">
                                   </a>
+
+                              </td>
 
                               </td>
                           </tr>
@@ -290,7 +311,34 @@
       </script>
       </div>
 
+
+<div id="exportModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="ExportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          <h4 class="modal-title" id="ExportModalLabel">Export Project</h4>
+        </div>
+        <div class="modal-body">
+
+            <input type="text" class="form-control" placeholder="File name" name="exportFilename" id="exportFilename">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onClick="exports($('#exportFilename').val());">Export</button>
+        </div>
+
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
        <script>
+
+function exportProject()
+{
+  $('#exportModal').modal('show')
+}
 function newFile() {
 }
 
@@ -348,6 +396,15 @@ function find() {
 function replace() {
     editor.execCommand("replace");
 	editor.focus();
+}
+
+
+function shareProject() {
+
+    //insert code here
+
+
+    editor.focus();
 }
 
 function macroRecord() {
