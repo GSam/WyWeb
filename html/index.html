@@ -11,6 +11,7 @@
       <script type="text/javascript" src="js/jquery-ui.js"></script>
       <script type="text/javascript" src="js/jstree.js"></script>
       <script type="text/javascript" src="js/require.js"></script>
+      <script type="text/javascript" src="js/bootstrap.js"></script>
 	  <script src="js/ace.js" type="text/javascript" charset="utf-8"></script>
       <script type="text/javascript">
          var root_url = "${ROOT_URL}";
@@ -237,15 +238,6 @@
                               </td>
                               <td style="border-right:1px solid #dddddd">
                                   <a class="disabled">
-                                      <img src="images/export.png" border="0" alt="Export" Title ="Export Project to GZIP">
-                                  </a>
-                                  <a href=" javascript:exportProject();" class="enabled">
-                                      <img src="images/export.png" border="0" alt="Export" Title ="Export Project to GZIP">
-                                  </a>
-
-                              </td>
-                              <td style="border-right:1px solid #dddddd">
-                                  <a class="disabled">
                                       <img src="images/share.png" border="0" alt="Share" Title ="Share with a Permalink">
                                   </a>
                                   <a href=" javascript:shareProject();" class="enabled">
@@ -320,21 +312,26 @@
       </div>
 
 
-<div class="modal fade export-modal-sm" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="Export project" aria-hidden="true">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-      <form class="navbar-form"  method="post" action="/auth/login" role="login">
-                           <div class="form-group">
-                              <input type="text" class="form-control" placeholder="Username" name="user">
-                              <input type="password" class="form-control" placeholder="Password" name="passwd">
-                              <input type="hidden" name="from_page" value="/" />
-                           </div>
-                           <button type="submit" class="btn btn-default">Log In</button>
-                              <a type="submit" class="btn btn-default" href="/auth/signup">Sign Up</a>
-                        </form>
-    </div>
-  </div>
-</div>
+<div id="exportModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="ExportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          <h4 class="modal-title" id="ExportModalLabel">Export Project</h4>
+        </div>
+        <div class="modal-body">
+
+            <input type="text" class="form-control" placeholder="File name" name="exportFilename" id="exportFilename">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onClick="exports($('#exportFilename').val());">Export</button>
+        </div>
+
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
 
        <script>
 
@@ -401,13 +398,6 @@ function replace() {
 	editor.focus();
 }
 
-function exportProject() {
-
-    //insert code here
-
-
-    editor.focus();
-}
 
 function shareProject() {
 
