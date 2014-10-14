@@ -103,10 +103,20 @@
                                   <a href="javascript:editor.focus();">
                                       <img src="images/save.png" style="opacity:0.3" border="0" alt="Save All Files" title="Saving Is Only Available To Logged In Users">
                                   </a>
+                              </td>
+                              <td>
+                                  <a href="javascript:editor.focus();">
+                                      <img src="images/export.png" style="opacity:0.3" border="0" alt="Export project" title="Export Is Only Available To Logged In Users.">
+                                  </a>  
                         % endif
                         % if LOGGED is True:
                                   <a href="javascript:saveToServer();editor.focus();">
-                                      <img src="images/save.png" border="0" alt="Save All Files" title="Save All Files">
+                                    <img src="images/save.png" border="0" alt="Save All Files" title="Save All Files">
+                                  </a>
+                              </td>
+                              <td>
+                                  <a href="javascript:exportProject();">
+                                      <img src="images/export.png" border="0" alt="Export project" title="Export your source to an archive file.">
                                   </a>
                         % endif
                               </td>
@@ -290,7 +300,29 @@
       </script>
       </div>
 
+
+<div class="modal fade export-modal-sm" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="Export project" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <form class="navbar-form"  method="post" action="/auth/login" role="login">
+                           <div class="form-group">
+                              <input type="text" class="form-control" placeholder="Username" name="user">
+                              <input type="password" class="form-control" placeholder="Password" name="passwd">
+                              <input type="hidden" name="from_page" value="/" />
+                           </div>
+                           <button type="submit" class="btn btn-default">Log In</button>
+                              <a type="submit" class="btn btn-default" href="/auth/signup">Sign Up</a>
+                        </form>
+    </div>
+  </div>
+</div>
+
        <script>
+
+function exportProject()
+{
+  $('#exportModal').modal('show')
+}
 function newFile() {
 }
 
