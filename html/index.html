@@ -20,7 +20,7 @@
          var isLoggedIn = ${"true" if LOGGED else "false"};
          var serverFiles = ${FILES};
          var loggedStorage = undefined;
-
+         var userid = "${USERID}";
       </script>
       <style>
       .ide-menu td {
@@ -85,6 +85,7 @@
             <div class="row">
                <nav class="navbar navbar-default" role="navigation">
                   <div class="container-fluid">
+   			              <!--<button type="button" style="float: right" class="btn btn-primary" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>-->
                      <form class="navbar-form navbar-left">
                         <div class="form-group">
                       <table id="toolbar" class="ide-menu">
@@ -121,6 +122,18 @@
                                   </a>
                         % endif
                               </td>
+                              <td style="border-right:1px solid #dddddd">
+                                  <a class="disabled">
+                                      <img src="images/share.png" border="0" alt="Share" Title ="Share with a Permalink">
+                                  </a>
+                                  <a href=" javascript:shareProject();" class="enabled">
+                                      <img src="images/share.png" border="0" alt="Share" Title ="Share with a Permalink">
+                                  </a>
+
+                              </td>
+                              <td style="border-right:1px solid #dddddd">
+                                  &nbsp;
+                              </td>
                               <td>
                                   <a class="disabled">
                                       <img src="images/compile.png" border="0" alt="Compile This Project" title="Compile">
@@ -136,6 +149,9 @@
                                   <a href="javascript:run();" class="enabled">
                                       <img src="images/run.png" border="0" alt="Run This Project" title="Run">
                                   </a>
+                              </td>
+                              <td style="border-right:1px solid #dddddd">
+                                  &nbsp;
                               </td>
                               <td>
                                   <a class="disabled">
@@ -219,6 +235,10 @@
                                   <a  id="boilerplateanchor" href=" javascript:insertBoilerplate();" class="enabled">
                                       <img src="images/expand.png" style="float:right" border="0" alt="Insert Code" title="Insert a code template at the cursor">
                                   </a>
+                              </td>
+                              <td style="border-right:1px solid #dddddd">
+                                  &nbsp;
+                              </td>
                               <td>
                                   <a class="disabled">
                                       <img src="images/record.png" border="0" alt="Record Macro" title="Record Macro">
@@ -236,20 +256,10 @@
                                   </a>
 
                               </td>
-                              <td style="border-right:1px solid #dddddd">
-                                  <a class="disabled">
-                                      <img src="images/share.png" border="0" alt="Share" Title ="Share with a Permalink">
-                                  </a>
-                                  <a href=" javascript:shareProject();" class="enabled">
-                                      <img src="images/share.png" border="0" alt="Share" Title ="Share with a Permalink">
-                                  </a>
-
-                              </td>
 
                               </td>
                           </tr>
                       </table>
-   			              <!--<button type="button"  class="btn" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>-->
                         <!--% if LOGGED is True:-->
                           <!--<button type="button" class="btn btn-primary" onClick="saveToServer();" title="Save your project online.">Save</button>-->
                         <!--% endif-->
@@ -400,9 +410,17 @@ function replace() {
 
 
 function shareProject() {
-
-    //insert code here
-
+    function getProject($files, node) {
+        if (node == '#') return null;
+        var data = $files.jstree('get_node', node);
+        if (!data) return null
+        if (data.type == "project") return data.text;
+        return getProject($files, data.parent);
+    }
+    var $files = $('#file-browser'),
+        project = getProject($files, $files.jstree('get_selected')[0]),
+        url = "view_project?userid="+encodeURIComponent(userid)+"&projectname="+encodeURIComponent(project);
+    alert("URL to project '"+project+"':\n\n"+root_url+url);
 
     editor.focus();
 }

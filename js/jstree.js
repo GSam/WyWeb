@@ -3207,7 +3207,9 @@
 			return node.id;
 		},
 		/**
+		 *
 		 * set the text value of a node
+		 *
 		 * @name rename_node(obj, val)
 		 * @param  {mixed} obj the node, you can pass an array to rename multiple nodes to the same name
 		 * @param  {String} val the new text value
@@ -3216,6 +3218,13 @@
 		 */
 		rename_node : function (obj, val) {
 			var t1, t2, old;
+			val = val.replace(/[^a-zA-Z0-9_$]/g, "")
+			val = val.replace(/^[0-9$]*/g, "")
+
+			if (val === "") {
+				return false;
+			}
+
 			if($.isArray(obj)) {
 				obj = obj.slice();
 				for(t1 = 0, t2 = obj.length; t1 < t2; t1++) {

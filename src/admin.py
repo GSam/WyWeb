@@ -615,6 +615,7 @@ class Admin(object):
         status = "DB: Connection ok"
         studentCourses = []
         studentProjects = []
+        empty = None
 
         if searchValue:
             cnx, status = db.connect()
@@ -627,7 +628,8 @@ class Admin(object):
                             if permittedStudents is None or id_ in permittedStudents]
             cursor.close()
             cnx.close()
-
+            if len(searchResult)< 1:
+                empty = True
         status, studentName, institutionName, studentCourses, studentProjects = \
                 studentInfo(id)
         
@@ -635,7 +637,8 @@ class Admin(object):
                                 REDIRECT=redirect, STATUS=status,
                                 SEARCHRESULT=searchResult, SEARCHVALUE=searchValue,
                                 STUDENTNAME=studentName, INSTITUTIONNAME=institutionName,
-                                STUDENTCOURSES=studentCourses, STUDENTPROJECTS=studentProjects, 
+                                STUDENTCOURSES=studentCourses, STUDENTPROJECTS=studentProjects,
+                                EMPTYRESULT=empty,
                                 IS_ADMIN=isAdmin)
 
     admin_students_search.exposed = True
