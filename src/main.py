@@ -215,7 +215,7 @@ class Main(admin.Admin):
 
         result = compile_all(_main, files, _verify, dir)
 
-        # #        shutil.rmtree(dir)
+        shutil.rmtree(dir)
 
         if "internal failure (null)" in str(result):
             make_tarfile('%s.tar.gz' % suffix, dir)
@@ -337,7 +337,7 @@ class Main(admin.Admin):
             output = run(run_path, class_to_run)
             response["output"] = output
 
-        # shutil.rmtree(dir)
+        shutil.rmtree(dir)
         return json.dumps(response)
 
     run_all.exposed = True
