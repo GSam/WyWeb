@@ -576,6 +576,7 @@ class Admin(object):
     # ============================================================
 
     def admin_students_search(self, searchValue="", id=None, *args, **kwargs):
+
         """
         Searches students by searchValue, displaying information for student number id. 
 
@@ -614,6 +615,7 @@ class Admin(object):
         status = "DB: Connection ok"
         studentCourses = []
         studentProjects = []
+        empty = None
 
         if searchValue:
             cnx, status = db.connect()
@@ -626,7 +628,8 @@ class Admin(object):
                             if permittedStudents is None or id_ in permittedStudents]
             cursor.close()
             cnx.close()
-
+            if len(searchResult)< 1:
+                empty = True
         status, studentName, institutionName, studentCourses, studentProjects = \
                 studentInfo(id)
         
@@ -634,7 +637,8 @@ class Admin(object):
                                 REDIRECT=redirect, STATUS=status,
                                 SEARCHRESULT=searchResult, SEARCHVALUE=searchValue,
                                 STUDENTNAME=studentName, INSTITUTIONNAME=institutionName,
-                                STUDENTCOURSES=studentCourses, STUDENTPROJECTS=studentProjects, 
+                                STUDENTCOURSES=studentCourses, STUDENTPROJECTS=studentProjects,
+                                EMPTYRESULT=empty,
                                 IS_ADMIN=isAdmin)
 
     admin_students_search.exposed = True
@@ -696,9 +700,7 @@ class Admin(object):
         >>> ('Agile Methods', 'SWEN302', 2014, 1) in ret.STUDENTCOURSES
         True
         """
-        userid = cherrypy.session.get(auth.SESSION_USERID)
-        isAdmin, permittedCourses, permittedStudents = True, None, None # Quick reverse on nonfunctioning getAccessPermissions()
-        requireAdmin(userid)
+        isAdmin, permittedCourses, permittedStudents = getAccessPermissions()
 
         allow(["HEAD", "GET", "POST"])
         error = ""

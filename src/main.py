@@ -458,31 +458,29 @@ def save(project_name, filename, data):
     userid = cherrypy.session.get(auth.SESSION_USERID)
     cnx, status = db.connect()
     cursor = cnx.cursor()
-    print "saving Project:", project_name, filename
+    print "saving Project:", project_name, userid
     sql = "SELECT p.projectid FROM project p where p.userid = %s AND p.project_name = %s"
     cursor.execute(sql, (userid,project_name))
     project = cursor.fetchone()
     if project:
         projectid = project[0]
-        print projectid
-        if projectid is None:
-            sql = "INSERT INTO project (project_name, userid) VALUES (%s, %s)"
-            cursor.execute(sql, (project_name, userid))
-            projectid = cursor.lastrowid
+    else:
+        sql = "INSERT INTO project (project_name, userid) VALUES (%s, %s)"
+        cursor.execute(sql, (project_name, userid))
+        projectid = cursor.lastrowid
 
-
-        sql = "INSERT INTO file (projectid, filename, source) VALUES (%s, %s, %s)"
-        print projectid, filename, data
-        print sql
-        cursor = cnx.cursor()
-        cursor.execute(sql, (projectid, filename, data))
-        if cursor.fetchwarnings():
-            for item in cursor.fetchwarnings():
-                print item
-        cursor.close()
-        cursor = cnx.cursor()
-        cursor.execute("select * from file where projectid = %s", (projectid, ))
-        print cursor.fetchall()
+    sql = "INSERT INTO file (projectid, filename, source) VALUES (%s, %s, %s)"
+    print projectid, filename, data
+    print sql
+    cursor = cnx.cursor()
+    cursor.execute(sql, (projectid, filename, data))
+    if cursor.fetchwarnings():
+        for item in cursor.fetchwarnings():
+            print item
+    cursor.close()
+    cursor = cnx.cursor()
+    cursor.execute("select * from file where projectid = %s", (projectid, ))
+    print cursor.fetchall()
 
 def clear_files(project_name):
     print "CLEAR FILES", project_name

@@ -77,6 +77,8 @@
     % endfor
 </select></td></tr></table>
 <br>
+</fieldset>
+</form>
 <table><tr><td width=55 align=left><img src=images/student_small.png></td><td><h2> Current Students</h2></td></tr>
 <tr><td>&nbsp;</td><td>
     % for student_id, name in OPTIONSTUDENT:
@@ -84,7 +86,8 @@
     % endfor
 </td></tr></table>
 <br><hr>
-</td><td valign=top width="50%"><fieldset>  <legend>
+</td>
+<td valign=top width="50%"><fieldset>  <legend>
         ${STUDENTNAME}<br />
         <h5>${STUDENTINSTITUTION}</h5>
 </legend>
@@ -97,19 +100,34 @@
 <br>
 % if STUDENTPROJECTS:
     <h4>Projects</h4>
+    <select name"studentProjects" id="studentProjects">
     % for projectid, projectname, files in STUDENTPROJECTS:
-        <a href="student_project?project=${str(projectid)}">${projectname}</a><br />
-        % for filename in files:
-            &nbsp; --> &nbsp; ${filename}
-        % endfor
+        <option value = "${str(projectid)}">${projectname}</option>
     % endfor
+    </select>
+
+    
+    <button  type="button" class="btn btn-default btn-sm" onClick="updateViewButton($('#studentProjects option:selected').val());") >GO</button>
 % endif
-</fieldset></td></tr></table>
-</form>
+</td></tr></table>
 <br><br>
 </div>
 </div>
 </div>
+
+<script>
+
+function updateViewButton(projectid)
+{
+  console.log(projectid);
+  window.location.replace("student_project?project=" + projectid);
+}
+
+function showProject(url)
+{
+}
+
+</script>
    </body>
 </html>
 
