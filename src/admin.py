@@ -576,6 +576,7 @@ class Admin(object):
     # ============================================================
 
     def admin_students_search(self, searchValue="", id=None, *args, **kwargs):
+
         """
         Searches students by searchValue, displaying information for student number id. 
 
@@ -699,9 +700,7 @@ class Admin(object):
         >>> ('Agile Methods', 'SWEN302', 2014, 1) in ret.STUDENTCOURSES
         True
         """
-        userid = cherrypy.session.get(auth.SESSION_USERID)
-        isAdmin, permittedCourses, permittedStudents = True, None, None # Quick reverse on nonfunctioning getAccessPermissions()
-        requireAdmin(userid)
+        isAdmin, permittedCourses, permittedStudents = getAccessPermissions()
 
         allow(["HEAD", "GET", "POST"])
         error = ""
