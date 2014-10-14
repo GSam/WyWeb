@@ -160,7 +160,12 @@ function clearErrors() {
 }
 
 $(function() {
-    $("#file-browser").jstree({
+    function selectFirstFile(node) {
+        var data = $files.js_tree('get_node', node);
+        if (data.type == 'file') $files.js_tree('set_selected', node);
+        i = data.length; while (i-- >= 0) selectFirstFile(data.children[i])
+    }
+    $files = $("#file-browser").jstree({
      core: {
             check_callback: true,
             data: getFileData()
@@ -200,6 +205,14 @@ $(function() {
             "project":{}
         }
     })
+
+    $(document).on('ace-loaded', function() {
+        var selected = $files.jstree('get_selected')[0],
+            data = $files.jstree('get_node', selected),
+            text = data.data;
+        editor.renderer.setStyle('disabled', false);
+        editor.setValue(text, 0);
+    }); // Otherwise text doesn't display.
 });
 
 function createNewFile(data)
