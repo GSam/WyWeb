@@ -20,7 +20,7 @@
          var isLoggedIn = ${"true" if LOGGED else "false"};
          var serverFiles = ${FILES};
          var loggedStorage = undefined;
-
+         var userid = "${USERID}";
       </script>
       <style>
       .ide-menu td {
@@ -85,6 +85,7 @@
             <div class="row">
                <nav class="navbar navbar-default" role="navigation">
                   <div class="container-fluid">
+   			              <button type="button" style="float: right" class="btn btn-primary" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>
                      <form class="navbar-form navbar-left">
                         <div class="form-group">
                       <table id="toolbar" class="ide-menu">
@@ -259,7 +260,6 @@
                               </td>
                           </tr>
                       </table>
-   			              <!--<button type="button"  class="btn" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>-->
                         <!--% if LOGGED is True:-->
                           <!--<button type="button" class="btn btn-primary" onClick="saveToServer();" title="Save your project online.">Save</button>-->
                         <!--% endif-->

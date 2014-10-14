@@ -176,7 +176,7 @@ $(function() {
                         action: function(data) {
                             var inst = $.jstree.reference(data.reference),
                                 obj = inst.get_node(data.reference);
-                            inst.create_node(obj, {type: "default", text: "New folder"}, "last", function(new_node) {
+                            inst.create_node(obj, {type: "default", text: "NewFolder"}, "last", function(new_node) {
                                 setTimeout(function() {inst.edit(new_node);}, 0);
                             });
                         }
@@ -206,7 +206,7 @@ function createNewFile(data)
 {
     var inst = $.jstree.reference(data.reference);
     var obj = inst.get_node(data.reference);
-    inst.create_node(obj, {type: "file", text: "New File", data: ""}, "last",
+    inst.create_node(obj, {type: "file", text: "NewFile", data: ""}, "last",
         function(new_node) {
             setTimeout(function() {inst.edit(new_node); }, 0);
         }
@@ -373,16 +373,17 @@ function run() {
  * Save a given snippet of Whiley code.
  */
 function save() {
-    var request = { code: editor.getValue() };
-    $.post(root_url + "/save", request, function(response) {
-        clearMessages();
-        var response = $.parseJSON(response);
-        $("#spinner").hide();
-        addMessage("success", "Saved program as " + response.id + ".", function() {
-            window.location.replace("?id=" + response.id);
-        });
-    });
-    $("#spinner").show();
+    function getProject($files, node) {
+        if (node == '#') return null;
+        var data = $files.jstree('get_node', node);
+        if (!data) return null
+        if (data.type == "project") return data.text;
+        return getProject($files, data.parent);
+    }
+    var $files = $('#file-browser'),
+        project = getProject($files, $files.jstree('get_selected')[0]),
+        url = "view_project?userid="+encodeURIComponent(userid)+"&projectname="+encodeURIComponent(project);
+    alert("URL to project '"+project+"':\n\n"+root_url+url);
 }
 
 
