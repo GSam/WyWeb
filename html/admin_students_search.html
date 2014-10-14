@@ -62,8 +62,12 @@
 <div class=content>
 <table><tr><td><form action="?" method="post">Search Student Given Name or Surname <input type="textfield" name="searchValue" value="${SEARCHVALUE}"></td><td> <input type="submit" value="Go"></td></tr></table>
 % for id, name in SEARCHRESULT:
-    <a href="?id=${str(id)}&searchValue=${SEARCHVALUE}">${name}</a><br />
+	<a href="?id=${str(id)}&searchValue=${SEARCHVALUE}">${name}</a><br />
 % endfor
+
+% if EMPTYRESULT:
+	<h4>Your search returned no results</h4>
+% endif
 <hr>
 <h3>${STUDENTNAME}</h3><h5>${INSTITUTIONNAME}</h5>
 % if STUDENTCOURSES:
