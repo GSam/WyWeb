@@ -14,6 +14,7 @@ import cherrypy
 from cherrypy.lib.static import serve_file
 from cherrypy.lib.cptools import allow
 from cherrypy import HTTPRedirect
+from cherrypy._cperror import HTTPError
 from mako.lookup import TemplateLookup
 
 import db
@@ -158,11 +159,6 @@ requires !m.doorOpen:
                 "type": 'project'
             }
         ]
-HELLO_WORLD = """import whiley.lang.System
-
-method main(System.Console console):
-    console.out.println("Hello World")
-"""
 
 class Main(admin.Admin):
     # gives access to images/
@@ -337,7 +333,7 @@ class Main(admin.Admin):
     # ============================================================
     # application root
     # ============================================================
-    def index(self, id="HelloWorld", *args, **kwargs):
+    def index(self, *args, **kwargs):
         allow(["HEAD", "GET"])
         error = ""
         redirect = "NO"
@@ -368,21 +364,35 @@ class Main(admin.Admin):
                             USERID=userid, 
                             LOGGED=loggedin,
                             ADMIN=admin,
-                            HELLO_WORLD=HELLO_WORLD,
                             FILES=json.dumps(files))
 
     index.exposed = True
     # exposed
 
+    def view_project(self, userid, projectname):
+        allow(["HEAD", "GET"])
+
+        cnx, status = db.connect()
+        cursor = cnx.cursor()
+        sql = "SELECT p.projectid FROM project p where p.userid = %s AND p.project_name = %s"
+        cursor.execute(sql, (userid, projectname))
+        result = cursor.fetchone()
+        print result        
+        if not result:
+            raise HTTPError(404)
+        result = result[0]
+
+        return self.student_project(result)
+    view_project.exposed = True
+
     def student_project(self, project):
         allow(["HEAD", "GET"])
         admin = False
-        # TODO This page should REALLY be secured!
+        # TODO This page should REALLY be secured! How should this work?
         template = lookup.get_template("index.html")
         username = cherrypy.session.get(auth.SESSION_KEY)
         userid = cherrypy.session.get(auth.SESSION_USERID)
-        if not userid:
-            raise cherrypy.HTTPError(403, "Unauthorised!")
+
         if isAdmin(userid):
             admin = True
         files = get_project(project)
