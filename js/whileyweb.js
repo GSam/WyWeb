@@ -176,7 +176,7 @@ $(function() {
                         action: function(data) {
                             var inst = $.jstree.reference(data.reference),
                                 obj = inst.get_node(data.reference);
-                            inst.create_node(obj, {type: "default", text: "New folder"}, "last", function(new_node) {
+                            inst.create_node(obj, {type: "default", text: "NewFolder"}, "last", function(new_node) {
                                 setTimeout(function() {inst.edit(new_node);}, 0);
                             });
                         }
@@ -206,7 +206,7 @@ function createNewFile(data)
 {
     var inst = $.jstree.reference(data.reference);
     var obj = inst.get_node(data.reference);
-    inst.create_node(obj, {type: "file", text: "New File", data: ""}, "last",
+    inst.create_node(obj, {type: "file", text: "NewFile", data: ""}, "last",
         function(new_node) {
             setTimeout(function() {inst.edit(new_node); }, 0);
         }
