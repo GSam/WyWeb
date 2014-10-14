@@ -85,7 +85,7 @@
             <div class="row">
                <nav class="navbar navbar-default" role="navigation">
                   <div class="container-fluid">
-   			              <button type="button" style="float: right" class="btn btn-primary" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>
+   			              <!--<button type="button" style="float: right" class="btn btn-primary" onClick="save();" title="Create a permalink of this program to share with others.">Share</button>-->
                      <form class="navbar-form navbar-left">
                         <div class="form-group">
                       <table id="toolbar" class="ide-menu">
@@ -410,9 +410,17 @@ function replace() {
 
 
 function shareProject() {
-
-    //insert code here
-
+    function getProject($files, node) {
+        if (node == '#') return null;
+        var data = $files.jstree('get_node', node);
+        if (!data) return null
+        if (data.type == "project") return data.text;
+        return getProject($files, data.parent);
+    }
+    var $files = $('#file-browser'),
+        project = getProject($files, $files.jstree('get_selected')[0]),
+        url = "view_project?userid="+encodeURIComponent(userid)+"&projectname="+encodeURIComponent(project);
+    alert("URL to project '"+project+"':\n\n"+root_url+url);
 
     editor.focus();
 }

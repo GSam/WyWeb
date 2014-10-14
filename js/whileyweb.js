@@ -369,23 +369,6 @@ function run() {
     });
     $("#spinner").show();
 }
-/**
- * Save a given snippet of Whiley code.
- */
-function save() {
-    function getProject($files, node) {
-        if (node == '#') return null;
-        var data = $files.jstree('get_node', node);
-        if (!data) return null
-        if (data.type == "project") return data.text;
-        return getProject($files, data.parent);
-    }
-    var $files = $('#file-browser'),
-        project = getProject($files, $files.jstree('get_selected')[0]),
-        url = "view_project?userid="+encodeURIComponent(userid)+"&projectname="+encodeURIComponent(project);
-    alert("URL to project '"+project+"':\n\n"+root_url+url);
-}
-
 
 // Global reference to the code editor.
 var editor;
