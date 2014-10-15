@@ -20,7 +20,11 @@ function compile() {
 
     // build parameters
     var $files = $('#file-browser');
-    var main = getPath($files, $files.jstree('get_selected')[0]) + ".whiley";
+    var selected = $files.jstree('get_selected');
+    if (!selected || selected.length == 0) {
+        return;
+    }
+    var main = getPath($files, selected[0]) + ".whiley";
     var request = { _main: main, _verify: verify.checked };
     if (main.indexOf('/') != -1) {
         main = main.split("/")[0];
