@@ -56,10 +56,15 @@
                 <div class="col-md-6">
                   <h2>Manage Admins</h2>
                   <form action="/manage_admins" method="get">
-                      <label for="searchuser">Add admin</label>
-                      <input type="text" name="searchuser" placeholder="Username" />
-                      <input type="submit" value="+"/>
-                  </form>
+                  <select name="searchuser">
+					 % for username, userid in OPTION:
+  <option value="${str(username)}">
+                        ${username}</option>
+					  % endfor
+            	</select>
+
+                 <input type="submit" value=" Add "/>
+</form>
                   % if MESSAGE:
                       <div class="alert alert-danger" role="alert">${MESSAGE}</div>
                   % endif
