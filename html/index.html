@@ -449,8 +449,7 @@ function shareProject() {
     var $files = $('#file-browser'),
         project = getProject($files, $files.jstree('get_selected')[0]),
         url = "view_project?userid="+encodeURIComponent(userid)+"&projectname="+encodeURIComponent(project);
-    // alert(document.baseURI);
-    $('#projectPermalink').val(root_url+url);
+    $('#projectPermalink').val(document.baseURI+url);
     $('#shareModal').modal('show')
     editor.focus();
 }
