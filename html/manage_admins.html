@@ -86,10 +86,16 @@
 
                 <div class="col-md-6">
                   <h2>Manage Teachers</h2>
+
                   <form action="/admin_teacher_add" method="get">
                       <label for="searchuser">Add teacher</label>
-                      <input type="text" name="id" placeholder="Username" />
-                      <input type="submit" value="+"/>
+                      <select name="id" placeholder="Username">
+					  				  					 % for username, userid in TEACHEROPTION:
+					  				    <option value="${str(username)}">
+					  				                          ${username}</option>
+					  				  					  % endfor
+            	</select>
+                      <input type="submit" value=" Add"/>
                   </form>
                   % if TEACHER_MESSAGE:
                       <div class="alert alert-danger" role="alert">${TEACHER_MESSAGE}</div>

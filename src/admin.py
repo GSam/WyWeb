@@ -75,7 +75,7 @@ class Admin(object):
         adminList = []
         userList = []
         options = []
-        leave="leavemystuffalone"
+        teacheroptions = []
 
         cnx, status = db.connect()
         cursor = cnx.cursor() 
@@ -84,6 +84,7 @@ class Admin(object):
         for (username, userid) in cursor:
             username_clean = ''.join(ch for ch in username if ch.isalnum())
             options.append((username_clean,userid))
+            teacheroptions.append((username_clean,userid))
         cursor.close()
 
         if searchuser is not None:
@@ -123,7 +124,7 @@ class Admin(object):
             cursor.close()
             userid = None
 
-        return templating.render("manage_admins.html", ADMINLIST=adminList, TEACHERLIST=teacherList,OPTION=options, 
+        return templating.render("manage_admins.html", ADMINLIST=adminList, TEACHERLIST=teacherList,TEACHEROPTION=teacheroptions,OPTION=options, 
                                     MESSAGE=message, TEACHER_MESSAGE=teacherMessage, IS_ADMIN=isAdmin(adminUserid))
 
     manage_admins.exposed = True
