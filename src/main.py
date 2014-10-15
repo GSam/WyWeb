@@ -257,6 +257,7 @@ class Main(admin.Admin):
 
                 # save
                 save(project, "/".join(filepath)[:-len(".whiley")], source)
+        return json.dumps({"result": "success"})
     private_save.exposed = True
 
     def save(self, code, *args, **kwargs):

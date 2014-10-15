@@ -20,7 +20,11 @@ function compile() {
 
     // build parameters
     var $files = $('#file-browser');
-    var main = getPath($files, $files.jstree('get_selected')[0]) + ".whiley";
+    var selected = $files.jstree('get_selected');
+    if (!selected || selected.length == 0) {
+        return;
+    }
+    var main = getPath($files, selected[0]) + ".whiley";
     var request = { _main: main, _verify: verify.checked };
     if (main.indexOf('/') != -1) {
         main = main.split("/")[0];
@@ -355,7 +359,24 @@ function saveToServer() {
     var $files = $('#file-browser');
     addFiles($files, "", "#", request);
 
-    $.post(root_url + '/private_save',  request, function() {});
+    $.post(root_url + '/private_save',  request, function(response) {
+        clearMessages();
+        $("#spinner").hide();
+        console.log(response);
+        var response = $.parseJSON(response);
+        if(response.result == "success") {
+            clearErrors(true);
+            addMessage("success", "Saved successfully.");
+        } else if(response.result == "errors") {
+            addMessage("error", "Save failed: " + errors.length + " error" + (errors.length > 1 ? "s." : "."));
+        } else if(response.result == "error") {
+            clearErrors(true);
+            addMessage("error", response.error);
+        }
+    });
+
+    $("#spinner").show();
+
 }
 /**
  * Compile and run a given snippet of Whiley code.
