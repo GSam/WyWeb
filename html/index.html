@@ -31,7 +31,9 @@
       border-left:1px solid #dddddd;
       border-top:1px solid #dddddd;
       }
-          .disabled{opacity:0.3;}
+      .disabled{
+        opacity:0.3;
+      }
       </style>
       <script type="text/javascript" src="js/whileyweb.js"></script>
       <script type="text/javascript" src="js/ext-searchbox.js"></script>
@@ -109,7 +111,12 @@
                               <td>
                                   <a href="javascript:editor.focus();">
                                       <img src="images/export.png" style="opacity:0.3" border="0" alt="Export project" rel=tooltip title="Export Is Only Available To Logged In Users.">
-                                  </a>  
+                                  </a> 
+                              </td>
+                              <td>
+                              <a href="javascript:editor.focus();">
+                                      <img src="images/share.png"  style="opacity:0.3" border="0" alt="Share" rel=tooltip title ="Share Is Only Available To Logged In Users.">
+                              </a>
                         % endif
                         % if LOGGED is True:
                                   <a href="javascript:saveToServer();editor.focus();">
@@ -120,16 +127,11 @@
                                   <a href="javascript:exportProject();">
                                       <img src="images/export.png" border="0" alt="Export project" rel=tooltip title="Export your source to an archive file.">
                                   </a>
+                              <td>
+                                  <a href=" javascript:shareProject();">
+                                      <img src="images/share.png" border="0" alt="Share" rel=tooltip title ="Share with a Permalink">
+                                  </a>
                         % endif
-                              </td>
-                              <td style="border-right:1px solid #dddddd">
-                                  <a class="disabled">
-                                      <img src="images/share.png" border="0" alt="Share" rel=tooltip title ="Share with a Permalink">
-                                  </a>
-                                  <a href=" javascript:shareProject();" class="enabled">
-                                      <img src="images/share.png" border="0" alt="Share" rel=tooltip title ="Share with a Permalink">
-                                  </a>
-
                               </td>
                               <td style="border-right:1px solid #dddddd">
                                   &nbsp;

@@ -295,12 +295,13 @@ $(function() {
             _selectedFile = data.node
         }
     }).on('loaded.jstree', function() {
-                jQuery("#toolbar a.disabled").hide();
-                jQuery("#toolbar a.enabled").show();
+            jQuery("#toolbar a.enabled").hide();
+            jQuery("#toolbar a.disabled").show();
             editor.container.style.pointerEvents="none"
             editor.container.style.opacity=0.5
             editor.renderer.setStyle("disabled", true)
             editor.blur()
+
         _selectedFile = $(this).jstree('get_node', $(this).jstree('get_selected')[0])
     })
 })
