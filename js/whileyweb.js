@@ -312,14 +312,14 @@ $(function() {
     }).on('delete_node.jstree', function(first, second){
         var $files = $('#file-browser');
         var request = { _project: second.node.text};
-        alert(request._project);
+        // console.log(request._project);
         $.post(root_url + '/private_delete_project',  request, function() {});
     }).on('rename_node.jstree', function(first, second){
         var $files = $('#file-browser');
-        console.log(first);
-        console.log(second);
+        // console.log(first);
+        // console.log(second);
         var request = { _project: second.old, _new_name: second.text};
-        alert(request._new_name);
+        // console.log(request._new_name);
         $.post(root_url + '/private_rename_project',  request, function() {});
     })
 })
