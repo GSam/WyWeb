@@ -216,7 +216,13 @@ loggedStorage = undefined;
 
 function getFileData() {
     if ("files" in localStorage && !isLoggedIn) {
-        return JSON.parse(localStorage["files"])
+        var local = JSON.parse(localStorage["files"]);
+        for (var i = 0; i < local.length; i++) {
+            if (local[i].state) {
+                local[i].state.selected = false;
+            }
+        }
+        return local;
     }
 
     if (isLoggedIn && loggedStorage != undefined) {
