@@ -75,6 +75,7 @@ class Admin(object):
         adminList = []
         userList = []
         options = []
+        leave="leavemystuffalone"
 
         cnx, status = db.connect()
         cursor = cnx.cursor() 
