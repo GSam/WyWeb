@@ -97,37 +97,37 @@
                               <!--</td>-->
                               <td>
                                   <a href="javascript:addProject();">
-                                      <img src="images/new_project.png" border="0" alt="Create New Project" title="New Project">
+                                      <img src="images/new_project.png" border="0" alt="Create New Project" rel=tooltip title="New Project">
                                   </a>
                               </td>
                               <td>
                         % if LOGGED is False:
                                   <a href="javascript:editor.focus();">
-                                      <img src="images/save.png" style="opacity:0.3" border="0" alt="Save All Files" title="Saving Is Only Available To Logged In Users">
+                                      <img src="images/save.png" style="opacity:0.3" border="0" alt="Save All Files" rel=tooltip title="Saving Is Only Available To Logged In Users">
                                   </a>
                               </td>
                               <td>
                                   <a href="javascript:editor.focus();">
-                                      <img src="images/export.png" style="opacity:0.3" border="0" alt="Export project" title="Export Is Only Available To Logged In Users.">
+                                      <img src="images/export.png" style="opacity:0.3" border="0" alt="Export project" rel=tooltip title="Export Is Only Available To Logged In Users.">
                                   </a>  
                         % endif
                         % if LOGGED is True:
                                   <a href="javascript:saveToServer();editor.focus();">
-                                    <img src="images/save.png" border="0" alt="Save All Files" title="Save All Files">
+                                    <img src="images/save.png" border="0" alt="Save All Files" rel=tooltip title="Save All Files">
                                   </a>
                               </td>
                               <td>
                                   <a href="javascript:exportProject();">
-                                      <img src="images/export.png" border="0" alt="Export project" title="Export your source to an archive file.">
+                                      <img src="images/export.png" border="0" alt="Export project" rel=tooltip title="Export your source to an archive file.">
                                   </a>
                         % endif
                               </td>
                               <td style="border-right:1px solid #dddddd">
                                   <a class="disabled">
-                                      <img src="images/share.png" border="0" alt="Share" Title ="Share with a Permalink">
+                                      <img src="images/share.png" border="0" alt="Share" rel=tooltip title ="Share with a Permalink">
                                   </a>
                                   <a href=" javascript:shareProject();" class="enabled">
-                                      <img src="images/share.png" border="0" alt="Share" Title ="Share with a Permalink">
+                                      <img src="images/share.png" border="0" alt="Share" rel=tooltip title ="Share with a Permalink">
                                   </a>
 
                               </td>
@@ -136,18 +136,18 @@
                               </td>
                               <td>
                                   <a class="disabled">
-                                      <img src="images/compile.png" border="0" alt="Compile This Project" title="Compile">
+                                      <img src="images/compile.png" border="0" alt="Compile This Project" rel=tooltip title="Compile">
                                   </a>
                                   <a href="javascript:compile();" class="enabled">
-                                      <img src="images/compile.png" border="0" alt="Compile This Project" title="Compile">
+                                      <img src="images/compile.png" border="0" alt="Compile This Project" rel=tooltip title="Compile">
                                   </a>
                               </td>
                               <td>
                                   <a class="disabled">
-                                      <img src="images/run.png" border="0" alt="Run This Project" title="Run">
+                                      <img src="images/run.png" border="0" alt="Run This Project" rel=tooltip title="Run">
                                   </a>
                                   <a href="javascript:run();" class="enabled">
-                                      <img src="images/run.png" border="0" alt="Run This Project" title="Run">
+                                      <img src="images/run.png" border="0" alt="Run This Project" rel=tooltip title="Run">
                                   </a>
                               </td>
                               <td style="border-right:1px solid #dddddd">
@@ -155,71 +155,71 @@
                               </td>
                               <td>
                                   <a class="disabled">
-                                      <img src="images/comments.png" border="0" alt="comment selected text" title="Comment selected text">
+                                      <img src="images/comments.png" border="0" alt="comment selected text" rel=tooltip title="Comment selected text">
                                   </a>
                                   <a href=" javascript:commentCode();" class="enabled">
-                                      <img src="images/comments.png" border="0" alt="comment selected text" title="Comment selected text">
+                                      <img src="images/comments.png" border="0" alt="comment selected text" rel=tooltip title="Comment selected text">
                                   </a>
                               </td>
                               <td>
                                   <a class="disabled">
-                                      <img src="images/indent.png" border="0" alt="Indent selected text" title="Indent selected text">
+                                      <img src="images/indent.png" border="0" alt="Indent selected text" rel=tooltip title="Indent selected text">
                                   </a>
                                   <a href=" javascript:indentBlock();" class="enabled">
-                                      <img src="images/indent.png" border="0" alt="Indent selected text" title="Indent selected text">
+                                      <img src="images/indent.png" border="0" alt="Indent selected text" rel=tooltip title="Indent selected text">
                                   </a>
                               </td>
                               <td>
                                   <a class="disabled">
-                                      <img src="images/outdent.png" border="0" alt="Outdent selected text" title="Outdent selected text">
+                                      <img src="images/outdent.png" border="0" alt="Outdent selected text" rel=tooltip title="Outdent selected text">
                                   </a>
                                   <a href=" javascript:outdentBlock();" class="enabled">
-                                      <img src="images/outdent.png" border="0" alt="Outdent selected text" title="Outdent selected text">
+                                      <img src="images/outdent.png" border="0" alt="Outdent selected text" rel=tooltip title="Outdent selected text">
                                   </a>
                               </td>
 
                               <td>
                                   <a class="disabled">
-                                      <img src="images/undo.png" border="0" alt="Undo" title="Undo">
+                                      <img src="images/undo.png" border="0" alt="Undo" rel=tooltip title="Undo">
                                   </a>
                                   <a href=" javascript:undo();" class="enabled">
-                                      <img src="images/undo.png" border="0" alt="Undo" title="Undo">
+                                      <img src="images/undo.png" border="0" alt="Undo" rel=tooltip title="Undo">
                                   </a>
                               </td>
                               <td>
                                   <a class="disabled">
-                                      <img src="images/redo.png" border="0" alt="Redo" title="Redo">
+                                      <img src="images/redo.png" border="0" alt="Redo" rel=tooltip title="Redo">
                                   </a>
                                   <a href=" javascript:redo();" class="enabled">
-                                      <img src="images/redo.png" border="0" alt="Redo" title="Redo">
+                                      <img src="images/redo.png" border="0" alt="Redo" rel=tooltip title="Redo">
                                   </a>
                               </td>
                               <td>
                                   <a class="disabled">
-                                      <img src="images/goto.png" border="0" alt="Redo" title="Redo">
+                                      <img src="images/goto.png" border="0" alt="Redo" rel=tooltip title="Redo">
                                   </a>
                                   <a href=" javascript:gotoLine();" class="enabled">
-                                      <img src="images/goto.png" border="0" alt="Goto Line" title="Goto Line">
+                                      <img src="images/goto.png" border="0" alt="Goto Line" rel=tooltip title="Goto Line">
                                   </a>
                               </td>
                               <td>
                                   <a class="disabled">
-                                      <img src="images/find.png" border="0" alt="Find" Title="Find">
+                                      <img src="images/find.png" border="0" alt="Find" rel=tooltip Title="Find">
                                   </a>
                                   <a href=" javascript:find();" class="enabled">
-                                      <img src="images/find.png" border="0" alt="Find" Title="Find">
+                                      <img src="images/find.png" border="0" alt="Find" rel=tooltip Title="Find">
                                   </a>
                               </td>
                               <td>
                                   <a class="disabled">
-                                      <img src="images/replace.png" border="0" alt="Replace" Title="Replace">
+                                      <img src="images/replace.png" border="0" alt="Replace" rel=tooltip Title="Replace">
                                   </a>
                                   <a href=" javascript:replace();" class="enabled">
-                                      <img src="images/replace.png" border="0" alt="Replace" Title="Replace">
+                                      <img src="images/replace.png" border="0" alt="Replace" rel=tooltip Title="Replace">
                                   </a>
                               </td>
                               <td style="border-right:1px solid #dddddd; ">
-                                  <select id="boilerplateselect" title="Insert a code template at the cursor">
+                                  <select id="boilerplateselect" rel=tooltip title="Insert a code template at the cursor">
                                       <option value="">Code Templates</option>
                                       <option value="main">Main Method</option>
                                       <option value="function">Function</option>
@@ -233,7 +233,7 @@
                                       <img src="images/expand.png" style="float:right" border="0" alt="Insert Code" Title ="Insert Code">
                                   </a>
                                   <a  id="boilerplateanchor" href=" javascript:insertBoilerplate();" class="enabled">
-                                      <img src="images/expand.png" style="float:right" border="0" alt="Insert Code" title="Insert a code template at the cursor">
+                                      <img src="images/expand.png" style="display:inline" border="0" rel=tooltip alt="Insert Code" title="Insert a code template at the cursor">
                                   </a>
                               </td>
                               <td style="border-right:1px solid #dddddd">
@@ -241,18 +241,18 @@
                               </td>
                               <td>
                                   <a class="disabled">
-                                      <img src="images/record.png" border="0" alt="Record Macro" title="Record Macro">
+                                      <img src="images/record.png" border="0" alt="Record Macro" rel=tooltip title="Record Macro">
                                   </a>
                                   <a href=" javascript:macroRecord();" class="enabled">
-                                      <img id="macro_recorder" src="images/record.png" border="0" alt="Record Macro" title="Record Macro">
+                                      <img id="macro_recorder" src="images/record.png" border="0" alt="Record Macro" rel=tooltip title="Record Macro">
                                   </a>
                               </td>
                               <td style="border-right:1px solid #dddddd">
                                   <a class="disabled">
-                                      <img src="images/play.png" border="0" alt="Play Macro" Title ="Play Macro">
+                                      <img src="images/play.png" border="0" alt="Play Macro" rel=tooltip Title ="Play Macro">
                                   </a>
                                   <a href=" javascript:macroPlay();" class="enabled">
-                                      <img src="images/play.png" border="0" alt="Play Macro" Title ="Play Macro">
+                                      <img src="images/play.png" border="0" alt="Play Macro" rel=tooltip Title ="Play Macro">
                                   </a>
 
                               </td>
@@ -343,7 +343,36 @@
     </div><!-- /.modal-dialog -->
   </div><!-- /.modal -->
 
+
+<div id="shareModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          <h4 class="modal-title" id="shareModalLabel">Share Project URL</h4>
+        </div>
+        <div class="modal-body">
+              <input type="text" class="form-control" placeholder="Permalink" name="projectPermalink" id="projectPermalink">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
        <script>
+
+jQuery(document).ready(function () {
+    if ($("[rel=tooltip]").length) {
+        jQuery("[rel=tooltip]").tooltip({
+            placement: 'bottom',
+            trigger: "hover"
+        });
+    }
+});
 
 function exportProject()
 {
@@ -420,8 +449,9 @@ function shareProject() {
     var $files = $('#file-browser'),
         project = getProject($files, $files.jstree('get_selected')[0]),
         url = "view_project?userid="+encodeURIComponent(userid)+"&projectname="+encodeURIComponent(project);
-    alert("URL to project '"+project+"':\n\n"+root_url+url);
-
+    // alert(document.baseURI);
+    $('#projectPermalink').val(root_url+url);
+    $('#shareModal').modal('show')
     editor.focus();
 }
 
