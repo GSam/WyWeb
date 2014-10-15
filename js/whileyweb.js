@@ -302,6 +302,18 @@ $(function() {
             editor.renderer.setStyle("disabled", true)
             editor.blur()
         _selectedFile = $(this).jstree('get_node', $(this).jstree('get_selected')[0])
+    }).on('delete_node.jstree', function(first, second){
+        var $files = $('#file-browser');
+        var request = { _project: second.node.text};
+        alert(request._project);
+        $.post(root_url + '/private_delete_project',  request, function() {});
+    }).on('rename_node.jstree', function(first, second){
+        var $files = $('#file-browser');
+        console.log(first);
+        console.log(second);
+        var request = { _project: second.old, _new_name: second.text};
+        alert(request._new_name);
+        $.post(root_url + '/private_rename_project',  request, function() {});
     })
 })
 

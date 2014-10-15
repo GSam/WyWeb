@@ -230,6 +230,18 @@ class Main(admin.Admin):
 
     compile_all.exposed = True
 
+    def private_delete_project(self, _project, **files):
+        projects = set()
+        if cherrypy.session.get(auth.SESSION_USERID):
+            delete_project(_project)
+    private_delete_project.exposed = True
+
+    def private_rename_project(self, _project, _new_name, **files):
+        projects = set()
+        if cherrypy.session.get(auth.SESSION_USERID):
+            rename_project(_project, _new_name)
+    private_rename_project.exposed = True
+
     def private_save(self, **files):
         projects = set()
         if cherrypy.session.get(auth.SESSION_USERID):
@@ -237,7 +249,7 @@ class Main(admin.Admin):
                 print filepath
                 filepath = filepath.split("/")
                 project = filepath.pop(0)
-                
+
                 # clear existing files in project
                 if project not in projects:
                     clear_files(project)
@@ -482,13 +494,47 @@ def save(project_name, filename, data):
     cursor.execute("select * from file where projectid = %s", (projectid, ))
     print cursor.fetchall()
 
+def delete_project(project_name):
+    print "DELETE PROJECT", project_name
+    userid = cherrypy.session.get(auth.SESSION_USERID)
+    cnx, status = db.connect()
+    cursor = cnx.cursor()
+    # Retrieve User ID
+    sql = "SELECT p.projectid FROM project p WHERE p.userid = %s and p.project_name = %s"
+    cursor.execute(sql, (userid,project_name))
+    projectids = cursor.fetchall()
+
+    for (projectid,) in projectids:
+        sql = "DELETE FROM file WHERE projectid = %s"
+        cursor.execute(sql, (projectid,))
+
+    for (projectid,) in projectids:
+        sql = "DELETE FROM project WHERE projectid = %s"
+        cursor.execute(sql, (projectid,))
+
+
+def rename_project(old_name, new_name):
+    print "RENAME PROJECT", old_name
+    userid = cherrypy.session.get(auth.SESSION_USERID)
+    cnx, status = db.connect()
+    cursor = cnx.cursor()
+    # Retrieve User ID
+    sql = "SELECT p.projectid FROM project p WHERE p.userid = %s and p.project_name = %s"
+    cursor.execute(sql, (userid,old_name))
+    projectids = cursor.fetchall()
+
+    for (projectid,) in projectids:
+        sql = "UPDATE project SET project_name = %s WHERE projectid = %s"
+        cursor.execute(sql, (new_name, projectid))
+
+
 def clear_files(project_name):
     print "CLEAR FILES", project_name
     userid = cherrypy.session.get(auth.SESSION_USERID)
     cnx, status = db.connect()
     cursor = cnx.cursor()
     # Retrieve User ID
-    sql =  "SELECT p.projectid FROM project p WHERE p.userid = %s and p.project_name = %s"
+    sql = "SELECT p.projectid FROM project p WHERE p.userid = %s and p.project_name = %s"
     cursor.execute(sql, (userid,project_name))
     projectids = cursor.fetchall()
 
