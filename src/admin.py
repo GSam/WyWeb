@@ -74,16 +74,18 @@ class Admin(object):
         redirect = "NO"
         adminList = []
         userList = []
+        options = []
+        teacheroptions = []
 
-        if newadminid == "":          
-            cnx, status = db.connect()
-            cursor = cnx.cursor() 
-            query = ("SELECT username, user.userid from whiley_user user, admin_users admin  where user.userid=admin.userid")
-            cursor.execute(query)
-            for (username, userid) in cursor:
-                adminList.append((username,userid))
-            cursor.close()
-            userid = None
+        cnx, status = db.connect()
+        cursor = cnx.cursor() 
+        query = ("SELECT username, userid from whiley_user user order by username")
+        cursor.execute(query)
+        for (username, userid) in cursor:
+            username_clean = ''.join(ch for ch in username if ch.isalnum())
+            options.append((username_clean,userid))
+            teacheroptions.append((username_clean,userid))
+        cursor.close()
 
         if searchuser is not None:
             cnx, status = db.connect()
@@ -98,6 +100,17 @@ class Admin(object):
                 message = "User does not exist"
             cursor.close()
 
+        if newadminid == "":          
+            cnx, status = db.connect()
+            cursor = cnx.cursor() 
+            query = ("SELECT username, user.userid from whiley_user user, admin_users admin  where user.userid=admin.userid")
+            cursor.execute(query)
+            for (username, userid) in cursor:
+               adminList.append((username,userid))
+            cursor.close()
+            userid = None
+
+
         teacherList = []
         teacherMessage = ""
 
@@ -111,7 +124,7 @@ class Admin(object):
             cursor.close()
             userid = None
 
-        return templating.render("manage_admins.html", ADMINLIST=adminList, TEACHERLIST=teacherList, 
+        return templating.render("manage_admins.html", ADMINLIST=adminList, TEACHERLIST=teacherList,TEACHEROPTION=teacheroptions,OPTION=options, 
                                     MESSAGE=message, TEACHER_MESSAGE=teacherMessage, IS_ADMIN=isAdmin(adminUserid))
 
     manage_admins.exposed = True

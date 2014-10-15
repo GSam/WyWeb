@@ -160,7 +160,7 @@ function clearErrors() {
 }
 
 $(function() {
-    $("#file-browser").jstree({
+    $files = $("#file-browser").jstree({
      core: {
             check_callback: true,
             data: getFileData()
