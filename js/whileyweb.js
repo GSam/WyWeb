@@ -160,7 +160,7 @@ function clearErrors() {
 }
 
 $(function() {
-    $("#file-browser").jstree({
+    $files = $("#file-browser").jstree({
      core: {
             check_callback: true,
             data: getFileData()
@@ -216,7 +216,13 @@ loggedStorage = undefined;
 
 function getFileData() {
     if ("files" in localStorage && !isLoggedIn) {
-        return JSON.parse(localStorage["files"])
+        var local = JSON.parse(localStorage["files"]);
+        for (var i = 0; i < local.length; i++) {
+            if (local[i].state) {
+                local[i].state.selected = false;
+            }
+        }
+        return local;
     }
 
     if (isLoggedIn && loggedStorage != undefined) {
@@ -303,6 +309,18 @@ $(function() {
             editor.blur()
 
         _selectedFile = $(this).jstree('get_node', $(this).jstree('get_selected')[0])
+    }).on('delete_node.jstree', function(first, second){
+        var $files = $('#file-browser');
+        var request = { _project: second.node.text};
+        alert(request._project);
+        $.post(root_url + '/private_delete_project',  request, function() {});
+    }).on('rename_node.jstree', function(first, second){
+        var $files = $('#file-browser');
+        console.log(first);
+        console.log(second);
+        var request = { _project: second.old, _new_name: second.text};
+        alert(request._new_name);
+        $.post(root_url + '/private_rename_project',  request, function() {});
     })
 })
 
